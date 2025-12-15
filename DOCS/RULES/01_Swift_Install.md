@@ -1,475 +1,66 @@
-# Swift Installation on Linux
+# Swift Tooling Setup (macOS + Linux)
 
 ## Purpose
 
-This document provides a step-by-step guide for installing Swift on Linux systems (Ubuntu/Debian-based distributions). It is essential for developers working on Hyperprompt to have a consistent Swift development environment for building and testing the project.
+Provide minimal, repo-accurate setup steps for building and testing **SpecificationConfig** locally.
 
----
+CI reference: `.github/workflows/ci.yml`.
 
-## Prerequisites
+## macOS (Recommended)
 
-### System Requirements
+### Install
 
-- **Linux Distribution**: Ubuntu 20.04, 22.04, or 24.04 LTS (or compatible Debian-based distro)
-- **Architecture**: x86_64 or ARM64
-- **Disk Space**: ~1.5 GB for Swift toolchain
-- **Network**: Internet connection for downloading Swift
-
-### Check Your System
+- Install Xcode (CI runs on Xcode 15.4+ and 16.0).
+- Select the active Xcode if you have multiple installed:
 
 ```bash
-# Check Ubuntu version
-lsb_release -a
-
-# Check architecture
-uname -m
-
-# Check available disk space
-df -h ~
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 ```
 
----
-
-## Installation Steps
-
-### Step 1: Update System Packages
+### Verify
 
 ```bash
-sudo apt update && sudo apt upgrade
-```
-
-### Step 2: Install Dependencies
-
-Swift requires several system libraries and tools:
-
-```bash
-# For Ubuntu 24.04
-sudo apt install -y \
-    binutils \
-    git \
-    gnupg2 \
-    libc6-dev \
-    libcurl4-openssl-dev \
-    libedit2 \
-    libgcc-9-dev \
-    libpython3.8 \
-    libsqlite3-0 \
-    libstdc++-9-dev \
-    libxml2-dev \
-    libz3-dev \
-    pkg-config \
-    tzdata \
-    unzip \
-    zlib1g-dev
-```
-
-**Note:** Package names may vary for different Ubuntu versions. For Ubuntu 20.04 or 22.04, adjust package versions accordingly (e.g., `libpython3.8` → `libpython3.10`).
-
-### Step 3: Download Swift
-
-**Recommended: Use Development Snapshot (Tested & Verified)**
-
-The most reliable method is using the Swift development snapshot. This has been verified to work on Ubuntu 20.04, 22.04, and 24.04:
-
-```bash
-# Navigate to a temporary directory
-cd /tmp
-
-# Download Swift development snapshot for Ubuntu 20.04
-# (Works on Ubuntu 24.04 as well)
-curl -L -o swift.tar.gz "https://download.swift.org/development/ubuntu2004/swift-DEVELOPMENT-SNAPSHOT-2025-08-27-a/swift-DEVELOPMENT-SNAPSHOT-2025-08-27-a-ubuntu20.04.tar.gz"
-
-# Extract the archive
-tar zxf swift.tar.gz
-
-# Install to system (requires sudo)
-sudo cp -r swift-DEVELOPMENT-SNAPSHOT-2025-08-27-a-ubuntu20.04/usr/* /usr/
-
-# Verify installation
 swift --version
-```
-
-**Alternative: Use Official Release**
-
-Visit the official Swift download page: [https://www.swift.org/download/](https://www.swift.org/download/)
-
-Or download directly using `curl`:
-
-```bash
-# Navigate to a temporary directory
-cd /tmp
-
-# Download Swift 6.0.3 for Ubuntu 24.04 (example)
-curl -L -o swift.tar.gz https://download.swift.org/swift-6.0.3-release/ubuntu2404/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
-```
-
-**Important:** Replace the URL with the version and distribution that matches your system:
-
-- Ubuntu 24.04: `ubuntu2404`
-- Ubuntu 22.04: `ubuntu2204`
-- Ubuntu 20.04: `ubuntu2004`
-
-### Step 4: Installation
-
-**For Development Snapshot (Recommended):**
-
-Development snapshot is already extracted and copied to `/usr/` in Step 3, so skip to Step 7 for verification.
-
-**For Official Release:**
-
-```bash
-# Extract the archive
-tar -xzf swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
-
-# Create installation directory
-mkdir -p ~/.local/swift
-
-# Move extracted files to installation directory
-mv swift-6.0.3-RELEASE-ubuntu24.04 ~/.local/swift/
-```
-
-**Alternative:** System-wide installation (requires sudo):
-
-```bash
-sudo mv swift-6.0.3-RELEASE-ubuntu24.04 /usr/share/swift
-```
-
-### Step 5: Add Swift to PATH (Only for Manual Installation)
-
-**Skip this step if you used development snapshot installation (already in /usr/bin)**
-
-#### For User Installation (~/.local/swift)
-
-Add to your shell profile (`~/.bashrc`, `~/.zshrc`, or `~/.profile`):
-
-```bash
-# Add this line to ~/.bashrc
-export PATH="$HOME/.local/swift/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin:$PATH"
-```
-
-Apply changes:
-
-```bash
-source ~/.bashrc
-```
-
-#### For System-wide Installation (/usr/share/swift)
-
-```bash
-# Add this line to ~/.bashrc
-export PATH="/usr/share/swift/usr/bin:$PATH"
-```
-
-Apply changes:
-
-```bash
-source ~/.bashrc
-```
-
-### Step 6: Verify Installation
-
-```bash
-# Check Swift version
-swift --version
-
-# Expected output:
-# Swift version 6.0.3 (swift-6.0.3-RELEASE)
-# Target: x86_64-unknown-linux-gnu
-```
-
-Test REPL:
-
-```bash
-# Start Swift REPL
-swift
-
-# Type in REPL:
-print("Hello, Swift!")
-
-# Exit REPL
-:quit
-```
-
----
-
-## Testing Swift with Hyperprompt
-
-### Build the Project
-
-```bash
-cd /home/user/Hyperprompt
-swift build
-```
-
-### Run Tests
-
-```bash
-# Run all tests
-swift test
-
-# Run specific test suite (example)
-swift test --filter CoreTests
-
-# Run with verbose output
+swift build -v
 swift test -v
 ```
 
-### Build for Release
+### SwiftFormat (Optional Locally, Required In CI)
+
+CI runs `swiftformat --lint .`. Install via Homebrew:
 
 ```bash
-swift build -c release
+brew install swiftformat
+swiftformat --lint .
 ```
 
----
+## Linux
 
-## Version Management
+### Option A: Use Docker (Matches CI)
 
-### Managing Multiple Swift Versions
+If you have Docker installed, this is the simplest way to match CI’s Swift toolchains:
 
-If you need to work with multiple Swift versions, you can:
+```bash
+docker run --rm -it -v "$PWD":/work -w /work swift:6.0 swift test -v
+```
 
-1. **Install to versioned directories:**
+(CI also tests Swift 5.10; swap the tag if needed.)
 
-   ```bash
-   ~/.local/swift/swift-6.0.3/
-   ~/.local/swift/swift-5.10/
-   ```
+### Option B: Install Swift Toolchain
 
-2. **Use symbolic links:**
+Install Swift using the official instructions for your distribution:
 
-   ```bash
-   ln -sf ~/.local/swift/swift-6.0.3-RELEASE-ubuntu24.04 ~/.local/swift/current
-   export PATH="$HOME/.local/swift/current/usr/bin:$PATH"
-   ```
+- https://www.swift.org/install/
 
-3. **Use swiftly (Swift version manager):**
+Then verify:
 
-   ```bash
-   # Install swiftly
-   curl -L https://swift-server.github.io/swiftly/swiftly-install.sh | bash
-
-   # Install Swift version
-   swiftly install 6.0.3
-
-   # Switch versions
-   swiftly use 6.0.3
-   ```
-
----
+```bash
+swift --version
+swift build -v
+swift test -v
+```
 
 ## Troubleshooting
 
-### Issue: "swift: command not found"
-
-**Solution:** PATH not set correctly. Verify:
-
-```bash
-echo $PATH
-# Should contain Swift bin directory
-
-# Re-source your profile
-source ~/.bashrc
-```
-
-### Issue: Missing Dependencies
-
-**Solution:** Install missing packages:
-
-```bash
-# Check for missing libraries
-ldd ~/.local/swift/swift-6.0.3-RELEASE-ubuntu24.04/usr/bin/swift
-
-# Install missing dependencies via apt
-sudo apt install <package-name>
-```
-
-### Issue: "cannot open shared object file"
-
-**Solution:** Install required system libraries:
-
-```bash
-sudo apt install -y libpython3.8 libcurl4 libxml2
-```
-
-### Issue: Tests Fail to Build
-
-**Solution:** Clean build artifacts and rebuild:
-
-```bash
-swift package clean
-swift build
-swift test
-```
-
----
-
-## Performance Optimization
-
-### Enable Compiler Optimizations
-
-```bash
-# Build with optimizations
-swift build -c release -Xswiftc -O
-
-# Use whole module optimization
-swift build -c release -Xswiftc -whole-module-optimization
-```
-
-### Parallel Test Execution
-
-```bash
-# Run tests in parallel (default)
-swift test --parallel
-
-# Specify number of workers
-swift test --num-workers 4
-```
-
----
-
-## Hyperprompt-Specific Notes
-
-### Verified Versions
-
-The following Swift versions are tested and confirmed working with Hyperprompt:
-
-- **Swift 6.2-dev (DEVELOPMENT-SNAPSHOT-2025-08-27-a)** ✅ (Recommended - Tested 2025-12-06)
-  - Installation: `https://download.swift.org/development/ubuntu2004/swift-DEVELOPMENT-SNAPSHOT-2025-08-27-a/`
-  - Status: ✅ All tests passing (130/130)
-  - Architecture: x86_64-unknown-linux-gnu
-- **Swift 6.0.3** ✅
-- **Swift 5.10.x** ✅
-- **Swift 5.9.x** ✅ (Required minimum for Package.swift)
-
-### Required Swift Package Manager Version
-
-Hyperprompt requires Swift Package Manager (SPM) 5.9 or later.
-
-```bash
-swift package --version
-```
-
-### Dependencies
-
-Hyperprompt depends on:
-
-- `swift-argument-parser` (^1.2.0)
-- `swift-crypto` (^3.0.0)
-- `SpecificationCore` (^1.0.0)
-
-These are automatically fetched during build.
-
----
-
-## CI/CD Integration
-
-### GitHub Actions Example
-
-```yaml
-name: Swift Tests
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Swift
-        run: |
-          wget https://download.swift.org/swift-6.0.3-release/ubuntu2404/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
-          tar -xzf swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
-          sudo mv swift-6.0.3-RELEASE-ubuntu24.04 /usr/share/swift
-          echo "/usr/share/swift/usr/bin" >> $GITHUB_PATH
-
-      - name: Build
-        run: swift build
-
-      - name: Test
-        run: swift test
-```
-
-### Docker Example
-
-```dockerfile
-FROM swift:6.0.3-jammy
-
-WORKDIR /app
-
-COPY . .
-
-RUN swift build -c release
-
-CMD ["swift", "test"]
-```
-
----
-
-## Updating Swift
-
-To update to a newer Swift version:
-
-1. Download the new version
-2. Extract to a new directory
-3. Update PATH or symbolic link
-4. Test compatibility with Hyperprompt
-5. Update this documentation with verified version
-
-```bash
-# Example: Updating from 6.0.3 to 6.1.0
-cd /tmp
-wget https://download.swift.org/swift-6.1.0-release/ubuntu2404/swift-6.1.0-RELEASE/swift-6.1.0-RELEASE-ubuntu24.04.tar.gz
-tar -xzf swift-6.1.0-RELEASE-ubuntu24.04.tar.gz
-mv swift-6.1.0-RELEASE-ubuntu24.04 ~/.local/swift/
-ln -sf ~/.local/swift/swift-6.1.0-RELEASE-ubuntu24.04 ~/.local/swift/current
-source ~/.bashrc
-swift --version
-```
-
----
-
-## Uninstallation
-
-To remove Swift:
-
-```bash
-# Remove installation directory
-rm -rf ~/.local/swift/swift-6.0.3-RELEASE-ubuntu24.04
-
-# Remove PATH entry from ~/.bashrc
-# (Edit file manually or use sed)
-sed -i '/swift.*usr\/bin/d' ~/.bashrc
-
-# Re-source profile
-source ~/.bashrc
-```
-
----
-
-## References
-
-- **Official Swift Downloads**: [https://www.swift.org/download/](https://www.swift.org/download/)
-- **Swift on Linux Documentation**: [https://www.swift.org/getting-started/#using-the-package-manager](https://www.swift.org/getting-started/#using-the-package-manager)
-- **Swift Package Manager**: [https://github.com/apple/swift-package-manager](https://github.com/apple/swift-package-manager)
-- **Swiftly Version Manager**: [https://github.com/swift-server/swiftly](https://github.com/swift-server/swiftly)
-- **Swift Forums**: [https://forums.swift.org/](https://forums.swift.org/)
-
----
-
-## Changelog
-
-| Date | Version | Changes | Author |
-|------|---------|---------|--------|
-| 2025-12-06 | 1.1 | Added verified development snapshot method - Swift 6.2-dev tested with Hyperprompt (130/130 tests passing) | Claude |
-| 2025-12-03 | 1.0 | Initial version - Swift 6.0.3 on Ubuntu 24.04 | Claude |
-
----
-
-## Notes
-
-- **Recommended:** Use the development snapshot method (Step 3 - Download Swift) for most users
-- Development snapshot has been tested and verified to work with all Hyperprompt tests (130/130 passing)
-- For production deployments, pin to specific Swift version in CI/CD
-- Keep this document updated when testing new Swift releases
-- Report compatibility issues in project issue tracker
+- `swift: command not found` → install Swift (macOS: Xcode; Linux: Docker or swift.org toolchain).
+- Builds locally but fails in CI → re-run the exact CI commands from `.github/workflows/ci.yml`.

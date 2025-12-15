@@ -11,9 +11,9 @@ SELECT does **not** create implementation steps; it only chooses “what’s nex
 
 ## Inputs (Preferred Order)
 
-1. `DOCS/Workplan.md` (optional) — checkbox list derived from PRD §9
+1. `DOCS/Workplan.md` — checkbox list derived from PRD §9
 2. `DOCS/PRD/SpecificationConfig_PRD.md` — PRD work plan tables and milestones
-3. `DOCS/INPROGRESS/next.md` (optional) — current selection (may be empty)
+3. `DOCS/INPROGRESS/next.md` — current selection (may be empty)
 
 ## Algorithm
 

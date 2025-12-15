@@ -1,12 +1,12 @@
 # EXECUTE — Implement And Validate Current Task
 
-**Version:** 2.1.0
+**Version:** 1.0.0
 
 ## Purpose
 
 Provide a thin, repeatable workflow wrapper for implementing a selected task in this repository:
 
-1. Pre-flight checks (tooling + git state)
+1. Pre-flight checks (verify and setup tooling + git state)
 2. Implement work (following a task PRD or PRD §9)
 3. Validate like CI
 4. Finalize documentation and optionally commit
@@ -24,6 +24,7 @@ EXECUTE does not “auto-implement” requirements; it only standardizes the loo
 
 1. Confirm Swift is available:
    - `swift --version`
+1.1 If not available: download and install - see DOCS/RULES/01_Swift_Install.md
 2. Confirm a clean working tree (recommended):
    - `git status --porcelain`
 3. Confirm the selected task is known:

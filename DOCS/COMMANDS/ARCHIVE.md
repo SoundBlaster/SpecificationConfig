@@ -1,6 +1,6 @@
 # ARCHIVE — Archive Completed Task PRDs
 
-**Version:** 2.1.0
+**Version:** 1.0.0
 
 ## Purpose
 

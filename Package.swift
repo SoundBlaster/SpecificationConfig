@@ -5,21 +5,21 @@ let package = Package(
     name: "SpecificationConfig",
     platforms: [
         .macOS(.v12),
-        .iOS(.v15)
+        .iOS(.v15),
     ],
     products: [
         .library(
             name: "SpecificationConfig",
-            targets: ["SpecificationConfig"]
-        )
+            targets: ["SpecificationConfig"],
+        ),
     ],
     targets: [
         .target(
-            name: "SpecificationConfig"
+            name: "SpecificationConfig",
         ),
         .testTarget(
             name: "SpecificationConfigTests",
-            dependencies: ["SpecificationConfig"]
-        )
+            dependencies: ["SpecificationConfig"],
+        ),
     ]
 )

@@ -13,6 +13,7 @@ If you are not using `DOCS/INPROGRESS/`, this command is a no-op.
 
 - `DOCS/INPROGRESS/*.md` — task PRDs and summaries
 - `DOCS/Workplan.md` — project work plan, tracks completion of tasks
+- `DOCS/INPROGRESS/next.md` — current selection (may be empty)
 
 ## Algorithm
 
@@ -24,6 +25,7 @@ If you are not using `DOCS/INPROGRESS/`, this command is a no-op.
    - Move it from `DOCS/INPROGRESS/` to the tasks archive in the folder with template name `DOCS/TASKS_ARCHIVE/{Task_ID}_{Task_Title}/`.
    - Append an archive stamp at the end of file: `**Archived:** YYYY-MM-DD`.
 4. Update/create `DOCS/TASKS_ARCHIVE/INDEX.md` with a simple list grouped by PRD Phase (A…G) if known in the order of its executed.
+5. Remove archived tasks from the `DOCS/INPROGRESS/next.md`
 
 ## Output
 

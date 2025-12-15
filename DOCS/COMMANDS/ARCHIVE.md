@@ -11,24 +11,21 @@ If you are not using `DOCS/INPROGRESS/`, this command is a no-op.
 
 ## Inputs
 
-- `DOCS/INPROGRESS/*.md` (optional) — task PRDs
-- `DOCS/TASKS_ARCHIVE/` (optional) — archive destination
-- `DOCS/Workplan.md` (optional) — completion state, if you track it
+- `DOCS/INPROGRESS/*.md` — task PRDs and summaries
+- `DOCS/Workplan.md` — project work plan, tracks completion of tasks
 
 ## Algorithm
 
-1. Determine which task PRDs are “completed”:
-   - If `DOCS/Workplan.md` exists: completed = task marked `[x]`.
+1. See content of inputs
+2. Determine which task PRDs from `DOCS/INPROGRESS` are “completed”:
+   - If task exists in the `DOCS/Workplan.md` file: completed = task marked `[x]`.
    - Otherwise: completed = task PRD explicitly marked “Completed” in its own header.
-2. For each completed task PRD:
-   - Move it from `DOCS/INPROGRESS/` to `DOCS/TASKS_ARCHIVE/`.
-   - Append an archive stamp at the end: `**Archived:** YYYY-MM-DD`.
-3. Update/create `DOCS/TASKS_ARCHIVE/INDEX.md` with a simple list grouped by PRD Phase (A…G) if known.
+3. For each completed task PRD and other files:
+   - Move it from `DOCS/INPROGRESS/` to the tasks archive in the folder with template name `DOCS/TASKS_ARCHIVE/{Task_ID}_{Task_Title}/`.
+   - Append an archive stamp at the end of file: `**Archived:** YYYY-MM-DD`.
+4. Update/create `DOCS/TASKS_ARCHIVE/INDEX.md` with a simple list grouped by PRD Phase (A…G) if known in the order of its executed.
 
 ## Output
 
-- Updated `DOCS/TASKS_ARCHIVE/` contents (+ `INDEX.md`)
-
-## Notes
-
-- Do not automatically push. If you want archival recorded, commit normally after verifying changes.
+- Updated `DOCS/TASKS_ARCHIVE/` contents and `INDEX.md`
+- Cleaned `DOCS/INPROGRESS`

@@ -265,3 +265,7 @@ swift test --filter BindingTests
 - Type erasure (AnyBinding) will come in B2 to allow heterogeneous collections
 - The decoder closure design allows maximum flexibility for custom decoding logic
 - SpecificationCore's `AnySpecification` already provides type erasure for specs
+
+---
+
+**Archived:** 2025-12-16

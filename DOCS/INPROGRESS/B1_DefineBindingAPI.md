@@ -5,7 +5,7 @@
 **Priority:** High
 **Effort:** M (½–1d)
 **Dependencies:** A2 (completed)
-**Status:** Planning Complete
+**Status:** Completed
 
 ---
 
@@ -224,15 +224,37 @@ swift test --filter BindingTests
 
 ## 10. Definition of Done
 
-- [ ] `Binding.swift` created with complete public API
-- [ ] All properties defined with appropriate types
-- [ ] At least one initializer with sensible defaults
-- [ ] DocC documentation on struct and key members
-- [ ] `BindingTests.swift` with 3+ passing tests
-- [ ] `swift build` succeeds
-- [ ] `swift test` passes
-- [ ] Workplan marked B1 as `[x]`
-- [ ] This task PRD updated with completion status
+- [x] `Binding.swift` created with complete public API
+- [x] All properties defined with appropriate types
+- [x] At least one initializer with sensible defaults
+- [x] DocC documentation on struct and key members
+- [x] `BindingTests.swift` with 6 passing tests
+- [x] `swift build` succeeds
+- [x] `swift test` passes
+- [x] Workplan marked B1 as `[x]`
+- [x] This task PRD updated with completion status
+
+## 11. Completion Notes
+
+**Completed:** 2025-12-16
+
+**Files Created:**
+- `Sources/SpecificationConfig/Binding.swift` - Full generic API with documentation
+- `Tests/SpecificationConfigTests/BindingTests.swift` - 6 passing unit tests
+
+**Implementation Details:**
+- Generic struct `Binding<Draft, Value>` with all required properties
+- Full DocC-style documentation on all public members
+- Platform requirements updated to macOS 15+ / iOS 18+ (required by swift-configuration)
+- All tests pass (6 tests executed successfully)
+
+**Test Coverage:**
+- Binding initialization with all parameters
+- Default parameter values
+- Secret flag handling
+- KeyPath type correctness
+- Value specs array handling
+- Decoder closure storage
 
 ---
 

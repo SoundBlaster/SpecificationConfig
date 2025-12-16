@@ -5,12 +5,12 @@
 **Phase:** B
 **Effort:** M (½–1d)
 **Dependencies:** A2 (completed)
-**Status:** Selected
+**Status:** Completed
 
 ## Description
 
 Define the public API for `Binding<Draft, Value>`, which maps a configuration key to a typed value and a WritableKeyPath in the Draft config. This is the foundational type for the entire configuration pipeline.
 
-## Next Step
+## Completion
 
-Run PLAN to generate an implementation-ready task PRD for this item.
+Task B1 completed successfully on 2025-12-16. Created Binding<Draft, Value> generic struct with full API and 6 passing tests. Platform requirements updated to macOS 15+. Ready for archiving.

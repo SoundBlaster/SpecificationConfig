@@ -67,3 +67,5 @@ Out of scope:
 - MIT license and README stub are present and referenced.
 - Scaffold provides a usable starting point for adding dependencies, bindings, and pipeline (enables progression to A2+).
 - No unresolved setup work remains before implementing functional features.
+
+**Archived:** 2025-12-16

@@ -3,7 +3,7 @@
 Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 
 - [x] A1 (High): Create new repo for wrapper (SPM package)
-- [INPROGRESS] A2 (High): Add dependencies: swift-configuration + SpecificationCore
+- [x] A2 (High): Add dependencies: swift-configuration + SpecificationCore
 - [ ] A3 (Medium): Add Docs/Tutorial structure with placeholder files
 - [ ] B1 (High): Define `Binding<Draft, Value>` public API
 - [ ] B2 (High): Implement `AnyBinding<Draft>` type erasure

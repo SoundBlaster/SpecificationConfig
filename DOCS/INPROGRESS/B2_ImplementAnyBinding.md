@@ -5,7 +5,7 @@
 **Priority:** High
 **Effort:** L (1–3d)
 **Dependencies:** B1 (completed)
-**Status:** Planning Complete
+**Status:** Complete
 
 ---
 
@@ -299,17 +299,17 @@ swift test
 
 ## 10. Definition of Done
 
-- [ ] `AnyBinding.swift` created with full type erasure implementation
-- [ ] Initializer accepts `Binding<Draft, Value>` and erases type
-- [ ] `apply` method correctly executes binding logic
-- [ ] Key property preserved through type erasure
-- [ ] Temporary `ConfigError` enum for error handling
-- [ ] `AnyBindingTests.swift` with 6+ passing tests
-- [ ] Can store heterogeneous bindings in `[AnyBinding<Draft>]` array
-- [ ] `swift build` succeeds
-- [ ] `swift test` passes (all tests)
-- [ ] Workplan marked B2 as `[x]`
-- [ ] This task PRD updated with completion status
+- [x] `AnyBinding.swift` created with full type erasure implementation
+- [x] Initializer accepts `Binding<Draft, Value>` and erases type
+- [x] `apply` method correctly executes binding logic
+- [x] Key property preserved through type erasure
+- [x] Temporary `ConfigError` enum for error handling
+- [x] `AnyBindingTests.swift` with 6+ passing tests (9 tests created)
+- [x] Can store heterogeneous bindings in `[AnyBinding<Draft>]` array
+- [x] `swift build` succeeds
+- [x] `swift test` passes (all 10 tests pass)
+- [x] Workplan marked B2 as `[x]`
+- [x] This task PRD updated with completion status
 
 ---
 

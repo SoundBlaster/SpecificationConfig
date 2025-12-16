@@ -195,3 +195,7 @@ swift build
 - Actual tutorial content will be written in F1, F3, F4, F5, F6 tasks
 - DocC tutorial format may evolve; placeholders keep structure flexible
 - Tutorial files use `.tutorial` extension per DocC conventions
+
+---
+
+**Archived:** 2025-12-16

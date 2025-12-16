@@ -1,3 +1,16 @@
-# Next Task: _none selected_
+# Next Task: A2 — Add Dependencies
 
-No task is currently selected. Choose the next item from PRD §9 and run PLAN/EXECUTE to begin.
+**Source:** PRD §9
+**Priority:** High
+**Phase:** A
+**Effort:** S (≤2h)
+**Dependencies:** A1 (completed)
+**Status:** Selected
+
+## Description
+
+Add dependencies to Package.swift: swift-configuration from Apple and SpecificationCore from SoundBlaster. Ensure the package builds successfully with these imports.
+
+## Next Step
+
+Run PLAN to generate an implementation-ready task PRD for this item.

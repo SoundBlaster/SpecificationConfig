@@ -1,7 +1,7 @@
-import XCTest
 import Configuration
-import SpecificationCore
 @testable import SpecificationConfig
+import SpecificationCore
+import XCTest
 
 final class BindingTests: XCTestCase {
     // Test Draft type for demonstration

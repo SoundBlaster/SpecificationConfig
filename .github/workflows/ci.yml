@@ -34,11 +34,8 @@ jobs:
   test-linux:
     name: Test on Linux
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        swift: ['6.0']
     container:
-      image: swift:${{ matrix.swift }}
+      image: swift:6.2
     steps:
       - uses: actions/checkout@v4
 

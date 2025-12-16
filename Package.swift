@@ -13,9 +13,17 @@ let package = Package(
             targets: ["SpecificationConfig"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-configuration", from: "1.0.0"),
+        .package(url: "https://github.com/SoundBlaster/SpecificationCore", from: "1.0.0"),
+    ],
     targets: [
         .target(
-            name: "SpecificationConfig"
+            name: "SpecificationConfig",
+            dependencies: [
+                .product(name: "Configuration", package: "swift-configuration"),
+                .product(name: "SpecificationCore", package: "SpecificationCore"),
+            ]
         ),
         .testTarget(
             name: "SpecificationConfigTests",

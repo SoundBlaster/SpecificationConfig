@@ -5,7 +5,7 @@
 **Priority:** High
 **Effort:** M (½–1d)
 **Dependencies:** B1 (completed)
-**Status:** Planning Complete
+**Status:** Complete
 
 ---
 
@@ -343,17 +343,17 @@ if snapshot.hasErrors {
 
 ## 10. Definition of Done
 
-- [ ] `Snapshot.swift` created with all three types
-- [ ] `Provenance` enum with 4 cases + docs
-- [ ] `ResolvedValue` struct with redaction support + docs
-- [ ] `Snapshot` struct with lookup + docs
-- [ ] `SnapshotTests.swift` with 8+ passing tests
-- [ ] All types are `Sendable`
-- [ ] `swift build` succeeds
-- [ ] `swift test` passes (all tests)
-- [ ] `swiftformat --lint .` passes
-- [ ] Workplan marked B3 as `[x]`
-- [ ] This task PRD updated with completion status
+- [x] `Snapshot.swift` created with all three types
+- [x] `Provenance` enum with 4 cases + docs
+- [x] `ResolvedValue` struct with redaction support + docs
+- [x] `Snapshot` struct with lookup + docs
+- [x] `SnapshotTests.swift` with 8+ passing tests (13 tests created)
+- [x] All types are `Sendable`
+- [x] `swift build` succeeds
+- [x] `swift test` passes (all 29 tests pass)
+- [x] `swiftformat --lint .` passes
+- [x] Workplan marked B3 as `[x]`
+- [x] This task PRD updated with completion status
 
 ---
 

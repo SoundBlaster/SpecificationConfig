@@ -1,0 +1,18 @@
+# Adding Environment Variable Overrides
+
+> Placeholder for tutorial content. To be implemented in Phase F (Task F3).
+
+## Overview
+
+This tutorial will cover adding environment variable overrides to your Config Pet app, demonstrating provider precedence in Swift Configuration.
+
+## Topics
+
+### Implementation
+
+- Coming soon
+
+### Demo Features
+
+- ENV variables override file values
+- Provider hierarchy demonstration

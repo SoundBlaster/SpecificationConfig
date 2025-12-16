@@ -1,0 +1,19 @@
+# Using Decision Specs for Fallback Logic
+
+> Placeholder for tutorial content. To be implemented in Phase F (Task F5).
+
+## Overview
+
+This tutorial will cover using DecisionSpec for fallback and derivation logic. You'll learn how to provide default values when configuration is missing using SpecificationCore's decision specifications.
+
+## Topics
+
+### Implementation
+
+- Coming soon
+
+### Demo Features
+
+- DecisionSpec for default values
+- Fallback logic when isSleeping is missing
+- Computed/derived configuration values

@@ -1,0 +1,19 @@
+# Building the MVP: Config Pet v0
+
+> Placeholder for tutorial content. To be implemented in Phase F (Task F1).
+
+## Overview
+
+This tutorial will cover building the minimal viable product for Config Pet. You'll create a simple macOS app that reads configuration from a JSON file, including a pet's name and sleeping status, with a manual reload button.
+
+## Topics
+
+### Implementation
+
+- Coming soon
+
+### Demo Features
+
+- Name and isSleeping configuration
+- Single file provider (config.json)
+- Manual reload button

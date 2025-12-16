@@ -1,0 +1,19 @@
+# Validating Configuration with Specs
+
+> Placeholder for tutorial content. To be implemented in Phase F (Task F4).
+
+## Overview
+
+This tutorial will cover adding validation using SpecificationCore specs. You'll learn to define value-level specifications (e.g., non-empty strings) and display validation errors in the UI.
+
+## Topics
+
+### Implementation
+
+- Coming soon
+
+### Demo Features
+
+- Value-level specification validation
+- Error UI panel for validation failures
+- Non-empty name specification example

@@ -1,0 +1,19 @@
+# Hot Reload with Configuration Watching
+
+> Placeholder for tutorial content. To be implemented in Phase F (Task F6).
+
+## Overview
+
+This tutorial will cover implementing hot reload functionality using Swift Configuration's watching capabilities. Your Config Pet app will automatically update when the configuration file changes.
+
+## Topics
+
+### Implementation
+
+- Coming soon
+
+### Demo Features
+
+- Automatic file watching
+- Hot reload without manual button click
+- Real-time configuration updates

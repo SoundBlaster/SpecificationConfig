@@ -1,20 +1,13 @@
-# macOS
+# Swift Package Manager / Xcode artifacts
+.build/
+.swiftpm/
 .DS_Store
-/.build
-/Packages
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.swiftpm/xcode/package.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
-.swiftpm/xcode/package.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-
-# Xcode
+*.xcuserstate
 xcuserdata/
 DerivedData/
 
-# Swift Package Manager
-/.swiftpm
-/.build
-/Packages
-*.xcodeproj
-
-# Misc
-*.swp
+# Editor / tooling
+.vscode/
+.idea/
+*.swiftsourceinfo
+*.swiftdoc

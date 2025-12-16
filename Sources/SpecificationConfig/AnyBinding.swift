@@ -52,8 +52,8 @@ public struct AnyBinding<Draft> {
     ///
     /// - Parameter binding: The binding to wrap and type-erase
     public init<Value>(_ binding: Binding<Draft, Value>) {
-        self.key = binding.key
-        self._apply = { draft, reader in
+        key = binding.key
+        _apply = { draft, reader in
             // Decode the value
             let decodedValue = try binding.decoder(reader, binding.key)
 

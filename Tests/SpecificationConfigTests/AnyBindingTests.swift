@@ -1,7 +1,7 @@
-import XCTest
 import Configuration
-import SpecificationCore
 @testable import SpecificationConfig
+import SpecificationCore
+import XCTest
 
 final class AnyBindingTests: XCTestCase {
     // Test Draft type
@@ -122,7 +122,7 @@ final class AnyBindingTests: XCTestCase {
         let bindings: [AnyBinding<TestDraft>] = [
             AnyBinding(nameBinding),
             AnyBinding(ageBinding),
-            AnyBinding(activeBinding)
+            AnyBinding(activeBinding),
         ]
 
         XCTAssertEqual(bindings.count, 3)

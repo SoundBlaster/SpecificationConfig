@@ -1,3 +1,3 @@
-# Next Task: _none selected_
+# Next Task
 
-No task is currently selected. Choose the next item from PRD §9 and run PLAN/EXECUTE to begin.
+No task currently selected. Run SELECT to choose the next task from the Workplan.

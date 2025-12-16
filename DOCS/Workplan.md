@@ -6,7 +6,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] A2 (High): Add dependencies: swift-configuration + SpecificationCore
 - [x] A3 (Medium): Add Docs/Tutorial structure with placeholder files
 - [x] B1 (High): Define `Binding<Draft, Value>` public API
-- [ ] B2 (High): Implement `AnyBinding<Draft>` type erasure
+- [x] B2 (High): Implement `AnyBinding<Draft>` type erasure
 - [ ] B3 (High): Define `Snapshot` model (values + provenance)
 - [ ] B4 (High): Define `DiagnosticsReport` & error items
 - [ ] B5 (Medium): Add `Redaction` support (secret flag)

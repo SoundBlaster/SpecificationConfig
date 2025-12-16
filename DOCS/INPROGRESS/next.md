@@ -5,7 +5,7 @@
 **Phase:** A
 **Effort:** S
 **Dependencies:** None
-**Status:** Selected
+**Status:** Completed
 
 ## Description
 
@@ -13,4 +13,4 @@ Create the new Swift Package Manager repository wrapper with an MIT license and 
 
 ## Next Step
 
-Run PLAN to generate an implementation-ready task PRD for this item.
+Select the next task from PRD §9 and repeat PLAN/EXECUTE as needed.

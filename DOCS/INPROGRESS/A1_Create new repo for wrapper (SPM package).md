@@ -36,11 +36,11 @@ Out of scope:
 ## Execution plan (checklist with acceptance criteria)
 | Status | Subtask | Details | Acceptance criteria |
 | --- | --- | --- | --- |
-| [ ] | Initialize SPM package skeleton | Create `Package.swift` with product `SpecificationConfig`, targets `SpecificationConfig` and `SpecificationConfigTests`; add placeholder source/test files. | `swift build -v` succeeds; target names match PRD terminology; module compiles on macOS/Linux. |
-| [ ] | Add licensing | Include MIT `LICENSE` file and ensure repository headers/reference align with MIT usage. | LICENSE present at repo root and references MIT; no conflicting licenses. |
-| [ ] | Author README stub | Provide project overview, requirements, setup instructions, and build/test snippets matching CI commands. | README includes purpose statement, supported Swift/Xcode versions, and SPM build/test snippets. |
-| [ ] | Validate repository shape against CI | Confirm paths and commands used in `.github/workflows/ci.yml` are satisfied by scaffold (build, test, optional SwiftFormat). | Running `swift build -v` and `swift test -v` succeeds; if SwiftFormat installed, `swiftformat --lint .` reports no format violations. |
-| [ ] | Repository hygiene | Add basic `.gitignore` (if missing) for Swift/SwiftPM artifacts; ensure no stray files. | Git status clean after initial build/test; no generated artifacts committed. |
+| [x] | Initialize SPM package skeleton | Create `Package.swift` with product `SpecificationConfig`, targets `SpecificationConfig` and `SpecificationConfigTests`; add placeholder source/test files. | `swift build -v` succeeds; target names match PRD terminology; module compiles on macOS/Linux. |
+| [x] | Add licensing | Include MIT `LICENSE` file and ensure repository headers/reference align with MIT usage. | LICENSE present at repo root and references MIT; no conflicting licenses. |
+| [x] | Author README stub | Provide project overview, requirements, setup instructions, and build/test snippets matching CI commands. | README includes purpose statement, supported Swift/Xcode versions, and SPM build/test snippets. |
+| [x] | Validate repository shape against CI | Confirm paths and commands used in `.github/workflows/ci.yml` are satisfied by scaffold (build, test, optional SwiftFormat). | Running `swift build -v` and `swift test -v` succeeds; if SwiftFormat installed, `swiftformat --lint .` reports no format violations. |
+| [x] | Repository hygiene | Add basic `.gitignore` (if missing) for Swift/SwiftPM artifacts; ensure no stray files. | Git status clean after initial build/test; no generated artifacts committed. |
 
 ## Acceptance criteria (per subtask)
 - **SPM skeleton:** Library target exports a compilable placeholder type; test target builds and executes a smoke test.
@@ -50,10 +50,10 @@ Out of scope:
 - **Hygiene:** Repo ready for follow-on tasks without clean-up; structure matches `Sources/SpecificationConfig` and `Tests/SpecificationConfigTests`.
 
 ## Verification plan
-- Commands to run locally (match CI):
+- Commands run locally (match CI):
   - `swift build -v`
   - `swift test -v`
-  - `swiftformat --lint .` (optional; required if SwiftFormat available)
+  - `swiftformat --lint .` (optional; not run here—tool not installed)
 - Manual review: confirm LICENSE, README, and scaffold files exist with correct names/paths.
 
 ## Risks and mitigations

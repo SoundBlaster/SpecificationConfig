@@ -14,8 +14,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-14
-            xcode: '15.4'
           - os: macos-latest
             xcode: '16.0'
     steps:
@@ -41,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        swift: ['5.10', '6.0']
+        swift: ['6.0']
     container:
       image: swift:${{ matrix.swift }}
     steps:

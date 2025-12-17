@@ -47,3 +47,5 @@ Create the `ConfigPipeline` that orchestrates applying bindings from a `SpecProf
 - `swift build -v`
 - `swift test -v`
 - `swiftformat --lint .` (if available)
+
+**Archived:** 2025-12-17

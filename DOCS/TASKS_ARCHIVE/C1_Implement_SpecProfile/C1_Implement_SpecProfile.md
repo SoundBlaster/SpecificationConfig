@@ -46,3 +46,5 @@ Implement the `SpecProfile<Draft, Final>` type that aggregates bindings, drives 
 - `swift build -v`
 - `swift test -v`
 - `swiftformat --lint .` (if available)
+
+**Archived:** 2025-12-17

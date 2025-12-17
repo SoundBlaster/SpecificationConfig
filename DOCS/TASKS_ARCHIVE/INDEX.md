@@ -11,3 +11,6 @@
 - B3 — Define Snapshot model (values + provenance) — archived 2025-12-17
 - B4 — Define DiagnosticsReport & error items — archived 2025-12-17
 - B5 — Add Redaction support (secret flag) — archived 2025-12-17
+
+## Phase C
+- C1 — Implement `SpecProfile<Draft, Final>` — archived 2025-12-17

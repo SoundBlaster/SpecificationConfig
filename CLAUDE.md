@@ -18,7 +18,7 @@
   - `COMMAND_TEMPLATE.md` → pattern for new command specs
   - `01_Swift_Install.md` → environment setup notes
 - `DOCS/INPROGRESS/`, `DOCS/TASKS_ARCHIVE/` — live vs. archived task PRDs.
-- `DOCS/Workplan.md` — optional checklist of PRD task IDs.
+- `DOCS/Workplan.md` — **required** checklist of PRD task IDs.
 
 ## Usage Principles
 - Treat command files as instructions/prompts, not shell scripts.

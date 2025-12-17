@@ -983,3 +983,5 @@ assert(report1.diagnostics == report2.diagnostics)
 ---
 
 **End of PRD**
+
+**Archived:** 2025-12-17

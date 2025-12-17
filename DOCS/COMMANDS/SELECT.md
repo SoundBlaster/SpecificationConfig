@@ -1,11 +1,14 @@
 # SELECT — Next Work Item
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ## Purpose
 
 Select the next task to execute for **SpecificationConfig**, using the PRD’s work plan (PRD §9) as the canonical task
 list unless a repo-local `DOCS/Workplan.md` exists.
+
+SELECT is a documentation-only command. Do **not** build or test the project while performing SELECT unless you
+explicitly touched source code during this command (rare). The default assumption is that no code is modified here.
 
 SELECT does **not** create implementation steps; it only chooses “what’s next” and records minimal metadata for PLAN.
 

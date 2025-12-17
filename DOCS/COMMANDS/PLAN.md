@@ -1,11 +1,14 @@
 # PLAN — Generate Task PRD
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ## Purpose
 
 Turn a selected task (usually from PRD §9) into an **implementation-ready, single-task PRD** with concrete steps and
 verification commands that match the current repository.
+
+PLAN is a documentation-only command. Do **not** build or test the project while performing PLAN unless you explicitly
+changed source code during this command (uncommon); the default flow should only adjust task PRDs.
 
 ## Inputs
 

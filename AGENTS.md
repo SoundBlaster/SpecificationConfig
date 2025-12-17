@@ -13,7 +13,7 @@ This file applies to the entire repository.
   - `README.md` → overview of the command set and validation baseline
 - `DOCS/RULES/` — supporting standards and templates (e.g., PRD authoring rules, XP/TDD workflow, command template, Swift install notes).
 - `DOCS/INPROGRESS/` and `DOCS/TASKS_ARCHIVE/` — active and archived task PRDs.
-- `DOCS/Workplan.md` — optional task checklist derived from PRD IDs.
+- `DOCS/Workplan.md` — **required** task checklist derived from PRD IDs.
 
 ## How to Use the Commands
 - Treat files in `DOCS/COMMANDS/` as prompts/instructions, not shell scripts.

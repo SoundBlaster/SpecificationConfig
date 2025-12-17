@@ -8,8 +8,8 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] B1 (High): Define `Binding<Draft, Value>` public API
 - [x] B2 (High): Implement `AnyBinding<Draft>` type erasure
 - [x] B3 (High): Define `Snapshot` model (values + provenance)
-- [ ] B4 (High): Define `DiagnosticsReport` & error items
-- [INPROGRESS] B5 (Medium): Add `Redaction` support (secret flag)
+- [INPROGRESS] B4 (High): Define `DiagnosticsReport` & error items
+- [x] B5 (Medium): Add `Redaction` support (secret flag)
 - [ ] C1 (High): Implement `SpecProfile<Draft, Final>`
 - [ ] C2 (High): Implement `ConfigPipeline` (build result: success/failure)
 - [ ] C3 (High): Deterministic ordering of diagnostics

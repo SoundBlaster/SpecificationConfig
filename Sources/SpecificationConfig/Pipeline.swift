@@ -1,0 +1,232 @@
+import Configuration
+import Foundation
+
+/// Result of building a configuration through the pipeline.
+///
+/// The pipeline always produces diagnostics and a snapshot, whether the build
+/// succeeds or fails. On success, the final configuration is included.
+///
+/// ## Example
+///
+/// ```swift
+/// let result = ConfigPipeline.build(profile: myProfile, reader: configReader)
+/// switch result {
+/// case let .success(final, snapshot):
+///     print("Config built successfully")
+///     print("Resolved \(snapshot.resolvedValues.count) values")
+/// case let .failure(diagnostics, snapshot):
+///     print("Build failed with \(diagnostics.errorCount) errors")
+///     for diagnostic in diagnostics.diagnostics where diagnostic.severity == .error {
+///         print("Error: \(diagnostic.displayMessage)")
+///     }
+/// }
+/// ```
+public enum BuildResult<Final> {
+    /// Configuration built successfully with final config and snapshot.
+    ///
+    /// - Parameters:
+    ///   - final: The validated final configuration.
+    ///   - snapshot: Snapshot containing resolved values, provenance, and any non-fatal diagnostics.
+    case success(final: Final, snapshot: Snapshot)
+
+    /// Configuration build failed with diagnostics and partial snapshot.
+    ///
+    /// - Parameters:
+    ///   - diagnostics: Error and warning messages explaining the failure.
+    ///   - snapshot: Snapshot containing any successfully resolved values before failure.
+    case failure(diagnostics: DiagnosticsReport, snapshot: Snapshot)
+
+    /// The diagnostics from this build result.
+    public var diagnostics: DiagnosticsReport {
+        switch self {
+        case let .success(_, snapshot):
+            return snapshot.diagnostics
+        case let .failure(diagnostics, _):
+            return diagnostics
+        }
+    }
+
+    /// The snapshot from this build result.
+    public var snapshot: Snapshot {
+        switch self {
+        case let .success(_, snapshot):
+            return snapshot
+        case let .failure(_, snapshot):
+            return snapshot
+        }
+    }
+}
+
+/// Configuration pipeline that orchestrates binding application, finalization,
+/// and validation with comprehensive diagnostics and snapshot generation.
+///
+/// `ConfigPipeline` wraps `SpecProfile` to provide observable, testable configuration
+/// building with deterministic error reporting and value provenance tracking.
+///
+/// ## Example
+///
+/// ```swift
+/// let profile = SpecProfile(
+///     bindings: [appNameBinding, apiKeyBinding],
+///     finalize: { draft in MyConfig(draft: draft) },
+///     makeDraft: { MyConfigDraft() }
+/// )
+///
+/// let result = ConfigPipeline.build(profile: profile, reader: configReader)
+/// switch result {
+/// case let .success(config, snapshot):
+///     // Use config and inspect snapshot for debugging
+///     print("App name: \(snapshot.value(forKey: "app.name")?.displayValue ?? "unknown")")
+/// case let .failure(diagnostics, _):
+///     // Handle errors with detailed diagnostics
+///     for error in diagnostics.diagnostics where error.severity == .error {
+///         print(error.formattedDescription())
+///     }
+/// }
+/// ```
+public enum ConfigPipeline {
+    /// Builds a configuration using the profile and reader, producing a result
+    /// with diagnostics and snapshot.
+    ///
+    /// The pipeline executes in order:
+    /// 1. Apply bindings to populate draft from configuration reader
+    /// 2. Track resolved values with provenance for the snapshot
+    /// 3. Finalize the draft into the final configuration type
+    /// 4. Run post-finalization specifications
+    ///
+    /// If any step fails, the pipeline returns `.failure` with diagnostics explaining
+    /// the error and a partial snapshot containing successfully resolved values.
+    ///
+    /// - Parameters:
+    ///   - profile: The specification profile defining bindings, finalization, and specs.
+    ///   - reader: The configuration reader supplying values.
+    /// - Returns: Build result containing either success (final config + snapshot) or
+    ///            failure (diagnostics + partial snapshot).
+    public static func build<Draft, Final>(
+        profile: SpecProfile<Draft, Final>,
+        reader: Configuration.ConfigReader
+    ) -> BuildResult<Final> {
+        var diagnostics = DiagnosticsReport()
+        var resolvedValues: [ResolvedValue] = []
+
+        // Create draft
+        var draft = profile.makeDraft()
+
+        // Apply bindings, collecting resolved values and diagnostics
+        for binding in profile.bindings {
+            do {
+                try binding.apply(to: &draft, reader: reader)
+
+                // Track successfully resolved value for snapshot
+                // For now, we can't extract the actual value from the draft
+                // without reflection, so we'll create a placeholder entry
+                // indicating the binding was applied successfully
+                // TODO: Track isSecret when AnyBinding exposes it
+                let resolvedValue = ResolvedValue(
+                    key: binding.key,
+                    stringifiedValue: "<applied>",
+                    provenance: .unknown,
+                    isSecret: false
+                )
+                resolvedValues.append(resolvedValue)
+
+            } catch let error as ConfigError {
+                // Convert ConfigError to diagnostic
+                let diagnostic = diagnosticFromConfigError(error, key: binding.key)
+                diagnostics.add(diagnostic)
+
+                // On error, stop and return failure (fail-fast behavior)
+                // Snapshot gets empty diagnostics - errors are only in BuildResult
+                let snapshot = Snapshot(
+                    resolvedValues: resolvedValues,
+                    diagnostics: DiagnosticsReport()
+                )
+                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+
+            } catch {
+                // Handle other errors (decode errors, etc.)
+                diagnostics.add(
+                    key: binding.key,
+                    severity: .error,
+                    message: "Binding application failed: \(error.localizedDescription)"
+                )
+
+                let snapshot = Snapshot(
+                    resolvedValues: resolvedValues,
+                    diagnostics: DiagnosticsReport()
+                )
+                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            }
+        }
+
+        // Check if we have any errors before finalizing
+        if diagnostics.hasErrors {
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+        }
+
+        // Finalize draft
+        let final: Final
+        do {
+            final = try profile.finalizeDraft(draft)
+        } catch let error as ConfigError {
+            let diagnostic = diagnosticFromConfigError(error, key: nil)
+            diagnostics.add(diagnostic)
+
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+
+        } catch {
+            diagnostics.add(
+                severity: .error,
+                message: "Finalization failed: \(error.localizedDescription)"
+            )
+
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+        }
+
+        // Success - build final snapshot
+        let snapshot = Snapshot(
+            resolvedValues: resolvedValues,
+            diagnostics: diagnostics
+        )
+
+        return .success(final: final, snapshot: snapshot)
+    }
+
+    /// Converts a ConfigError into a DiagnosticItem.
+    ///
+    /// - Parameters:
+    ///   - error: The configuration error to convert.
+    ///   - key: Optional configuration key associated with the error.
+    /// - Returns: A diagnostic item representing the error.
+    private static func diagnosticFromConfigError(
+        _ error: ConfigError,
+        key: String?
+    ) -> DiagnosticItem {
+        switch error {
+        case let .specFailed(specKey):
+            return DiagnosticItem(
+                key: key ?? specKey,
+                severity: .error,
+                message: "Value specification failed for key '\(specKey)'"
+            )
+        case .finalSpecFailed:
+            return DiagnosticItem(
+                key: key,
+                severity: .error,
+                message: "Post-finalization specification failed"
+            )
+        }
+    }
+}

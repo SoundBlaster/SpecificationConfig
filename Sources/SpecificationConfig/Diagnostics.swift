@@ -207,7 +207,7 @@ public struct DiagnosticsReport: Sendable, Equatable {
 
     /// Creates an empty diagnostics report.
     public init() {
-        self.items = []
+        items = []
     }
 
     /// Creates a diagnostics report with initial items.

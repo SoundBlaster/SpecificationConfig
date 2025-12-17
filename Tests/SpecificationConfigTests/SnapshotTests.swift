@@ -144,7 +144,7 @@ final class SnapshotTests: XCTestCase {
 
         let snapshot = Snapshot(
             resolvedValues: values,
-            diagnostics: []
+            diagnostics: DiagnosticsReport()
         )
 
         XCTAssertEqual(snapshot.resolvedValues.count, 1)
@@ -201,17 +201,21 @@ final class SnapshotTests: XCTestCase {
 
     func testSnapshotHasErrors() {
         // Empty diagnostics = no errors
-        let cleanSnapshot = Snapshot(diagnostics: [])
+        let cleanSnapshot = Snapshot(diagnostics: DiagnosticsReport())
         XCTAssertFalse(cleanSnapshot.hasErrors)
 
         // With diagnostics = has errors
-        let errorSnapshot = Snapshot(diagnostics: ["Missing required key"])
+        var errorReport = DiagnosticsReport()
+        errorReport.add(key: "missing.key", severity: .error, message: "Missing required key")
+        let errorSnapshot = Snapshot(diagnostics: errorReport)
         XCTAssertTrue(errorSnapshot.hasErrors)
 
         // Multiple diagnostics
-        let multiErrorSnapshot = Snapshot(
-            diagnostics: ["Error 1", "Error 2", "Warning 1"]
-        )
+        var multiReport = DiagnosticsReport()
+        multiReport.add(key: "error.one", severity: .error, message: "Error 1")
+        multiReport.add(key: "error.two", severity: .error, message: "Error 2")
+        multiReport.add(key: "warn.one", severity: .warning, message: "Warning 1")
+        let multiErrorSnapshot = Snapshot(diagnostics: multiReport)
         XCTAssertTrue(multiErrorSnapshot.hasErrors)
     }
 
@@ -291,7 +295,7 @@ final class SnapshotTests: XCTestCase {
         let snapshot = Snapshot(
             resolvedValues: [],
             timestamp: customDate,
-            diagnostics: []
+            diagnostics: DiagnosticsReport()
         )
 
         XCTAssertEqual(snapshot.timestamp, customDate)

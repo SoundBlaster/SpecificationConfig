@@ -6,7 +6,7 @@
 **Effort:** M (½–1d)
 **Dependencies:** B1 (completed)
 **Phase:** B
-**Status:** Ready for implementation
+**Status:** Completed
 
 ---
 

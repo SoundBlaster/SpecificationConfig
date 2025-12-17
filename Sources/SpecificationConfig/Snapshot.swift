@@ -108,7 +108,7 @@ public struct ResolvedValue: Sendable, Equatable {
 ///             provenance: .fileProvider(name: "config.json")
 ///         )
 ///     ],
-///     diagnostics: []
+///     diagnostics: DiagnosticsReport()
 /// )
 ///
 /// if let name = snapshot.value(forKey: "app.name") {
@@ -122,18 +122,17 @@ public struct Snapshot: Sendable {
     /// When this snapshot was created
     public let timestamp: Date
 
-    /// Placeholder for diagnostics messages.
+    /// Diagnostic messages collected during configuration resolution.
     ///
-    /// This will be replaced with proper `DiagnosticItem` types in B4.
-    /// For now, stores string messages for errors/warnings.
-    public let diagnostics: [String]
+    /// Contains errors, warnings, and informational messages with context
+    /// about what went wrong and where.
+    public let diagnostics: DiagnosticsReport
 
     /// Whether this snapshot contains any errors.
     ///
-    /// Currently checks if diagnostics array is non-empty.
-    /// Will be enhanced in B4 when proper diagnostic types are added.
+    /// Returns true if any diagnostic has severity `.error`.
     public var hasErrors: Bool {
-        !diagnostics.isEmpty
+        diagnostics.hasErrors
     }
 
     /// Creates a configuration snapshot.
@@ -141,11 +140,11 @@ public struct Snapshot: Sendable {
     /// - Parameters:
     ///   - resolvedValues: The resolved configuration values (default: empty)
     ///   - timestamp: When the snapshot was created (default: now)
-    ///   - diagnostics: Error/warning messages (default: empty)
+    ///   - diagnostics: Collected diagnostics (default: empty report)
     public init(
         resolvedValues: [ResolvedValue] = [],
         timestamp: Date = Date(),
-        diagnostics: [String] = []
+        diagnostics: DiagnosticsReport = DiagnosticsReport()
     ) {
         self.resolvedValues = resolvedValues
         self.timestamp = timestamp

@@ -1,5 +1,16 @@
-# Next Task: TBD
+# Next Task: C1 — Implement `SpecProfile<Draft, Final>`
 
-**Status:** Unassigned
+**Source:** PRD §9
+**Priority:** High
+**Phase:** C
+**Effort:** M
+**Dependencies:** B1
+**Status:** Selected
 
-No active task is currently selected. Use `DOCS/COMMANDS/SELECT.md` to choose the next work item from `DOCS/Workplan.md`.
+## Description
+
+Implement `SpecProfile<Draft, Final>`.
+
+## Next Step
+
+Run PLAN to generate an implementation-ready task PRD for this item.

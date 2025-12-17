@@ -10,7 +10,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] B3 (High): Define `Snapshot` model (values + provenance)
 - [x] B4 (High): Define `DiagnosticsReport` & error items
 - [x] B5 (Medium): Add `Redaction` support (secret flag)
-- [ ] C1 (High): Implement `SpecProfile<Draft, Final>`
+- [ ] C1 (High): Implement `SpecProfile<Draft, Final>` — INPROGRESS
 - [ ] C2 (High): Implement `ConfigPipeline` (build result: success/failure)
 - [ ] C3 (High): Deterministic ordering of diagnostics
 - [ ] C4 (Medium): Add collect-all vs fail-fast option

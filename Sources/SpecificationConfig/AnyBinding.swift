@@ -89,6 +89,10 @@ public struct AnyBinding<Draft> {
 }
 
 /// Temporary error type for B2 (will be replaced by proper Diagnostics in B4)
-public enum ConfigError: Error {
+public enum ConfigError: Error, Equatable {
+    /// A value-level specification failed while applying bindings.
     case specFailed(key: String)
+
+    /// A post-finalization specification failed.
+    case finalSpecFailed
 }

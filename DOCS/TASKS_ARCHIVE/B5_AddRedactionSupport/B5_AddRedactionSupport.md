@@ -602,3 +602,6 @@ let errorMessage = "Failed to validate \(Redaction.redact(value, isSecret: bindi
 ---
 
 **End of PRD**
+
+
+**Archived:** 2025-12-17

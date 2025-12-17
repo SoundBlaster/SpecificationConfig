@@ -9,3 +9,4 @@
 - B1 — Define `Binding<Draft, Value>` public API — archived 2025-12-16
 - B2 — Implement AnyBinding<Draft> type erasure — archived 2025-12-17
 - B3 — Define Snapshot model (values + provenance) — archived 2025-12-17
+- B5 — Add Redaction support (secret flag) — archived 2025-12-17

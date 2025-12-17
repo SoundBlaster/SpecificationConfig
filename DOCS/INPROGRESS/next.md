@@ -5,7 +5,7 @@
 **Phase:** B
 **Effort:** M (½–1d)
 **Dependencies:** B1 (completed)
-**Status:** Selected
+**Status:** Completed
 
 ## Description
 
@@ -13,4 +13,4 @@ Define formal diagnostics and error reporting types. Create `DiagnosticsReport` 
 
 ## Next Step
 
-Run PLAN to generate an implementation-ready task PRD for this item.
+Archive this task PRD or select the next item from PRD §9.

@@ -68,7 +68,7 @@ public struct ResolvedValue: Sendable, Equatable {
     /// Returns `[REDACTED]` for secret values, or the actual value otherwise.
     /// Use this for logs, UI display, and diagnostics output.
     public var displayValue: String {
-        isSecret ? "[REDACTED]" : stringifiedValue
+        Redaction.redact(stringifiedValue, isSecret: isSecret)
     }
 
     /// Creates a resolved value.

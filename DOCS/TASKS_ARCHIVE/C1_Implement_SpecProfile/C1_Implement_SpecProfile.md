@@ -26,15 +26,15 @@ Implement the `SpecProfile<Draft, Final>` type that aggregates bindings, drives 
 - Updated module exports if needed so the new type is visible to library consumers.
 
 ## Plan — Subtasks & Acceptance Criteria
-- [ ] **Define `SpecProfile` data model and initializer(s).**
+- [x] **Define `SpecProfile` data model and initializer(s).**
   - Acceptance: Struct or class holding `bindings: [AnyBinding<Draft>]`, `finalize: (Draft) throws -> Final`, and optional `finalSpecs: [AnySpecification<Final>]` (or equivalent). Provides at least one public initializer that sets these properties; ensures bindings are kept in declared order.
-- [ ] **Implement binding application + finalize helpers.**
+- [x] **Implement binding application + finalize helpers.**
   - Acceptance: Public method(s) to construct a `Draft`, apply bindings using a supplied `Configuration.ConfigReader`, and return a populated draft while propagating decode/spec errors (using existing `ConfigError` until B4). Another method runs finalize on a provided draft and then executes `finalSpecs`, failing fast on spec violations.
-- [ ] **Expose convenience API for pipeline integration.**
+- [x] **Expose convenience API for pipeline integration.**
   - Acceptance: Provide a top-level helper (e.g., `build(reader:)` or similar) that performs “apply bindings → finalize → post-specs” in sequence and returns the final config, enabling C2 to orchestrate without duplicating logic. Method should be generic-friendly and keep draft mutation encapsulated.
-- [ ] **Add unit tests.**
+- [x] **Add unit tests.**
   - Acceptance: Tests create minimal `Draft`/`Final` structs, define bindings with value specs, and verify: (a) successful application produces expected `Final`, (b) missing/invalid values surface errors, (c) post-final specs are enforced, (d) bindings are applied in declared order when multiple keys exist. Tests live in `SpecProfileTests.swift` and compile/run via `swift test -v`.
-- [ ] **Document public API.**
+- [x] **Document public API.**
   - Acceptance: DocC-style comments for `SpecProfile` and its primary methods covering purpose, parameters, thrown errors, and usage notes; align with terminology in PRD §4.
 
 ## Definition of Done (task-level)
@@ -46,3 +46,5 @@ Implement the `SpecProfile<Draft, Final>` type that aggregates bindings, drives 
 - `swift build -v`
 - `swift test -v`
 - `swiftformat --lint .` (if available)
+
+**Archived:** 2025-12-17

@@ -601,4 +601,229 @@ final class PipelineTests: XCTestCase {
             XCTAssertEqual(snapshot.resolvedValues.count, 0)
         }
     }
+
+    // MARK: - Provenance Tracking Tests
+
+    func testSnapshotContainsActualStringifiedValues() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: ConfigReader.string
+        )
+
+        let portBinding = Binding(
+            key: "app.port",
+            keyPath: \TestDraft.port,
+            decoder: ConfigReader.int
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding), AnyBinding(portBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: draft.port ?? 0, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.name": "TestApp",
+            "app.port": 8080,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(snapshot.resolvedValues.count, 2)
+
+            let nameValue = snapshot.value(forKey: "app.name")
+            XCTAssertEqual(nameValue?.stringifiedValue, "TestApp")
+            XCTAssertEqual(nameValue?.provenance, .unknown)
+
+            let portValue = snapshot.value(forKey: "app.port")
+            XCTAssertEqual(portValue?.stringifiedValue, "8080")
+            XCTAssertEqual(portValue?.provenance, .unknown)
+
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testSnapshotTracksIsSecretFlag() {
+        let apiKeyBinding = Binding(
+            key: "api.key",
+            keyPath: \TestDraft.name,
+            decoder: ConfigReader.string,
+            isSecret: true
+        )
+
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: ConfigReader.string,
+            isSecret: false
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(apiKeyBinding), AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "api.key": "secret123",
+            "app.name": "TestApp",
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let apiKeyValue = snapshot.value(forKey: "api.key")
+            XCTAssertEqual(apiKeyValue?.isSecret, true)
+            XCTAssertEqual(apiKeyValue?.displayValue, "[REDACTED]")
+            XCTAssertEqual(apiKeyValue?.stringifiedValue, "secret123")
+
+            let nameValue = snapshot.value(forKey: "app.name")
+            XCTAssertEqual(nameValue?.isSecret, false)
+            XCTAssertEqual(nameValue?.displayValue, "TestApp")
+
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testSnapshotProvenanceDefaultValue() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: ConfigReader.string,
+            defaultValue: "DefaultApp"
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        // No value provided, default should be used
+        let provider = InMemoryProvider(values: [:])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let nameValue = snapshot.value(forKey: "app.name")
+            XCTAssertEqual(nameValue?.stringifiedValue, "DefaultApp")
+            XCTAssertEqual(nameValue?.provenance, .defaultValue)
+
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testSnapshotHandlesNilValues() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: ConfigReader.string
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "<none>", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        // No value provided, no default
+        let provider = InMemoryProvider(values: [:])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let nameValue = snapshot.value(forKey: "app.name")
+            XCTAssertEqual(nameValue?.stringifiedValue, "<nil>")
+
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testSnapshotStringifiesDifferentTypes() {
+        struct TestDraft2 {
+            var name: String?
+            var port: Int?
+            var enabled: Bool?
+        }
+
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft2.name,
+            decoder: ConfigReader.string
+        )
+
+        let portBinding = Binding(
+            key: "app.port",
+            keyPath: \TestDraft2.port,
+            decoder: ConfigReader.int
+        )
+
+        let enabledBinding = Binding(
+            key: "app.enabled",
+            keyPath: \TestDraft2.enabled,
+            decoder: ConfigReader.bool
+        )
+
+        let profile = SpecProfile(
+            bindings: [
+                AnyBinding(nameBinding),
+                AnyBinding(portBinding),
+                AnyBinding(enabledBinding),
+            ],
+            finalize: { draft in
+                TestConfig(
+                    name: draft.name ?? "",
+                    port: draft.port ?? 0,
+                    isEnabled: draft.enabled ?? false
+                )
+            },
+            makeDraft: { TestDraft2() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.name": "TestApp",
+            "app.port": 8080,
+            "app.enabled": true,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let nameValue = snapshot.value(forKey: "app.name")
+            XCTAssertEqual(nameValue?.stringifiedValue, "TestApp")
+
+            let portValue = snapshot.value(forKey: "app.port")
+            XCTAssertEqual(portValue?.stringifiedValue, "8080")
+
+            let enabledValue = snapshot.value(forKey: "app.enabled")
+            XCTAssertEqual(enabledValue?.stringifiedValue, "true")
+
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
 }

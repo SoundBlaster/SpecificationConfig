@@ -140,18 +140,20 @@ public enum ConfigPipeline {
         // Apply bindings, collecting resolved values and diagnostics
         for binding in profile.bindings {
             do {
-                try binding.apply(to: &draft, reader: reader)
+                let (stringifiedValue, usedDefault) = try binding.applyAndCapture(
+                    to: &draft,
+                    reader: reader
+                )
+
+                // Determine provenance based on whether default was used
+                let provenance: Provenance = usedDefault ? .defaultValue : .unknown
 
                 // Track successfully resolved value for snapshot
-                // For now, we can't extract the actual value from the draft
-                // without reflection, so we'll create a placeholder entry
-                // indicating the binding was applied successfully
-                // TODO: Track isSecret when AnyBinding exposes it
                 let resolvedValue = ResolvedValue(
                     key: binding.key,
-                    stringifiedValue: "<applied>",
-                    provenance: .unknown,
-                    isSecret: false
+                    stringifiedValue: stringifiedValue ?? "<nil>",
+                    provenance: provenance,
+                    isSecret: binding.isSecret
                 )
                 resolvedValues.append(resolvedValue)
 

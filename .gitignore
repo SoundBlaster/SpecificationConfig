@@ -6,6 +6,11 @@
 xcuserdata/
 DerivedData/
 
+# Xcode project user-specific files
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
 # Editor / tooling
 .vscode/
 .idea/

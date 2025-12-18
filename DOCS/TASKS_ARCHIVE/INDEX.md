@@ -42,3 +42,4 @@
 ## Phase G
 - G1 — GitHub Actions: build + test on macOS — archived 2025-12-19
 - G2 — README “Why this wrapper” + quickstart — archived 2025-12-19
+- G3 — 0.1.0 release checklist + changelog — archived 2025-12-19

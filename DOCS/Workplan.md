@@ -31,4 +31,4 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] F6 (Low): Optional watching step + doc (`05_Watching.md`)
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart
-- [ ] G3 (Medium): 0.1.0 release checklist + changelog
+- [x] G3 (Medium): 0.1.0 release checklist + changelog

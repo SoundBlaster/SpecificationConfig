@@ -485,4 +485,6 @@ let enabledBinding = Binding(
 
 ---
 
+**Archived:** 2025-12-18
+
 **End of PRD**

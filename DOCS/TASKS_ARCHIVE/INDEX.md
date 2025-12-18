@@ -17,3 +17,6 @@
 - C2 — Implement `ConfigPipeline` — archived 2025-12-17
 - C3 — Deterministic ordering of diagnostics — archived 2025-12-18
 - C4 — Add collect-all vs fail-fast option — archived 2025-12-18
+
+## Phase D
+- D1 — Add minimal helpers for reading primitives — archived 2025-12-18

@@ -1,15 +1,15 @@
-# Next Task: D1 — Add minimal helpers for reading primitives
+# Next Task: D2 — Provenance capture strategy
 
 **Source:** PRD §9
 **Priority:** High
 **Phase:** D
 **Effort:** M
-**Dependencies:** A2
+**Dependencies:** B3, D1
 **Status:** Selected
 
 ## Description
 
-Add minimal helpers for reading primitive types (String/Bool/Int/URL) from ConfigReader. These helpers will simplify binding decoders and provide consistent error handling.
+Define and implement provenance capture strategy for configuration values in Snapshot. Determine how to extract source information from Swift Configuration API or use placeholders if not available.
 
 ## Next Step
 

@@ -5,7 +5,7 @@ Demonstration application for the SpecificationConfig library.
 ## Current Status
 
 - **E1 Complete:** App scaffolding created
-- **E2 Pending:** Configuration file loading
+- **E2 Complete:** Configuration file loading
 - **E3 Pending:** AppConfig types and SpecProfile
 - **E4 Pending:** Split-view UI with reload button
 - **E5 Pending:** Error display panel
@@ -88,12 +88,31 @@ When working on the demo app:
 3. Library changes are immediately available to the demo app
 4. Build and run the demo to test integration
 
-## Future Features
+## Configuration File
 
-### Task E2: Configuration Loading
-- Add config.json file support
-- Create FileProvider for reading config
-- Integrate with library's ConfigReader
+The app reads configuration from `config.json` in the project root.
+
+### Format
+
+```json
+{
+  "pet": {
+    "name": "Egorchi",
+    "isSleeping": true
+  }
+}
+```
+
+### Fields
+
+- `pet.name` (String): The pet's display name
+- `pet.isSleeping` (Boolean): Whether the pet is currently asleep
+
+To modify the configuration:
+1. Edit `Demo/ConfigPetApp/config.json`
+2. Reload the app (or use the Reload button when E4 is complete)
+
+## Future Features
 
 ### Task E3: AppConfig Types
 - Define AppConfigDraft and AppConfig structs

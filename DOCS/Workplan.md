@@ -18,7 +18,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] D2 (High): Provenance capture strategy
 - [x] D3 (Medium): Manual reload API (rebuild with same profile/reader)
 - [x] E1 (High): Create macOS SwiftUI app target (Demo/ConfigPetApp)
-- [ ] E2 (High): Add config file loader (config.json in app working dir)
+- [x] E2 (High): Add config file loader (config.json in app working dir)
 - [ ] E3 (High): Implement `AppConfig` + `Draft` + `SpecProfile` for v0
 - [ ] E4 (High): UI split view + Reload button
 - [ ] E5 (High): UI error list panel when build fails

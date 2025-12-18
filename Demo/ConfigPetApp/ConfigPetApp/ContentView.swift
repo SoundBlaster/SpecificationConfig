@@ -1,6 +1,9 @@
+import Configuration
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var configManager: ConfigManager
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Config Pet")
@@ -13,12 +16,49 @@ struct ContentView: View {
 
             Spacer()
 
+            VStack(spacing: 12) {
+                // Config status
+                HStack {
+                    Text("Config Status:")
+                        .fontWeight(.semibold)
+                    Text(configManager.statusDescription)
+                        .foregroundColor(configManager.loadError != nil ? .red : .green)
+                }
+
+                // Show loaded values if available
+                if let reader = configManager.reader {
+                    Divider()
+
+                    Text("Loaded Configuration:")
+                        .fontWeight(.semibold)
+
+                    if let petName = reader.string(forKey: ConfigKey("pet.name")) {
+                        HStack {
+                            Text("Pet Name:")
+                            Text(petName)
+                                .foregroundColor(.blue)
+                        }
+                    }
+
+                    if let isSleeping = reader.bool(forKey: ConfigKey("pet.isSleeping")) {
+                        HStack {
+                            Text("Is Sleeping:")
+                            Text(isSleeping ? "Yes" : "No")
+                                .foregroundColor(isSleeping ? .purple : .orange)
+                        }
+                    }
+                }
+            }
+            .font(.body)
+
+            Spacer()
+
             VStack(spacing: 8) {
-                Text("Configuration loading will be added in task E2")
+                Text("Task E2 complete: Config file loading")
                     .font(.caption)
                     .foregroundColor(.gray)
 
-                Text("Current status: App scaffolding complete (E1)")
+                Text("Next: E3 - AppConfig types and SpecProfile")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
@@ -30,4 +70,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(ConfigManager())
 }

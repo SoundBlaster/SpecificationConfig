@@ -11,6 +11,12 @@ DerivedData/
 *.xcodeproj/xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 
+# Tuist
+.build/
+Derived/
+*.xcodeproj
+*.xcworkspace
+
 # Editor / tooling
 .vscode/
 .idea/

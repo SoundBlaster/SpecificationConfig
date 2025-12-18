@@ -12,40 +12,54 @@ Demonstration application for the SpecificationConfig library.
 
 ## Building and Running
 
-### Option 1: Using Xcode (Recommended for macOS App)
+### Prerequisites
+
+- Tuist must be installed
+- macOS 15.0 or later
+
+### Using Tuist + Xcode (Required)
 
 1. Navigate to the demo directory:
    ```bash
    cd Demo/ConfigPetApp
    ```
 
-2. Open the package in Xcode:
+2. Install dependencies:
    ```bash
-   open Package.swift
+   tuist install
    ```
 
-3. In Xcode:
+3. Generate the Xcode project:
+   ```bash
+   tuist generate
+   ```
+
+4. Open the workspace:
+   ```bash
+   open ConfigPetApp.xcworkspace
+   ```
+
+5. In Xcode:
    - Select "ConfigPetApp" scheme
    - Product > Run (⌘R)
 
 The app will launch as a macOS SwiftUI application.
 
-### Option 2: Using Swift Package Manager
+### Quick Regeneration
 
-From the demo directory:
+After making changes to Project.swift or dependencies:
 
 ```bash
-cd Demo/ConfigPetApp
-swift run ConfigPetApp
+tuist generate
 ```
-
-Note: This runs as a command-line executable with SwiftUI. For full macOS app experience, use Option 1.
 
 ## Project Structure
 
 ```
 ConfigPetApp/
-├── Package.swift              # SPM package definition
+├── Project.swift              # Tuist project manifest
+├── Tuist/
+│   └── Package.swift         # External dependencies (SPM)
 └── ConfigPetApp/
     ├── ConfigPetApp.swift     # App entry point (@main)
     └── ContentView.swift      # Main view (currently placeholder)
@@ -53,10 +67,14 @@ ConfigPetApp/
 
 ## Dependencies
 
-The app depends on the SpecificationConfig library via local package reference:
+The app is managed by Tuist and depends on the SpecificationConfig library via local package reference:
 
 ```swift
-.package(path: "../..")
+// In Tuist/Package.swift
+.package(path: "../../..")
+
+// In Project.swift
+.external(name: "SpecificationConfig")
 ```
 
 This ensures the demo always uses the latest library code from the repository.
@@ -66,8 +84,9 @@ This ensures the demo always uses the latest library code from the repository.
 When working on the demo app:
 
 1. Make changes to library code in `Sources/SpecificationConfig/`
-2. Library changes are immediately available to the demo app
-3. Build and run the demo to test integration
+2. Regenerate the project if needed: `tuist generate`
+3. Library changes are immediately available to the demo app
+4. Build and run the demo to test integration
 
 ## Future Features
 
@@ -93,12 +112,13 @@ When working on the demo app:
 
 ## Troubleshooting
 
-### Package Dependency Not Resolving
+### Project Not Generating
 
-If Xcode shows "Missing package product 'SpecificationConfig'":
+If `tuist generate` fails:
 
-1. File > Packages > Reset Package Caches
-2. File > Packages > Resolve Package Versions
+1. Clean Tuist cache: `tuist clean`
+2. Reinstall dependencies: `tuist install`
+3. Try generating again: `tuist generate`
 
 ### Build Errors
 
@@ -108,6 +128,14 @@ Ensure the root SpecificationConfig library builds successfully:
 cd ../..
 swift build
 swift test
+```
+
+### Tuist Installation
+
+If Tuist is not installed, install it using:
+
+```bash
+curl -Ls https://install.tuist.io | bash
 ```
 
 ## Notes

@@ -26,6 +26,7 @@
 ## Phase E
 - E1 — Create macOS SwiftUI app target — archived 2025-12-18
 - E2 — Add config file loader — archived 2025-12-18
+- E2B1 — Bug: config path shows double slash in error — archived 2025-12-19
 - E3 — Implement `AppConfig` + `Draft` + `SpecProfile` for v0 — archived 2025-12-18
 - E4 — UI split view + Reload button — archived 2025-12-18
 - E5 — UI error list panel when build fails — archived 2025-12-19

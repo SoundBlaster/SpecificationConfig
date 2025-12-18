@@ -1,5 +1,6 @@
 import Configuration
 import Foundation
+import SpecificationConfig
 
 /// Loads configuration from config.json file.
 ///
@@ -31,7 +32,10 @@ struct ConfigFileLoader {
     ///
     /// The default path is `config.json` in the current working directory.
     init() {
-        configFilePath = FileManager.default.currentDirectoryPath + "/config.json"
+        configFilePath = PathUtils.joinedPath(
+            FileManager.default.currentDirectoryPath,
+            "config.json"
+        )
     }
 
     /// Creates a loader with a specific config file path.
@@ -137,7 +141,10 @@ struct ConfigFileLoader {
         let fileManager = FileManager.default
 
         // Try current directory
-        let currentDirPath = fileManager.currentDirectoryPath + "/config.json"
+        let currentDirPath = PathUtils.joinedPath(
+            fileManager.currentDirectoryPath,
+            "config.json"
+        )
         if fileManager.fileExists(atPath: currentDirPath) {
             return ConfigFileLoader(configFilePath: currentDirPath)
         }

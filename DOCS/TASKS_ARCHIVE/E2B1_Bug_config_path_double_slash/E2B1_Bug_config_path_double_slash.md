@@ -64,4 +64,9 @@ Record and scope the bug where the ConfigPetApp shows a double-slash path in the
 
 - Bug task recorded and linked to E2
 
+## 6. Resolution
+
+- Fixed by normalizing config paths with URL-based joining in `ConfigFileLoader`
+- Added unit tests covering path normalization
+
 **Archived:** 2025-12-19

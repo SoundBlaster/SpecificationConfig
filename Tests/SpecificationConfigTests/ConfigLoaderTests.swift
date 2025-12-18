@@ -214,6 +214,34 @@ final class ConfigLoaderTests: XCTestCase {
         }
     }
 
+    func testConfigLoaderValueSpecFailure() {
+        let nameBinding = Binding<TestDraft, String>(
+            key: "pet.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            valueSpecs: [AnySpecification<String> { !$0.isEmpty }]
+        )
+        let profile = SpecProfile<TestDraft, TestConfig>(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                try TestConfig(draft: draft)
+            },
+            makeDraft: { TestDraft() }
+        )
+        let provider = InMemoryProvider(values: ["pet.name": ""])
+        let reader = ConfigReader(provider: provider)
+        let loader = ConfigLoader(profile: profile, reader: reader)
+
+        let result = loader.build()
+
+        switch result {
+        case .success:
+            XCTFail("Expected value spec failure but got success")
+        case let .failure(diagnostics, _):
+            XCTAssertTrue(diagnostics.hasErrors)
+        }
+    }
+
     // MARK: - Snapshot Tests
 
     func testConfigLoaderSnapshot() {

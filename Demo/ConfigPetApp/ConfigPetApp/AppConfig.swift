@@ -1,6 +1,7 @@
 import Configuration
 import Foundation
 import SpecificationConfig
+import SpecificationCore
 
 struct AppConfigDraft {
     var petName: String?
@@ -17,7 +18,12 @@ struct AppConfig {
                 Binding(
                     key: "pet.name",
                     keyPath: \AppConfigDraft.petName,
-                    decoder: ConfigReader.string
+                    decoder: ConfigReader.string,
+                    valueSpecs: [
+                        AnySpecification { value in
+                            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        },
+                    ]
                 )
             ),
             AnyBinding(

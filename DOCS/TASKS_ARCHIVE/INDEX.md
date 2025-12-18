@@ -37,6 +37,7 @@
 - F3 — Add ENV override step + doc (`02_EnvOverrides.md`) — archived 2025-12-19
 - F4 — Add value specs step + doc (`03_ValueSpecs.md`) — archived 2025-12-19
 - F5 — Add decision fallback step + doc (`04_Decisions.md`) — archived 2025-12-19
+- F6 — Optional watching step + doc (`05_Watching.md`) — archived 2025-12-19
 
 ## Phase G
 - G1 — GitHub Actions: build + test on macOS — archived 2025-12-19

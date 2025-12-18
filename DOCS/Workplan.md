@@ -16,7 +16,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] C4 (Medium): Add collect-all vs fail-fast option
 - [x] D1 (High): Add minimal helpers for reading primitives
 - [x] D2 (High): Provenance capture strategy
-- [ ] D3 (Medium): Manual reload API (rebuild with same profile/reader)
+- [x] D3 (Medium): Manual reload API (rebuild with same profile/reader)
 - [ ] E1 (High): Create macOS SwiftUI app target (Demo/ConfigPetApp)
 - [ ] E2 (High): Add config file loader (config.json in app working dir)
 - [ ] E3 (High): Implement `AppConfig` + `Draft` + `SpecProfile` for v0

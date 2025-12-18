@@ -1,15 +1,15 @@
-# Next Task: C4 — Add collect-all vs fail-fast option
+# Next Task: D1 — Add minimal helpers for reading primitives
 
 **Source:** PRD §9
-**Priority:** Medium
-**Phase:** C
+**Priority:** High
+**Phase:** D
 **Effort:** M
-**Dependencies:** C2
+**Dependencies:** A2
 **Status:** Selected
 
 ## Description
 
-Add configuration option to ConfigPipeline to choose between collect-all errors mode (default) and fail-fast mode. This allows users to decide whether to collect all diagnostics before failing or stop at the first error.
+Add minimal helpers for reading primitive types (String/Bool/Int/URL) from ConfigReader. These helpers will simplify binding decoders and provide consistent error handling.
 
 ## Next Step
 

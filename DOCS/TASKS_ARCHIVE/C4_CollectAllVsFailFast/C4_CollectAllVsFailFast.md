@@ -524,4 +524,6 @@ Result: 2 errors in diagnostics, 1 value in snapshot
 
 ---
 
+**Archived:** 2025-12-18
+
 **End of PRD**

@@ -13,7 +13,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] C1 (High): Implement `SpecProfile<Draft, Final>`
 - [x] C2 (High): Implement `ConfigPipeline` (build result: success/failure)
 - [x] C3 (High): Deterministic ordering of diagnostics
-- [ ] C4 (Medium): Add collect-all vs fail-fast option
+- [x] C4 (Medium): Add collect-all vs fail-fast option
 - [ ] D1 (High): Add minimal helpers for reading primitives
 - [ ] D2 (High): Provenance capture strategy
 - [ ] D3 (Medium): Manual reload API (rebuild with same profile/reader)

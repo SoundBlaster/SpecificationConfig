@@ -27,7 +27,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] F2 (High): Tag repo `tutorial-v0`
 - [x] F3 (Medium): Add ENV override step + doc (`02_EnvOverrides.md`)
 - [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
-- [ ] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
+- [x] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
 - [ ] F6 (Low): Optional watching step + doc (`05_Watching.md`)
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart

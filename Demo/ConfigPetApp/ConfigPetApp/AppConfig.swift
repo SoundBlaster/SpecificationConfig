@@ -12,6 +12,24 @@ struct AppConfig {
     let petName: String
     let isSleeping: Bool
 
+    private static let petNameFallbacks: [AnyDecisionSpec<AppConfigDraft, String>] = [
+        AnyDecisionSpec(
+            PredicateSpec<AppConfigDraft>(description: "Sleeping pet") { draft in
+                draft.isSleeping == true
+            }
+            .returning("Sleepy")
+        ),
+    ]
+
+    private static func resolvePetName(from draft: AppConfigDraft) -> String? {
+        for decision in petNameFallbacks {
+            if let name = decision.decide(draft) {
+                return name
+            }
+        }
+        return nil
+    }
+
     static let profile = SpecProfile<AppConfigDraft, AppConfig>(
         bindings: [
             AnyBinding(
@@ -36,7 +54,8 @@ struct AppConfig {
             ),
         ],
         finalize: { draft in
-            guard let petName = draft.petName else {
+            let petName = draft.petName ?? resolvePetName(from: draft)
+            guard let petName else {
                 throw AppConfigError.missingRequiredValue(key: "pet.name")
             }
             guard let isSleeping = draft.isSleeping else {

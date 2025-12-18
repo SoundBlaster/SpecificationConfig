@@ -242,6 +242,66 @@ final class ConfigLoaderTests: XCTestCase {
         }
     }
 
+    func testConfigLoaderDecisionFallbackUsesSleepingName() {
+        struct DecisionDraft {
+            var name: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig: Equatable {
+            let name: String
+            let isSleeping: Bool
+        }
+
+        enum DecisionError: Error {
+            case missingName
+            case missingSleepFlag
+        }
+
+        let nameBinding = Binding<DecisionDraft, String>(
+            key: "pet.name",
+            keyPath: \DecisionDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+        let sleepingBinding = Binding<DecisionDraft, Bool>(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: { reader, key in reader.bool(forKey: ConfigKey(key)) }
+        )
+
+        let decisionSpec = PredicateSpec<DecisionDraft>(description: "Sleeping pet") { draft in
+            draft.isSleeping == true
+        }.returning("Sleepy")
+        let decisionFallbacks: [AnyDecisionSpec<DecisionDraft, String>] = [AnyDecisionSpec(decisionSpec)]
+
+        let profile = SpecProfile<DecisionDraft, DecisionConfig>(
+            bindings: [AnyBinding(nameBinding), AnyBinding(sleepingBinding)],
+            finalize: { draft in
+                let name = draft.name ?? decisionFallbacks.compactMap { $0.decide(draft) }.first
+                guard let name else {
+                    throw DecisionError.missingName
+                }
+                guard let isSleeping = draft.isSleeping else {
+                    throw DecisionError.missingSleepFlag
+                }
+                return DecisionConfig(name: name, isSleeping: isSleeping)
+            },
+            makeDraft: { DecisionDraft() }
+        )
+        let provider = InMemoryProvider(values: ["pet.isSleeping": true])
+        let reader = ConfigReader(provider: provider)
+        let loader = ConfigLoader(profile: profile, reader: reader)
+
+        let result = loader.build()
+
+        switch result {
+        case let .success(config, _):
+            XCTAssertEqual(config, DecisionConfig(name: "Sleepy", isSleeping: true))
+        case .failure:
+            XCTFail("Expected decision fallback success but got failure")
+        }
+    }
+
     // MARK: - Snapshot Tests
 
     func testConfigLoaderSnapshot() {

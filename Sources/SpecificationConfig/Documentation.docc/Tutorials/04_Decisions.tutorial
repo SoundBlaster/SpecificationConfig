@@ -1,19 +1,77 @@
 # Using Decision Specs for Fallback Logic
 
-> Placeholder for tutorial content. To be implemented in Phase F (Task F5).
+Add DecisionSpec-based fallback logic so your app can derive values when configuration is missing.
 
 ## Overview
 
-This tutorial will cover using DecisionSpec for fallback and derivation logic. You'll learn how to provide default values when configuration is missing using SpecificationCore's decision specifications.
+You will:
+- Create a DecisionSpec that derives a pet name when the pet is sleeping.
+- Use the decision in `AppConfig` finalization.
+- Trigger the fallback by removing `pet.name` from the config.
 
-## Topics
+## Prerequisites
 
-### Implementation
+- Completed `03_ValueSpecs`
+- Demo app builds and loads `config.json`
 
-- Coming soon
+## Step 1: Add a decision fallback
 
-### Demo Features
+Update `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`:
 
-- DecisionSpec for default values
-- Fallback logic when isSleeping is missing
-- Computed/derived configuration values
+```swift
+import SpecificationCore
+
+// ...
+
+private static let petNameFallbacks: [AnyDecisionSpec<AppConfigDraft, String>] = [
+    AnyDecisionSpec(
+        PredicateSpec<AppConfigDraft>(description: "Sleeping pet") { draft in
+            draft.isSleeping == true
+        }
+        .returning("Sleepy")
+    ),
+]
+
+private static func resolvePetName(from draft: AppConfigDraft) -> String? {
+    for decision in petNameFallbacks {
+        if let name = decision.decide(draft) {
+            return name
+        }
+    }
+    return nil
+}
+```
+
+In `finalize`, prefer the explicit value and then fall back to the decision result:
+
+```swift
+let petName = draft.petName ?? resolvePetName(from: draft)
+```
+
+## Step 2: Trigger the fallback
+
+Edit `Demo/ConfigPetApp/config.json` to remove the name:
+
+```json
+{
+  "pet": {
+    "isSleeping": true
+  }
+}
+```
+
+Run the app and press Reload. The left panel should show `Sleepy` as the pet name.
+
+## Validation
+
+From the repo root:
+
+```bash
+swift build -v
+swift test -v
+swiftformat --lint .
+```
+
+## Next
+
+Proceed to `05_Watching` for optional config watching.

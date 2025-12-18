@@ -11,6 +11,7 @@ let project = Project(
             deploymentTargets: .macOS("15.0"),
             infoPlist: .default,
             sources: ["ConfigPetApp/**"],
+            resources: ["config.json"],
             dependencies: [
                 .external(name: "SpecificationConfig"),
             ]

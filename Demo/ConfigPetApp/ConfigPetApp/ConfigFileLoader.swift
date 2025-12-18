@@ -133,12 +133,17 @@ struct ConfigFileLoader {
     /// Attempts to find config.json in common locations.
     ///
     /// Search order:
-    /// 1. Current working directory
-    /// 2. App bundle resources (if running as app)
+    /// 1. App bundle resources (if running as app)
+    /// 2. Current working directory
     ///
     /// - Returns: ConfigFileLoader with resolved path, or nil if not found.
     static func findConfigFile() -> ConfigFileLoader? {
         let fileManager = FileManager.default
+
+        // Try app bundle
+        if let bundlePath = Bundle.main.path(forResource: "config", ofType: "json") {
+            return ConfigFileLoader(configFilePath: bundlePath)
+        }
 
         // Try current directory
         let currentDirPath = PathUtils.joinedPath(
@@ -147,11 +152,6 @@ struct ConfigFileLoader {
         )
         if fileManager.fileExists(atPath: currentDirPath) {
             return ConfigFileLoader(configFilePath: currentDirPath)
-        }
-
-        // Try app bundle
-        if let bundlePath = Bundle.main.path(forResource: "config", ofType: "json") {
-            return ConfigFileLoader(configFilePath: bundlePath)
         }
 
         return nil

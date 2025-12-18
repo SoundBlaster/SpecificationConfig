@@ -1,15 +1,15 @@
-# Next Task: D2 — Provenance capture strategy
+# Next Task: D3 — Manual reload API
 
 **Source:** PRD §9
-**Priority:** High
+**Priority:** Medium
 **Phase:** D
-**Effort:** M
-**Dependencies:** B3, D1
+**Effort:** S
+**Dependencies:** C2
 **Status:** Selected
 
 ## Description
 
-Define and implement provenance capture strategy for configuration values in Snapshot. Determine how to extract source information from Swift Configuration API or use placeholders if not available.
+Add manual reload API to rebuild configuration with same profile and reader. This provides a simple way to refresh configuration without creating new pipeline instances.
 
 ## Next Step
 

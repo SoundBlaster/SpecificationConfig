@@ -12,9 +12,9 @@ let project = Project(
             infoPlist: .default,
             sources: ["ConfigPetApp/**"],
             dependencies: [
-                .external(name: "SpecificationConfig")
+                .external(name: "SpecificationConfig"),
             ]
-        )
+        ),
     ],
     schemes: [
         .scheme(
@@ -22,6 +22,6 @@ let project = Project(
             shared: true,
             buildAction: .buildAction(targets: ["ConfigPetApp"]),
             runAction: .runAction(executable: "ConfigPetApp")
-        )
+        ),
     ]
 )

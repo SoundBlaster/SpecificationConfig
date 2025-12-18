@@ -6,7 +6,7 @@ import PackageDescription
 
     let packageSettings = PackageSettings(
         productTypes: [
-            "SpecificationConfig": .framework
+            "SpecificationConfig": .framework,
         ]
     )
 #endif
@@ -14,6 +14,6 @@ import PackageDescription
 let package = Package(
     name: "ConfigPetAppDependencies",
     dependencies: [
-        .package(path: "../../..")
+        .package(path: "../../.."),
     ]
 )

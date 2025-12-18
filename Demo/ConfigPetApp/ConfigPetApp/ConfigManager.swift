@@ -47,7 +47,7 @@ class ConfigManager: ObservableObject {
         }
     }
 
-    /// Provides a debug description of the configuration status.
+    /// Provides a user-facing description of load/build status.
     var statusDescription: String {
         if let error = loadError {
             "Error: \(error.localizedDescription)"

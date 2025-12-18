@@ -1,6 +1,7 @@
 import SpecificationConfig
 import SwiftUI
 
+/// Main UI for the Config Pet demo.
 struct ContentView: View {
     @EnvironmentObject var configManager: ConfigManager
 
@@ -20,6 +21,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// Summary, reload controls, and diagnostics list.
     private var leftPanel: some View {
         VStack(alignment: .leading, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
@@ -109,6 +111,7 @@ struct ContentView: View {
         .font(.body)
     }
 
+    /// The pet display based on the resolved configuration.
     private var rightPanel: some View {
         VStack(spacing: 16) {
             if let config = configManager.config {
@@ -135,6 +138,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// Filters build diagnostics down to error items, if present.
     private var failureDiagnostics: [DiagnosticItem]? {
         guard case let .failure(diagnostics, _) = configManager.buildResult else {
             return nil
@@ -143,6 +147,7 @@ struct ContentView: View {
         return diagnostics.diagnostics
     }
 
+    /// Maps diagnostic severity to a UI color.
     private func severityColor(_ severity: DiagnosticSeverity) -> Color {
         switch severity {
         case .error:

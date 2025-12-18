@@ -1,7 +1,7 @@
-# Next Task: C3 — Deterministic ordering of diagnostics
+# Next Task: C4 — Add collect-all vs fail-fast option
 
 **Source:** PRD §9
-**Priority:** High
+**Priority:** Medium
 **Phase:** C
 **Effort:** M
 **Dependencies:** C2
@@ -9,7 +9,7 @@
 
 ## Description
 
-Add stable sorting function to ensure deterministic ordering of diagnostics in DiagnosticsReport. This ensures consistent output for testing and user experience.
+Add configuration option to ConfigPipeline to choose between collect-all errors mode (default) and fail-fast mode. This allows users to decide whether to collect all diagnostics before failing or stop at the first error.
 
 ## Next Step
 

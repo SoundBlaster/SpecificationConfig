@@ -15,3 +15,4 @@
 ## Phase C
 - C1 — Implement `SpecProfile<Draft, Final>` — archived 2025-12-17
 - C2 — Implement `ConfigPipeline` — archived 2025-12-17
+- C3 — Deterministic ordering of diagnostics — archived 2025-12-18

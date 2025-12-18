@@ -338,4 +338,6 @@ The sorting algorithm and tests were implemented as part of earlier work on the 
 
 ---
 
+**Archived:** 2025-12-18
+
 **End of PRD**

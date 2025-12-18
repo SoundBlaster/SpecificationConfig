@@ -46,7 +46,7 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
 
-            Button("Sleep for 10s") {
+            Button("Wake up for 10s") {
                 configManager.triggerSleepOverride()
             }
             .buttonStyle(.bordered)

@@ -70,7 +70,7 @@ class ConfigManager: ObservableObject {
     func triggerSleepOverride(duration: TimeInterval = 10) {
         guard config != nil else { return }
         sleepOverrideTask?.cancel()
-        sleepOverride = true
+        sleepOverride = false
         sleepOverrideTask = Task { [duration] in
             let nanoseconds = UInt64(duration * 1_000_000_000)
             try? await Task.sleep(nanoseconds: nanoseconds)

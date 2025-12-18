@@ -28,3 +28,7 @@
 - E2 — Add config file loader — archived 2025-12-18
 - E3 — Implement `AppConfig` + `Draft` + `SpecProfile` for v0 — archived 2025-12-18
 - E4 — UI split view + Reload button — archived 2025-12-18
+- E5 — UI error list panel when build fails — archived 2025-12-19
+
+## Phase F
+- F1 — Write `Docs/Tutorial/01_MVP.md` matching v0 — archived 2025-12-19

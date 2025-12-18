@@ -1,3 +1,4 @@
+import SpecificationConfig
 import SwiftUI
 
 struct ContentView: View {
@@ -64,14 +65,43 @@ struct ContentView: View {
                 }
             }
 
+            if let diagnostics = failureDiagnostics {
+                Divider()
+
+                Text("Configuration Errors")
+                    .fontWeight(.semibold)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(diagnostics.enumerated()), id: \.offset) { _, item in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Circle()
+                                    .fill(severityColor(item.severity))
+                                    .frame(width: 8, height: 8)
+                                Text(item.key ?? "General")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+
+                            Text(item.formattedDescription())
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(8)
+                        .background(Color(.windowBackgroundColor).opacity(0.6))
+                        .cornerRadius(8)
+                    }
+                }
+            }
+
             Spacer()
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Task E4 complete: Split view UI + Reload")
+                Text("Task E5 complete: Error list panel")
                     .font(.caption)
                     .foregroundColor(.gray)
 
-                Text("Next: E5 - Error list panel")
+                Text("Next: F1 - Write MVP tutorial")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
@@ -103,6 +133,25 @@ struct ContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var failureDiagnostics: [DiagnosticItem]? {
+        guard case let .failure(diagnostics, _) = configManager.buildResult else {
+            return nil
+        }
+        guard !diagnostics.diagnostics.isEmpty else { return nil }
+        return diagnostics.diagnostics
+    }
+
+    private func severityColor(_ severity: DiagnosticSeverity) -> Color {
+        switch severity {
+        case .error:
+            .red
+        case .warning:
+            .orange
+        case .info:
+            .blue
+        }
     }
 }
 

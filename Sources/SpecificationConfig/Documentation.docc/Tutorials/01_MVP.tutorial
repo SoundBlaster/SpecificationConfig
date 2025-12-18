@@ -1,19 +1,337 @@
 # Building the MVP: Config Pet v0
 
-> Placeholder for tutorial content. To be implemented in Phase F (Task F1).
+Build the minimal Config Pet app that reads `config.json`, maps it into `AppConfig`, and refreshes on demand.
 
 ## Overview
 
-This tutorial will cover building the minimal viable product for Config Pet. You'll create a simple macOS app that reads configuration from a JSON file, including a pet's name and sleeping status, with a manual reload button.
+You will:
+- Create a `config.json` file with pet data.
+- Define `AppConfigDraft` and `AppConfig` plus a `SpecProfile`.
+- Load and build configuration in `ConfigManager`.
+- Present a split view UI with a reload button and an error list panel.
 
-## Topics
+## Prerequisites
 
-### Implementation
+- Tuist installed
+- macOS 15.0+
 
-- Coming soon
+## Step 1: Add the configuration file
 
-### Demo Features
+Create `Demo/ConfigPetApp/config.json`:
 
-- Name and isSleeping configuration
-- Single file provider (config.json)
-- Manual reload button
+```json
+{
+  "pet": {
+    "name": "Egorchi",
+    "isSleeping": true
+  }
+}
+```
+
+This file is loaded at runtime from the project root when the app runs.
+
+## Step 2: Define AppConfig and bindings
+
+Create `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`:
+
+```swift
+import Configuration
+import Foundation
+import SpecificationConfig
+
+struct AppConfigDraft {
+    var petName: String?
+    var isSleeping: Bool?
+}
+
+struct AppConfig {
+    let petName: String
+    let isSleeping: Bool
+
+    static let profile = SpecProfile<AppConfigDraft, AppConfig>(
+        bindings: [
+            AnyBinding(
+                Binding(
+                    key: "pet.name",
+                    keyPath: \AppConfigDraft.petName,
+                    decoder: ConfigReader.string
+                )
+            ),
+            AnyBinding(
+                Binding(
+                    key: "pet.isSleeping",
+                    keyPath: \AppConfigDraft.isSleeping,
+                    decoder: ConfigReader.bool,
+                    defaultValue: false
+                )
+            ),
+        ],
+        finalize: { draft in
+            guard let petName = draft.petName else {
+                throw AppConfigError.missingRequiredValue(key: "pet.name")
+            }
+            guard let isSleeping = draft.isSleeping else {
+                throw AppConfigError.missingRequiredValue(key: "pet.isSleeping")
+            }
+            return AppConfig(petName: petName, isSleeping: isSleeping)
+        },
+        makeDraft: AppConfigDraft.init
+    )
+}
+
+enum AppConfigError: LocalizedError {
+    case missingRequiredValue(key: String)
+
+    var errorDescription: String? {
+        switch self {
+        case let .missingRequiredValue(key):
+            "Missing required config value for key: \(key)"
+        }
+    }
+}
+```
+
+The bindings map `pet.name` and `pet.isSleeping` into the draft, and the `finalize` closure enforces required values.
+
+## Step 3: Build configuration in ConfigManager
+
+Update `Demo/ConfigPetApp/ConfigPetApp/ConfigManager.swift`:
+
+```swift
+import Configuration
+import Foundation
+import SpecificationConfig
+
+@MainActor
+class ConfigManager: ObservableObject {
+    @Published var reader: Configuration.ConfigReader?
+    @Published var buildResult: BuildResult<AppConfig>?
+    @Published var config: AppConfig?
+    @Published var loadError: Error?
+
+    init() {
+        loadConfig()
+    }
+
+    func loadConfig() {
+        do {
+            let loader = ConfigFileLoader.findConfigFile() ?? ConfigFileLoader()
+            reader = try loader.createReader()
+            buildResult = reader.map { ConfigPipeline.build(profile: AppConfig.profile, reader: $0) }
+            if case let .success(config, _) = buildResult {
+                self.config = config
+            } else {
+                config = nil
+            }
+            loadError = nil
+        } catch {
+            reader = nil
+            buildResult = nil
+            config = nil
+            loadError = error
+        }
+    }
+
+    var statusDescription: String {
+        if let error = loadError {
+            "Error: \(error.localizedDescription)"
+        } else if let buildResult {
+            switch buildResult {
+            case .success:
+                "Config built successfully"
+            case let .failure(diagnostics, _):
+                "Config build failed (\(diagnostics.errorCount) errors)"
+            }
+        } else if reader != nil {
+            "Config loaded successfully"
+        } else {
+            "No config loaded"
+        }
+    }
+}
+```
+
+`ConfigPipeline` returns either a successful `AppConfig` or a diagnostics report.
+
+## Step 4: Build the split view UI
+
+Update `Demo/ConfigPetApp/ConfigPetApp/ContentView.swift` to show a left panel for config values and a right panel for the pet display. Include a Reload button and a diagnostics list on failure:
+
+```swift
+import SpecificationConfig
+import SwiftUI
+
+struct ContentView: View {
+    @EnvironmentObject var configManager: ConfigManager
+
+    var body: some View {
+        HStack(spacing: 0) {
+            leftPanel
+                .frame(minWidth: 280, idealWidth: 360, maxWidth: 420)
+                .padding(32)
+                .frame(maxHeight: .infinity, alignment: .topLeading)
+
+            Divider()
+
+            rightPanel
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(48)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var leftPanel: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Config Pet")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+
+                Text("Demo application for SpecificationConfig")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Text("Config Status:")
+                    .fontWeight(.semibold)
+                Text(configManager.statusDescription)
+                    .foregroundColor(configManager.loadError != nil ? .red : .green)
+            }
+
+            Button("Reload") {
+                configManager.loadConfig()
+            }
+            .buttonStyle(.borderedProminent)
+
+            if let config = configManager.config {
+                Divider()
+
+                Text("Loaded Configuration:")
+                    .fontWeight(.semibold)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Pet Name:")
+                        Text(config.petName)
+                            .foregroundColor(.blue)
+                    }
+
+                    HStack {
+                        Text("Is Sleeping:")
+                        Text(config.isSleeping ? "Yes" : "No")
+                            .foregroundColor(config.isSleeping ? .purple : .orange)
+                    }
+                }
+            }
+
+            if let diagnostics = failureDiagnostics {
+                Divider()
+
+                Text("Configuration Errors")
+                    .fontWeight(.semibold)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(diagnostics.enumerated()), id: \.offset) { _, item in
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Circle()
+                                    .fill(severityColor(item.severity))
+                                    .frame(width: 8, height: 8)
+                                Text(item.key ?? "General")
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
+
+                            Text(item.formattedDescription())
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(8)
+                        .background(Color(.windowBackgroundColor).opacity(0.6))
+                        .cornerRadius(8)
+                    }
+                }
+            }
+
+            Spacer()
+        }
+        .font(.body)
+    }
+
+    private var rightPanel: some View {
+        VStack(spacing: 16) {
+            if let config = configManager.config {
+                Text(config.petName)
+                    .font(.system(size: 48, weight: .bold))
+
+                Image(systemName: config.isSleeping ? "moon.zzz.fill" : "sun.max.fill")
+                    .font(.system(size: 56))
+                    .foregroundColor(config.isSleeping ? .purple : .orange)
+
+                Text(config.isSleeping ? "Sleeping peacefully" : "Wide awake and playful")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("No pet loaded")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+
+                Text("Reload after updating config.json")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var failureDiagnostics: [DiagnosticItem]? {
+        guard case let .failure(diagnostics, _) = configManager.buildResult else {
+            return nil
+        }
+        guard !diagnostics.diagnostics.isEmpty else { return nil }
+        return diagnostics.diagnostics
+    }
+
+    private func severityColor(_ severity: DiagnosticSeverity) -> Color {
+        switch severity {
+        case .error:
+            .red
+        case .warning:
+            .orange
+        case .info:
+            .blue
+        }
+    }
+}
+```
+
+## Step 5: Run the demo
+
+From the demo directory:
+
+```bash
+cd Demo/ConfigPetApp
+
+tuist install
+
+tuist generate
+
+open ConfigPetApp.xcworkspace
+```
+
+In Xcode, run the `ConfigPetApp` scheme. Update `config.json` and press Reload to rebuild configuration.
+
+## Validation
+
+From the repo root:
+
+```bash
+swift build -v
+swift test -v
+swiftformat --lint .
+```
+
+## Next
+
+Proceed to `02_EnvOverrides` for environment override providers.

@@ -1,69 +1,107 @@
-import Configuration
 import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var configManager: ConfigManager
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Config Pet")
-                .font(.largeTitle)
-                .fontWeight(.bold)
+        HStack(spacing: 0) {
+            leftPanel
+                .frame(minWidth: 280, idealWidth: 360, maxWidth: 420)
+                .padding(32)
+                .frame(maxHeight: .infinity, alignment: .topLeading)
 
-            Text("Demo application for SpecificationConfig")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            Divider()
 
-            Spacer()
+            rightPanel
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(48)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 
-            VStack(spacing: 12) {
-                // Config status
-                HStack {
-                    Text("Config Status:")
-                        .fontWeight(.semibold)
-                    Text(configManager.statusDescription)
-                        .foregroundColor(configManager.loadError != nil ? .red : .green)
-                }
+    private var leftPanel: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Config Pet")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
 
-                // Show loaded values if available
-                if let reader = configManager.reader {
-                    Divider()
+                Text("Demo application for SpecificationConfig")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
 
-                    Text("Loaded Configuration:")
-                        .fontWeight(.semibold)
+            HStack {
+                Text("Config Status:")
+                    .fontWeight(.semibold)
+                Text(configManager.statusDescription)
+                    .foregroundColor(configManager.loadError != nil ? .red : .green)
+            }
 
-                    if let petName = reader.string(forKey: ConfigKey("pet.name")) {
-                        HStack {
-                            Text("Pet Name:")
-                            Text(petName)
-                                .foregroundColor(.blue)
-                        }
+            Button("Reload") {
+                configManager.loadConfig()
+            }
+            .buttonStyle(.borderedProminent)
+
+            if let config = configManager.config {
+                Divider()
+
+                Text("Loaded Configuration:")
+                    .fontWeight(.semibold)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Pet Name:")
+                        Text(config.petName)
+                            .foregroundColor(.blue)
                     }
 
-                    if let isSleeping = reader.bool(forKey: ConfigKey("pet.isSleeping")) {
-                        HStack {
-                            Text("Is Sleeping:")
-                            Text(isSleeping ? "Yes" : "No")
-                                .foregroundColor(isSleeping ? .purple : .orange)
-                        }
+                    HStack {
+                        Text("Is Sleeping:")
+                        Text(config.isSleeping ? "Yes" : "No")
+                            .foregroundColor(config.isSleeping ? .purple : .orange)
                     }
                 }
             }
-            .font(.body)
 
             Spacer()
 
-            VStack(spacing: 8) {
-                Text("Task E2 complete: Config file loading")
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Task E4 complete: Split view UI + Reload")
                     .font(.caption)
                     .foregroundColor(.gray)
 
-                Text("Next: E3 - AppConfig types and SpecProfile")
+                Text("Next: E5 - Error list panel")
                     .font(.caption)
                     .foregroundColor(.gray)
             }
         }
-        .padding(40)
+        .font(.body)
+    }
+
+    private var rightPanel: some View {
+        VStack(spacing: 16) {
+            if let config = configManager.config {
+                Text(config.petName)
+                    .font(.system(size: 48, weight: .bold))
+
+                Image(systemName: config.isSleeping ? "moon.zzz.fill" : "sun.max.fill")
+                    .font(.system(size: 56))
+                    .foregroundColor(config.isSleeping ? .purple : .orange)
+
+                Text(config.isSleeping ? "Sleeping peacefully" : "Wide awake and playful")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("No pet loaded")
+                    .font(.title2)
+                    .foregroundColor(.secondary)
+
+                Text("Reload after updating config.json")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+            }
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -61,9 +61,9 @@ public enum BuildResult<Final> {
     public var diagnostics: DiagnosticsReport {
         switch self {
         case let .success(_, snapshot):
-            return snapshot.diagnostics
+            snapshot.diagnostics
         case let .failure(diagnostics, _):
-            return diagnostics
+            diagnostics
         }
     }
 
@@ -71,9 +71,9 @@ public enum BuildResult<Final> {
     public var snapshot: Snapshot {
         switch self {
         case let .success(_, snapshot):
-            return snapshot
+            snapshot
         case let .failure(_, snapshot):
-            return snapshot
+            snapshot
         }
     }
 }
@@ -126,8 +126,8 @@ public enum ConfigPipeline {
     ///     the first error (useful for development/debugging).
     /// - Returns: Build result containing either success (final config + snapshot) or
     ///            failure (diagnostics + partial snapshot).
-    public static func build<Draft, Final>(
-        profile: SpecProfile<Draft, Final>,
+    public static func build<Final>(
+        profile: SpecProfile<some Any, Final>,
         reader: Configuration.ConfigReader,
         errorHandlingMode: ErrorHandlingMode = .collectAll
     ) -> BuildResult<Final> {
@@ -257,13 +257,13 @@ public enum ConfigPipeline {
     ) -> DiagnosticItem {
         switch error {
         case let .specFailed(specKey):
-            return DiagnosticItem(
+            DiagnosticItem(
                 key: key ?? specKey,
                 severity: .error,
                 message: "Value specification failed for key '\(specKey)'"
             )
         case .finalSpecFailed:
-            return DiagnosticItem(
+            DiagnosticItem(
                 key: key,
                 severity: .error,
                 message: "Post-finalization specification failed"

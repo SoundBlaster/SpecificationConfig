@@ -15,11 +15,11 @@ struct ConfigFileLoader {
         var errorDescription: String? {
             switch self {
             case let .fileNotFound(path):
-                return "Configuration file not found at: \(path)"
+                "Configuration file not found at: \(path)"
             case let .invalidJSON(error):
-                return "Invalid JSON in config file: \(error.localizedDescription)"
+                "Invalid JSON in config file: \(error.localizedDescription)"
             case let .readerCreationFailed(error):
-                return "Failed to create config reader: \(error.localizedDescription)"
+                "Failed to create config reader: \(error.localizedDescription)"
             }
         }
     }

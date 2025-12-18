@@ -1,4 +1,5 @@
 import Configuration
+import Foundation
 import SpecificationConfig
 
 struct AppConfigDraft {

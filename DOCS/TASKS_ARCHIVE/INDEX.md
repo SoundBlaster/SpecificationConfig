@@ -22,3 +22,6 @@
 - D1 — Add minimal helpers for reading primitives — archived 2025-12-18
 - D2 — Provenance capture strategy — archived 2025-12-18
 - D3 — Manual reload API — archived 2025-12-18
+
+## Phase E
+- E1 — Create macOS SwiftUI app target — archived 2025-12-18

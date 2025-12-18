@@ -1,6 +1,27 @@
 import Configuration
 import Foundation
 
+/// Error handling strategy for configuration pipeline.
+///
+/// Determines whether the pipeline stops at the first error or collects
+/// all errors before failing.
+public enum ErrorHandlingMode: Sendable {
+    /// Collect all binding errors before failing.
+    ///
+    /// The pipeline will attempt to apply all bindings even if some fail,
+    /// collecting diagnostic messages for all failures. This is the default
+    /// mode and is recommended for user-facing configuration validation
+    /// where showing all errors at once provides better user experience.
+    case collectAll
+
+    /// Stop at the first binding error.
+    ///
+    /// The pipeline will return immediately upon encountering the first
+    /// binding failure. Useful for development and debugging where you
+    /// want to fail quickly and fix issues one at a time.
+    case failFast
+}
+
 /// Result of building a configuration through the pipeline.
 ///
 /// The pipeline always produces diagnostics and a snapshot, whether the build
@@ -100,11 +121,15 @@ public enum ConfigPipeline {
     /// - Parameters:
     ///   - profile: The specification profile defining bindings, finalization, and specs.
     ///   - reader: The configuration reader supplying values.
+    ///   - errorHandlingMode: Strategy for handling binding errors. Default is `.collectAll`,
+    ///     which collects all binding errors before failing. Use `.failFast` to stop at
+    ///     the first error (useful for development/debugging).
     /// - Returns: Build result containing either success (final config + snapshot) or
     ///            failure (diagnostics + partial snapshot).
     public static func build<Draft, Final>(
         profile: SpecProfile<Draft, Final>,
-        reader: Configuration.ConfigReader
+        reader: Configuration.ConfigReader,
+        errorHandlingMode: ErrorHandlingMode = .collectAll
     ) -> BuildResult<Final> {
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
@@ -115,18 +140,20 @@ public enum ConfigPipeline {
         // Apply bindings, collecting resolved values and diagnostics
         for binding in profile.bindings {
             do {
-                try binding.apply(to: &draft, reader: reader)
+                let (stringifiedValue, usedDefault) = try binding.applyAndCapture(
+                    to: &draft,
+                    reader: reader
+                )
+
+                // Determine provenance based on whether default was used
+                let provenance: Provenance = usedDefault ? .defaultValue : .unknown
 
                 // Track successfully resolved value for snapshot
-                // For now, we can't extract the actual value from the draft
-                // without reflection, so we'll create a placeholder entry
-                // indicating the binding was applied successfully
-                // TODO: Track isSecret when AnyBinding exposes it
                 let resolvedValue = ResolvedValue(
                     key: binding.key,
-                    stringifiedValue: "<applied>",
-                    provenance: .unknown,
-                    isSecret: false
+                    stringifiedValue: stringifiedValue ?? "<nil>",
+                    provenance: provenance,
+                    isSecret: binding.isSecret
                 )
                 resolvedValues.append(resolvedValue)
 
@@ -135,13 +162,19 @@ public enum ConfigPipeline {
                 let diagnostic = diagnosticFromConfigError(error, key: binding.key)
                 diagnostics.add(diagnostic)
 
-                // On error, stop and return failure (fail-fast behavior)
-                // Snapshot gets empty diagnostics - errors are only in BuildResult
-                let snapshot = Snapshot(
-                    resolvedValues: resolvedValues,
-                    diagnostics: DiagnosticsReport()
-                )
-                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                // Mode-specific error handling
+                switch errorHandlingMode {
+                case .failFast:
+                    // Stop immediately and return failure
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                case .collectAll:
+                    // Continue to next binding
+                    continue
+                }
 
             } catch {
                 // Handle other errors (decode errors, etc.)
@@ -151,11 +184,19 @@ public enum ConfigPipeline {
                     message: "Binding application failed: \(error.localizedDescription)"
                 )
 
-                let snapshot = Snapshot(
-                    resolvedValues: resolvedValues,
-                    diagnostics: DiagnosticsReport()
-                )
-                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                // Mode-specific error handling
+                switch errorHandlingMode {
+                case .failFast:
+                    // Stop immediately and return failure
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                case .collectAll:
+                    // Continue to next binding
+                    continue
+                }
             }
         }
 

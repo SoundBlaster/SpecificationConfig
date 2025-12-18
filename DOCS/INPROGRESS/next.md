@@ -1,15 +1,15 @@
-# Next Task: C3 — Deterministic ordering of diagnostics
+# Next Task: D3 — Manual reload API
 
 **Source:** PRD §9
-**Priority:** High
-**Phase:** C
-**Effort:** M
+**Priority:** Medium
+**Phase:** D
+**Effort:** S
 **Dependencies:** C2
 **Status:** Selected
 
 ## Description
 
-Add stable sorting function to ensure deterministic ordering of diagnostics in DiagnosticsReport. This ensures consistent output for testing and user experience.
+Add manual reload API to rebuild configuration with same profile and reader. This provides a simple way to refresh configuration without creating new pipeline instances.
 
 ## Next Step
 

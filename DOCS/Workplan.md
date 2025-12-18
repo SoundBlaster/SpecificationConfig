@@ -12,10 +12,10 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] B5 (Medium): Add `Redaction` support (secret flag)
 - [x] C1 (High): Implement `SpecProfile<Draft, Final>`
 - [x] C2 (High): Implement `ConfigPipeline` (build result: success/failure)
-- [ ] C3 (High): Deterministic ordering of diagnostics — INPROGRESS
-- [ ] C4 (Medium): Add collect-all vs fail-fast option
-- [ ] D1 (High): Add minimal helpers for reading primitives
-- [ ] D2 (High): Provenance capture strategy
+- [x] C3 (High): Deterministic ordering of diagnostics
+- [x] C4 (Medium): Add collect-all vs fail-fast option
+- [x] D1 (High): Add minimal helpers for reading primitives
+- [x] D2 (High): Provenance capture strategy
 - [ ] D3 (Medium): Manual reload API (rebuild with same profile/reader)
 - [ ] E1 (High): Create macOS SwiftUI app target (Demo/ConfigPetApp)
 - [ ] E2 (High): Add config file loader (config.json in app working dir)

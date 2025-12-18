@@ -44,15 +44,25 @@ public struct AnyBinding<Draft> {
     /// The configuration key this binding reads from.
     public let key: String
 
+    /// Whether this value is a secret and should be redacted.
+    public let isSecret: Bool
+
     /// Type-erased application closure.
     /// Decodes the value, validates it, and writes to the draft.
     private let _apply: (inout Draft, Configuration.ConfigReader) throws -> Void
+
+    /// Type-erased application closure that also captures the resolved value.
+    /// Returns (stringifiedValue, usedDefault)
+    private let _applyAndCapture: (inout Draft, Configuration.ConfigReader) throws -> (String?, Bool)
 
     /// Creates a type-erased binding from a concrete `Binding`.
     ///
     /// - Parameter binding: The binding to wrap and type-erase
     public init<Value>(_ binding: Binding<Draft, Value>) {
         key = binding.key
+        isSecret = binding.isSecret
+
+        // Standard apply closure
         _apply = { draft, reader in
             // Decode the value
             let decodedValue = try binding.decoder(reader, binding.key)
@@ -75,6 +85,42 @@ public struct AnyBinding<Draft> {
             }
             // If no value and no default, leave draft field as nil (valid)
         }
+
+        // Apply with capture closure
+        _applyAndCapture = { draft, reader in
+            var usedDefault = false
+            var stringifiedValue: String?
+
+            // Decode the value
+            let decodedValue = try binding.decoder(reader, binding.key)
+
+            // Use default if needed
+            let valueToValidate: Value?
+            if decodedValue == nil, let defaultValue = binding.defaultValue {
+                valueToValidate = defaultValue
+                usedDefault = true
+            } else {
+                valueToValidate = decodedValue
+            }
+
+            // If we have a value, validate and write it
+            if let value = valueToValidate {
+                // Run all value specs
+                for spec in binding.valueSpecs {
+                    if !spec.isSatisfiedBy(value) {
+                        throw ConfigError.specFailed(key: binding.key)
+                    }
+                }
+
+                // Stringify the value
+                stringifiedValue = String(describing: value)
+
+                // Write validated value to draft
+                draft[keyPath: binding.keyPath] = value
+            }
+
+            return (stringifiedValue, usedDefault)
+        }
     }
 
     /// Applies this binding to a draft by reading from the config reader.
@@ -85,6 +131,20 @@ public struct AnyBinding<Draft> {
     /// - Throws: Decode errors or validation failures
     public func apply(to draft: inout Draft, reader: Configuration.ConfigReader) throws {
         try _apply(&draft, reader)
+    }
+
+    /// Applies this binding to a draft and captures the resolved value for provenance tracking.
+    ///
+    /// - Parameters:
+    ///   - draft: The draft configuration object to mutate
+    ///   - reader: The configuration reader to read values from
+    /// - Returns: A tuple of (stringified value, whether default was used)
+    /// - Throws: Decode errors or validation failures
+    public func applyAndCapture(
+        to draft: inout Draft,
+        reader: Configuration.ConfigReader
+    ) throws -> (stringifiedValue: String?, usedDefault: Bool) {
+        try _applyAndCapture(&draft, reader)
     }
 }
 

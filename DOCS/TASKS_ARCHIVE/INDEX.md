@@ -32,3 +32,4 @@
 
 ## Phase F
 - F1 — Write `Docs/Tutorial/01_MVP.md` matching v0 — archived 2025-12-19
+- F2 — Tag repo `tutorial-v0` — archived 2025-12-19

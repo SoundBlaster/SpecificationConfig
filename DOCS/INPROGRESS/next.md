@@ -1,16 +1,7 @@
-# Next Task: F2 — Tag repo tutorial-v0
+# Next Task: None
 
-**Source:** PRD §9
-**Priority:** High
-**Phase:** F
-**Effort:** S
-**Dependencies:** F1
-**Status:** Selected
+**Status:** None
 
 ## Description
 
-Create the git tag `tutorial-v0` for the MVP tutorial state.
-
-## Next Step
-
-Run PLAN to generate an implementation-ready task PRD for this item.
+No task selected. Run SELECT to choose the next item from DOCS/Workplan.md.

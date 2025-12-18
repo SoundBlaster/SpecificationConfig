@@ -23,7 +23,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] E4 (High): UI split view + Reload button
 - [x] E5 (High): UI error list panel when build fails
 - [x] F1 (High): Write `Docs/Tutorial/01_MVP.md` matching v0
-- [ ] F2 (High): Tag repo `tutorial-v0`
+- [x] F2 (High): Tag repo `tutorial-v0`
 - [ ] F3 (Medium): Add ENV override step + doc (`02_EnvOverrides.md`)
 - [ ] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
 - [ ] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)

@@ -1,18 +1,82 @@
 # Adding Environment Variable Overrides
 
-> Placeholder for tutorial content. To be implemented in Phase F (Task F3).
+Extend Config Pet so environment variables override values from `config.json`.
 
 ## Overview
 
-This tutorial will cover adding environment variable overrides to your Config Pet app, demonstrating provider precedence in Swift Configuration.
+You will:
+- Add a helper to build a reader with environment overrides.
+- Update the demo loader to use the helper.
+- Run the app with `PET_NAME`/`PET_IS_SLEEPING` overrides.
 
-## Topics
+## Prerequisites
 
-### Implementation
+- Completed `01_MVP`
+- `config.json` exists in the app bundle or working directory
 
-- Coming soon
+## Step 1: Add a reader helper for env overrides
 
-### Demo Features
+Create `Sources/SpecificationConfig/ConfigReader+EnvironmentOverrides.swift`:
 
-- ENV variables override file values
-- Provider hierarchy demonstration
+```swift
+import Configuration
+import Foundation
+
+public extension ConfigReader {
+    /// Creates a reader that prefers environment variables over provided values.
+    static func withEnvironmentOverrides(
+        values: [AbsoluteConfigKey: ConfigValue],
+        environmentVariables: [String: String] = ProcessInfo.processInfo.environment
+    ) -> ConfigReader {
+        let envProvider = EnvironmentVariablesProvider(environmentVariables: environmentVariables)
+        let inMemoryProvider = InMemoryProvider(values: values)
+        return ConfigReader(providers: [envProvider, inMemoryProvider])
+    }
+}
+```
+
+The order matters: `EnvironmentVariablesProvider` comes first, so any env var value wins.
+
+## Step 2: Update ConfigFileLoader to use env overrides
+
+Update `Demo/ConfigPetApp/ConfigPetApp/ConfigFileLoader.swift`:
+
+```swift
+// Create reader with environment override precedence
+return ConfigReader.withEnvironmentOverrides(values: configValues)
+```
+
+Now the demo reads from `config.json` but will override those values when a matching env var is set.
+
+## Step 3: Set environment variables
+
+Swift Configuration maps config keys to environment variables by:
+- Uppercasing
+- Replacing dots with underscores
+- Splitting camelCase into underscores
+
+Examples:
+- `pet.name` → `PET_NAME`
+- `pet.isSleeping` → `PET_IS_SLEEPING`
+
+Set them in Xcode:
+- Product → Scheme → Edit Scheme → Run → Arguments → Environment Variables
+- Add `PET_NAME` and `PET_IS_SLEEPING`
+
+## Step 4: Verify overrides in the UI
+
+Launch the app and press Reload. The left panel should show the overridden values instead of the ones from `config.json`.
+
+## Validation
+
+From the repo root:
+
+```bash
+swift build -v
+swift test -v
+swiftformat --lint .
+```
+
+## Next
+
+Proceed to `03_ValueSpecs` to add value validation rules.

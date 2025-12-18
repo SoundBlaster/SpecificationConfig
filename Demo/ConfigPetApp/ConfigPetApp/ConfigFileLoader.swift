@@ -70,9 +70,8 @@ struct ConfigFileLoader {
                 result[key] = value
             }
 
-            // Create InMemoryProvider with converted values
-            let provider = InMemoryProvider(values: configValues)
-            return ConfigReader(provider: provider)
+            // Create reader with environment override precedence
+            return ConfigReader.withEnvironmentOverrides(values: configValues)
         } catch let error as NSError where error.domain == NSCocoaErrorDomain {
             throw LoadError.invalidJSON(underlying: error)
         } catch {

@@ -19,6 +19,11 @@ class ConfigManager: ObservableObject {
     /// The error that occurred during loading, if any.
     @Published var loadError: Error?
 
+    /// Temporary sleep override applied to the resolved config.
+    @Published private var sleepOverride: Bool?
+
+    private var sleepOverrideTask: Task<Void, Never>?
+
     /// Initializes the manager and loads configuration.
     init() {
         loadConfig()
@@ -29,6 +34,8 @@ class ConfigManager: ObservableObject {
     /// Attempts to find and load config.json using ConfigFileLoader.
     /// Updates `reader` and `loadError` based on the result.
     func loadConfig() {
+        sleepOverrideTask?.cancel()
+        sleepOverride = nil
         do {
             let loader = ConfigFileLoader.findConfigFile() ?? ConfigFileLoader()
             reader = try loader.createReader()
@@ -44,6 +51,32 @@ class ConfigManager: ObservableObject {
             buildResult = nil
             config = nil
             loadError = error
+        }
+    }
+
+    /// The configuration with any active override applied.
+    var effectiveConfig: AppConfig? {
+        guard let config else { return nil }
+        guard let sleepOverride else { return config }
+        return AppConfig(petName: config.petName, isSleeping: sleepOverride)
+    }
+
+    /// Indicates whether a temporary sleep override is active.
+    var isSleepOverrideActive: Bool {
+        sleepOverride != nil
+    }
+
+    /// Forces the pet to sleep for a short duration.
+    func triggerSleepOverride(duration: TimeInterval = 10) {
+        guard config != nil else { return }
+        sleepOverrideTask?.cancel()
+        sleepOverride = true
+        sleepOverrideTask = Task { [duration] in
+            let nanoseconds = UInt64(duration * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: nanoseconds)
+            await MainActor.run {
+                self.sleepOverride = nil
+            }
         }
     }
 

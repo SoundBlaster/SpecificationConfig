@@ -46,7 +46,19 @@ struct ContentView: View {
             }
             .buttonStyle(.borderedProminent)
 
-            if let config = configManager.config {
+            Button("Sleep for 10s") {
+                configManager.triggerSleepOverride()
+            }
+            .buttonStyle(.bordered)
+            .disabled(configManager.effectiveConfig == nil || configManager.isSleepOverrideActive)
+
+            if configManager.isSleepOverrideActive {
+                Text("Temporary sleep override active")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            if let config = configManager.effectiveConfig {
                 Divider()
 
                 Text("Loaded Configuration:")
@@ -114,7 +126,7 @@ struct ContentView: View {
     /// The pet display based on the resolved configuration.
     private var rightPanel: some View {
         VStack(spacing: 16) {
-            if let config = configManager.config {
+            if let config = configManager.effectiveConfig {
                 Text(config.petName)
                     .font(.system(size: 48, weight: .bold))
 

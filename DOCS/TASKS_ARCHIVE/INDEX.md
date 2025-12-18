@@ -25,3 +25,4 @@
 
 ## Phase E
 - E1 — Create macOS SwiftUI app target — archived 2025-12-18
+- E2 — Add config file loader — archived 2025-12-18

@@ -743,3 +743,4 @@ struct ContentView: View {
 ---
 
 **End of PRD**
+**Archived:** 2025-12-18

@@ -34,3 +34,7 @@
 ## Phase F
 - F1 — Write `Docs/Tutorial/01_MVP.md` matching v0 — archived 2025-12-19
 - F2 — Tag repo `tutorial-v0` — archived 2025-12-19
+
+## Phase G
+- G1 — GitHub Actions: build + test on macOS — archived 2025-12-19
+- G2 — README “Why this wrapper” + quickstart — archived 2025-12-19

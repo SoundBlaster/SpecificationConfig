@@ -29,6 +29,6 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [ ] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
 - [ ] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
 - [ ] F6 (Low): Optional watching step + doc (`05_Watching.md`)
-- [ ] G1 (High): GitHub Actions: build + test on macOS
-- [ ] G2 (High): README “Why this wrapper” + quickstart
+- [x] G1 (High): GitHub Actions: build + test on macOS
+- [x] G2 (High): README “Why this wrapper” + quickstart
 - [ ] G3 (Medium): 0.1.0 release checklist + changelog

@@ -51,6 +51,11 @@ public struct Binding<Draft, Value> {
     /// Metadata (description/type name) is used for diagnostics. Empty array means no validation.
     public let valueSpecs: [SpecEntry<Value>]
 
+    /// Context-aware validation specs evaluated with an EvaluationContext.
+    ///
+    /// These specs evaluate both the candidate value and the injected context provider.
+    public let contextualValueSpecs: [ContextualSpecEntry<Value>]
+
     /// Whether this value is a secret and should be redacted in diagnostics.
     ///
     /// When `true`, the value will be replaced with `[REDACTED]` in logs, snapshots,
@@ -65,6 +70,7 @@ public struct Binding<Draft, Value> {
     ///   - decoder: Closure to decode the config value
     ///   - defaultValue: Optional default value if key is missing
     ///   - valueSpecs: Validation specs (with metadata) to apply to the decoded value
+    ///   - contextualValueSpecs: Context-aware validation specs evaluated with EvaluationContext
     ///   - isSecret: Whether to redact this value in diagnostics
     public init(
         key: String,
@@ -72,6 +78,7 @@ public struct Binding<Draft, Value> {
         decoder: @escaping (Configuration.ConfigReader, String) throws -> Value?,
         defaultValue: Value? = nil,
         valueSpecs: [SpecEntry<Value>] = [],
+        contextualValueSpecs: [ContextualSpecEntry<Value>] = [],
         isSecret: Bool = false
     ) {
         self.key = key
@@ -79,6 +86,7 @@ public struct Binding<Draft, Value> {
         self.decoder = decoder
         self.defaultValue = defaultValue
         self.valueSpecs = valueSpecs
+        self.contextualValueSpecs = contextualValueSpecs
         self.isSecret = isSecret
     }
 }

@@ -295,6 +295,57 @@ final class PipelineTests: XCTestCase {
         }
     }
 
+    func testPipelineReportsMissingContextProvider() {
+        struct ContextDraft {
+            var name: String?
+        }
+
+        struct ContextConfig: Equatable {
+            let name: String
+        }
+
+        enum ContextError: Error {
+            case missingName
+        }
+
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \ContextDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            contextualValueSpecs: [
+                ContextualSpecEntry(description: "Feature enabled") { context, _ in
+                    context.flag(for: "featureEnabled")
+                },
+            ]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                guard let name = draft.name else {
+                    throw ContextError.missingName
+                }
+                return ContextConfig(name: name)
+            },
+            makeDraft: { ContextDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.name": "TestApp",
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected missing context provider failure")
+        case let .failure(diagnostics, _):
+            let error = diagnostics.diagnostics.first { $0.key == "app.name" }
+            XCTAssertTrue(error?.message.contains("Context provider") ?? false)
+        }
+    }
+
     func testDiagnosticsIncludeSpecMetadataForValueSpecFailure() {
         let positiveSpec = PredicateSpec<Int>(description: "Positive port") { $0 > 0 }
 

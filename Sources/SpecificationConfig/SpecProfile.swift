@@ -9,6 +9,7 @@ import SpecificationCore
 /// 3. Apply ordered decision bindings to derive missing values.
 /// 4. Finalize the populated draft into a strongly-typed `Final` value.
 /// 5. Run optional post-finalization specifications to enforce cross-field invariants.
+/// 6. Optionally evaluate contextual specs using an injected context provider.
 ///
 /// The profile preserves the ordering of the supplied bindings and surfaces any decode
 /// or specification failures immediately. Diagnostics will be expanded in B4; until then
@@ -20,11 +21,17 @@ public struct SpecProfile<Draft, Final> {
     /// Optional decision bindings that derive missing values.
     public let decisionBindings: [AnyDecisionBinding<Draft>]
 
+    /// Optional context provider for contextual specs.
+    public let contextProvider: AnyContextProvider<EvaluationContext>?
+
     /// The finalize function that converts a populated draft into a final configuration value.
     public let finalize: (Draft) throws -> Final
 
     /// Optional specifications that validate the finalized configuration, with metadata.
     public let finalSpecs: [SpecEntry<Final>]
+
+    /// Optional contextual specs that validate the finalized configuration.
+    public let contextualFinalSpecs: [ContextualSpecEntry<Final>]
 
     /// Factory closure that creates an empty draft before bindings are applied.
     public let makeDraft: () -> Draft
@@ -34,20 +41,26 @@ public struct SpecProfile<Draft, Final> {
     /// - Parameters:
     ///   - bindings: Ordered bindings to apply to the draft.
     ///   - decisionBindings: Ordered decision bindings to derive missing values.
+    ///   - contextProvider: Optional context provider for contextual specs.
     ///   - finalize: Closure that converts a populated draft into a final configuration value.
     ///   - finalSpecs: Optional specs with metadata to validate the finalized configuration.
+    ///   - contextualFinalSpecs: Optional context-aware specs for the finalized configuration.
     ///   - makeDraft: Factory closure that creates a new draft before bindings are applied.
     public init(
         bindings: [AnyBinding<Draft>],
         decisionBindings: [AnyDecisionBinding<Draft>] = [],
+        contextProvider: AnyContextProvider<EvaluationContext>? = nil,
         finalize: @escaping (Draft) throws -> Final,
         finalSpecs: [SpecEntry<Final>] = [],
+        contextualFinalSpecs: [ContextualSpecEntry<Final>] = [],
         makeDraft: @escaping () -> Draft
     ) {
         self.bindings = bindings
         self.decisionBindings = decisionBindings
+        self.contextProvider = contextProvider
         self.finalize = finalize
         self.finalSpecs = finalSpecs
+        self.contextualFinalSpecs = contextualFinalSpecs
         self.makeDraft = makeDraft
     }
 
@@ -70,7 +83,11 @@ public struct SpecProfile<Draft, Final> {
     /// - Throws: Errors thrown by binding decoders or value specifications.
     public func applyBindings(to draft: inout Draft, reader: Configuration.ConfigReader) throws {
         for binding in bindings {
-            try binding.apply(to: &draft, reader: reader)
+            try binding.apply(
+                to: &draft,
+                reader: reader,
+                contextProvider: contextProvider
+            )
         }
     }
 
@@ -101,6 +118,18 @@ public struct SpecProfile<Draft, Final> {
         for spec in finalSpecs {
             if !spec.isSatisfiedBy(finalValue) {
                 throw ConfigError.finalSpecFailed(spec: spec.metadata)
+            }
+        }
+
+        if !contextualFinalSpecs.isEmpty {
+            guard let provider = contextProvider else {
+                throw ConfigError.contextProviderMissing(key: nil)
+            }
+
+            for spec in contextualFinalSpecs {
+                if !spec.isSatisfiedBy(finalValue, using: provider) {
+                    throw ConfigError.finalSpecFailed(spec: spec.metadata)
+                }
             }
         }
     }

@@ -143,7 +143,8 @@ public enum ConfigPipeline {
             do {
                 let (stringifiedValue, usedDefault) = try binding.applyAndCapture(
                     to: &draft,
-                    reader: reader
+                    reader: reader,
+                    contextProvider: profile.contextProvider
                 )
 
                 // Determine provenance based on whether default was used
@@ -316,6 +317,12 @@ public enum ConfigPipeline {
                 key: key ?? decisionKey,
                 severity: .error,
                 message: "Decision fallback did not match for key '\(decisionKey)'"
+            )
+        case let .contextProviderMissing(missingKey):
+            DiagnosticItem(
+                key: key ?? missingKey,
+                severity: .error,
+                message: "Context provider required for contextual spec evaluation"
             )
         }
     }

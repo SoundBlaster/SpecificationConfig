@@ -1,15 +1,15 @@
-# Next Task: H2 — Add DecisionBinding + DecisionTrace (FirstMatchSpec)
+# Next Task: H3 — Add context provider support for specs
 
 **Source:** PRD §9  
-**Priority:** High  
+**Priority:** Medium  
 **Phase:** H  
-**Effort:** L  
-**Dependencies:** B1, B3, C2  
+**Effort:** M  
+**Dependencies:** C1  
 **Status:** Archived
 
 ## Description
 
-Add DecisionBinding and DecisionTrace to support DecisionSpec-based fallbacks and capture which decision matched.
+Add context provider support so specs can evaluate against injected context (SpecificationCore ContextProviding).
 
 ## Next Step
 

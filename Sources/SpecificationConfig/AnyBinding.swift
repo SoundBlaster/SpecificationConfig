@@ -49,11 +49,19 @@ public struct AnyBinding<Draft> {
 
     /// Type-erased application closure.
     /// Decodes the value, validates it, and writes to the draft.
-    private let _apply: (inout Draft, Configuration.ConfigReader) throws -> Void
+    private let _apply: (
+        inout Draft,
+        Configuration.ConfigReader,
+        AnyContextProvider<EvaluationContext>?
+    ) throws -> Void
 
     /// Type-erased application closure that also captures the resolved value.
     /// Returns (stringifiedValue, usedDefault)
-    private let _applyAndCapture: (inout Draft, Configuration.ConfigReader) throws -> (String?, Bool)
+    private let _applyAndCapture: (
+        inout Draft,
+        Configuration.ConfigReader,
+        AnyContextProvider<EvaluationContext>?
+    ) throws -> (String?, Bool)
 
     /// Creates a type-erased binding from a concrete `Binding`.
     ///
@@ -63,7 +71,7 @@ public struct AnyBinding<Draft> {
         isSecret = binding.isSecret
 
         // Standard apply closure
-        _apply = { draft, reader in
+        _apply = { draft, reader, contextProvider in
             // Decode the value
             let decodedValue = try binding.decoder(reader, binding.key)
 
@@ -79,6 +87,18 @@ public struct AnyBinding<Draft> {
                     }
                 }
 
+                if !binding.contextualValueSpecs.isEmpty {
+                    guard let provider = contextProvider else {
+                        throw ConfigError.contextProviderMissing(key: binding.key)
+                    }
+
+                    for spec in binding.contextualValueSpecs {
+                        if !spec.isSatisfiedBy(value, using: provider) {
+                            throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    }
+                }
+
                 // Write validated value to draft
                 draft[keyPath: binding.keyPath] = value
             }
@@ -86,7 +106,7 @@ public struct AnyBinding<Draft> {
         }
 
         // Apply with capture closure
-        _applyAndCapture = { draft, reader in
+        _applyAndCapture = { draft, reader, contextProvider in
             var usedDefault = false
             var stringifiedValue: String?
 
@@ -111,6 +131,18 @@ public struct AnyBinding<Draft> {
                     }
                 }
 
+                if !binding.contextualValueSpecs.isEmpty {
+                    guard let provider = contextProvider else {
+                        throw ConfigError.contextProviderMissing(key: binding.key)
+                    }
+
+                    for spec in binding.contextualValueSpecs {
+                        if !spec.isSatisfiedBy(value, using: provider) {
+                            throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    }
+                }
+
                 // Stringify the value
                 stringifiedValue = String(describing: value)
 
@@ -129,7 +161,22 @@ public struct AnyBinding<Draft> {
     ///   - reader: The configuration reader to read values from
     /// - Throws: Decode errors or validation failures
     public func apply(to draft: inout Draft, reader: Configuration.ConfigReader) throws {
-        try _apply(&draft, reader)
+        try _apply(&draft, reader, nil)
+    }
+
+    /// Applies this binding to a draft with an optional context provider.
+    ///
+    /// - Parameters:
+    ///   - draft: The draft configuration object to mutate
+    ///   - reader: The configuration reader to read values from
+    ///   - contextProvider: Optional provider for contextual specs
+    /// - Throws: Decode errors or validation failures
+    public func apply(
+        to draft: inout Draft,
+        reader: Configuration.ConfigReader,
+        contextProvider: AnyContextProvider<EvaluationContext>?
+    ) throws {
+        try _apply(&draft, reader, contextProvider)
     }
 
     /// Applies this binding to a draft and captures the resolved value for provenance tracking.
@@ -143,7 +190,23 @@ public struct AnyBinding<Draft> {
         to draft: inout Draft,
         reader: Configuration.ConfigReader
     ) throws -> (stringifiedValue: String?, usedDefault: Bool) {
-        try _applyAndCapture(&draft, reader)
+        try _applyAndCapture(&draft, reader, nil)
+    }
+
+    /// Applies this binding to a draft and captures the resolved value for provenance tracking.
+    ///
+    /// - Parameters:
+    ///   - draft: The draft configuration object to mutate
+    ///   - reader: The configuration reader to read values from
+    ///   - contextProvider: Optional provider for contextual specs
+    /// - Returns: A tuple of (stringified value, whether default was used)
+    /// - Throws: Decode errors or validation failures
+    public func applyAndCapture(
+        to draft: inout Draft,
+        reader: Configuration.ConfigReader,
+        contextProvider: AnyContextProvider<EvaluationContext>?
+    ) throws -> (stringifiedValue: String?, usedDefault: Bool) {
+        try _applyAndCapture(&draft, reader, contextProvider)
     }
 }
 
@@ -157,4 +220,7 @@ public enum ConfigError: Error, Equatable {
 
     /// A decision fallback failed to match for a key.
     case decisionFallbackFailed(key: String)
+
+    /// A contextual spec was declared but no context provider was supplied.
+    case contextProviderMissing(key: String?)
 }

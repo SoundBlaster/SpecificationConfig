@@ -547,6 +547,7 @@ Demo/
 | H6 | Optional async spec pipeline | Low | L | AnyAsyncSpecification | Async build API + tests | C2 | Unit tests |
 | H7 | Surface spec metadata & decision trace in demo UI | Medium | M | Diagnostics report + Snapshot | Demo surfaces metadata, provenance, and decision trace so developers can understand failures | H3,H4 | Manual demo + UI checks |
 | H8 | Wrap SpecificationCore for common use cases | Medium | M | SpecEntry/ContextualSpecEntry + context provider helpers | Apps can import only SpecificationConfig while still using context-aware specs, decisions, and metadata | H1,H2,H3 | Unit tests |
+| H9 | Improve resolved value provenance | High | M | Snapshot + ConfigReader info | Resolved values include provider names (file/env/default/decision) so UI shows the true source instead of "Unknown" | D2,C2 | Unit tests + demo |
 
 ---
 

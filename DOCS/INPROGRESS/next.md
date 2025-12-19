@@ -1,16 +1,16 @@
-# Next Task: H5 — Demo v6: property-wrapper derived state
+# Next Task: H9 — Improve resolved value provenance
 
 **Source:** PRD §9  
-**Priority:** Low  
+**Priority:** High  
 **Phase:** H  
 **Effort:** M  
-**Dependencies:** H2, E3  
+**Dependencies:** D2, C2  
 **Status:** Selected
 
 ## Description
 
-Continue evolving the Config Pet demo toward v6 by introducing property wrapper helpers (e.g., `@Satisfies`, `@Decides`) that surface derived state from the config pipeline and keep the UI in sync.
+Resolve the “Source: Unknown” issue by ensuring `ResolvedValue` records provider details (file/env/default/decision) and the demo UI/documentation surface those values so provisioning transparency is restored.
 
 ## Next Step
 
-Run PLAN to create an H5 task PRD that captures the desired wrappers and derived-state behaviors.
+Run PLAN to flesh out the H9 fix (already started via `DOCS/INPROGRESS/H9_Improve_resolved_value_provenance.md`).

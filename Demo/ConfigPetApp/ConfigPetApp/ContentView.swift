@@ -134,6 +134,50 @@ struct ContentView: View {
                 }
             }
 
+            if !configManager.overrideEntries.isEmpty {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Overrides")
+                        .fontWeight(.semibold)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(configManager.overrideEntries) { entry in
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(entry.key)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(entry.value)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+
+                                Text(entry.source)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(8)
+                            .background(Color(.windowBackgroundColor).opacity(0.4))
+                            .cornerRadius(6)
+                        }
+                    }
+                }
+            } else {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Overrides")
+                        .fontWeight(.semibold)
+
+                    Text("No manual overrides active")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 4)
+            }
+
             if !configManager.resolvedValues.isEmpty {
                 Divider()
 

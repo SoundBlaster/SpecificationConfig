@@ -32,6 +32,14 @@ class ConfigManager: ObservableObject {
         loadConfig()
     }
 
+    /// Active override metadata for display.
+    struct OverrideEntry: Identifiable, Sendable {
+        let id: String
+        let key: String
+        let value: String
+        let source: String
+    }
+
     /// Loads or reloads the configuration.
     ///
     /// Attempts to find and load config.json using ConfigFileLoader.
@@ -108,6 +116,21 @@ class ConfigManager: ObservableObject {
     /// Indicates whether a manual night override is active.
     var isNightOverrideActive: Bool {
         DemoContextProvider.shared.isNightOverrideActive
+    }
+
+    var overrideEntries: [OverrideEntry] {
+        guard let overrideValue = sleepOverride else {
+            return []
+        }
+
+        return [
+            OverrideEntry(
+                id: "pet.isSleeping",
+                key: "pet.isSleeping",
+                value: overrideValue ? "true" : "false",
+                source: "Manual override"
+            ),
+        ]
     }
 
     /// The latest snapshot produced by the configuration pipeline.

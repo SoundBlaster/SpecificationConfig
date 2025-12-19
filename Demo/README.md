@@ -139,6 +139,9 @@ To modify the configuration:
 ### Task H9: Provenance-rich resolved values
 - The “Resolved Values” section now reports the provider (file, environment variable, default, or decision fallback) so the UI never shows “Source: Unknown.”
 
+### Task H10: Overrides panel
+- The new “Overrides” section surfaces manual adjustments (like the Wake up override) so you can see how they differ from the base config.
+
 ## Troubleshooting
 
 ### Project Not Generating

@@ -67,6 +67,19 @@ public struct SpecEntry<T>: Specification {
         metadata = SpecMetadata(description: description, typeName: typeName)
     }
 
+    /// Creates a spec entry from a predicate closure.
+    ///
+    /// - Parameters:
+    ///   - description: Optional description for diagnostics.
+    ///   - predicate: Predicate that returns true when the candidate is valid.
+    public init(description: String? = nil, _ predicate: @escaping (T) -> Bool) {
+        spec = AnySpecification(predicate)
+        metadata = SpecMetadata(
+            description: description,
+            typeName: String(describing: PredicateSpec<T>.self)
+        )
+    }
+
     public func isSatisfiedBy(_ candidate: T) -> Bool {
         spec.isSatisfiedBy(candidate)
     }

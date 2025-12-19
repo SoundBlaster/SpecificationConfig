@@ -133,6 +133,7 @@ public enum ConfigPipeline {
     ) -> BuildResult<Final> {
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
+        var decisionTraces: [DecisionTrace] = []
 
         // Create draft
         var draft = profile.makeDraft()
@@ -168,6 +169,7 @@ public enum ConfigPipeline {
                     // Stop immediately and return failure
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
                         diagnostics: DiagnosticsReport()
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -190,6 +192,7 @@ public enum ConfigPipeline {
                     // Stop immediately and return failure
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
                         diagnostics: DiagnosticsReport()
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -200,10 +203,45 @@ public enum ConfigPipeline {
             }
         }
 
+        for decisionBinding in profile.decisionBindings {
+            switch decisionBinding.apply(to: &draft) {
+            case .skipped:
+                continue
+            case let .applied(trace, stringifiedValue):
+                decisionTraces.append(trace)
+                let resolved = ResolvedValue(
+                    key: decisionBinding.key,
+                    stringifiedValue: stringifiedValue,
+                    provenance: .decisionFallback,
+                    isSecret: decisionBinding.isSecret
+                )
+                if let index = resolvedValues.firstIndex(where: { $0.key == decisionBinding.key }) {
+                    resolvedValues[index] = resolved
+                } else {
+                    resolvedValues.append(resolved)
+                }
+            case .noMatch:
+                let diagnostic = diagnosticFromConfigError(
+                    .decisionFallbackFailed(key: decisionBinding.key),
+                    key: decisionBinding.key
+                )
+                diagnostics.add(diagnostic)
+                if errorHandlingMode == .failFast {
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                }
+            }
+        }
+
         // Check if we have any errors before finalizing
         if diagnostics.hasErrors {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -219,6 +257,7 @@ public enum ConfigPipeline {
 
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -231,6 +270,7 @@ public enum ConfigPipeline {
 
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -239,6 +279,7 @@ public enum ConfigPipeline {
         // Success - build final snapshot
         let snapshot = Snapshot(
             resolvedValues: resolvedValues,
+            decisionTraces: decisionTraces,
             diagnostics: diagnostics
         )
 
@@ -269,6 +310,12 @@ public enum ConfigPipeline {
                 severity: .error,
                 message: "Post-finalization specification failed",
                 context: specContext(spec)
+            )
+        case let .decisionFallbackFailed(decisionKey):
+            DiagnosticItem(
+                key: key ?? decisionKey,
+                severity: .error,
+                message: "Decision fallback did not match for key '\(decisionKey)'"
             )
         }
     }

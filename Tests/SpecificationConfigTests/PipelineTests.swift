@@ -157,6 +157,144 @@ final class PipelineTests: XCTestCase {
         }
     }
 
+    func testDecisionBindingAppliesFallbackAndRecordsTrace() {
+        struct DecisionDraft {
+            var petName: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig: Equatable {
+            let petName: String
+            let isSleeping: Bool
+        }
+
+        enum DecisionError: Error {
+            case missingName
+            case missingSleepFlag
+        }
+
+        let sleepingBinding = Binding(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: ConfigReader.bool
+        )
+
+        let nameFallback = DecisionEntry(
+            description: "Sleeping pet",
+            predicate: { (draft: DecisionDraft) in draft.isSleeping == true },
+            result: "Sleepy"
+        )
+
+        let decisionBinding = DecisionBinding(
+            key: "pet.name",
+            keyPath: \DecisionDraft.petName,
+            decisions: [nameFallback]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(sleepingBinding)],
+            decisionBindings: [AnyDecisionBinding(decisionBinding)],
+            finalize: { draft in
+                guard let petName = draft.petName else {
+                    throw DecisionError.missingName
+                }
+                guard let isSleeping = draft.isSleeping else {
+                    throw DecisionError.missingSleepFlag
+                }
+                return DecisionConfig(petName: petName, isSleeping: isSleeping)
+            },
+            makeDraft: { DecisionDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "pet.isSleeping": true,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(config, snapshot):
+            XCTAssertEqual(config, DecisionConfig(petName: "Sleepy", isSleeping: true))
+            XCTAssertEqual(snapshot.decisionTraces.count, 1)
+            let trace = snapshot.decisionTrace(forKey: "pet.name")
+            XCTAssertEqual(trace?.decisionName, "Sleeping pet")
+            XCTAssertEqual(trace?.matchedIndex, 0)
+            let resolved = snapshot.value(forKey: "pet.name")
+            XCTAssertEqual(resolved?.stringifiedValue, "Sleepy")
+            XCTAssertEqual(resolved?.provenance, .decisionFallback)
+        case .failure:
+            XCTFail("Expected decision fallback to succeed")
+        }
+    }
+
+    func testDecisionBindingNoMatchAddsDiagnostic() {
+        struct DecisionDraft {
+            var petName: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig {
+            let petName: String
+            let isSleeping: Bool
+        }
+
+        enum DecisionError: Error {
+            case missingName
+            case missingSleepFlag
+        }
+
+        let sleepingBinding = Binding(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: ConfigReader.bool
+        )
+
+        let nameFallback = DecisionEntry(
+            description: "Sleeping pet",
+            predicate: { (draft: DecisionDraft) in draft.isSleeping == true },
+            result: "Sleepy"
+        )
+
+        let decisionBinding = DecisionBinding(
+            key: "pet.name",
+            keyPath: \DecisionDraft.petName,
+            decisions: [nameFallback]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(sleepingBinding)],
+            decisionBindings: [AnyDecisionBinding(decisionBinding)],
+            finalize: { draft in
+                guard let petName = draft.petName else {
+                    throw DecisionError.missingName
+                }
+                guard let isSleeping = draft.isSleeping else {
+                    throw DecisionError.missingSleepFlag
+                }
+                return DecisionConfig(petName: petName, isSleeping: isSleeping)
+            },
+            makeDraft: { DecisionDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "pet.isSleeping": false,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected decision fallback failure")
+        case let .failure(diagnostics, snapshot):
+            XCTAssertTrue(diagnostics.hasErrors)
+            XCTAssertEqual(snapshot.decisionTraces.count, 0)
+            let error = diagnostics.diagnostics.first { $0.key == "pet.name" }
+            XCTAssertTrue(error?.message.contains("Decision fallback") ?? false)
+        }
+    }
+
     func testDiagnosticsIncludeSpecMetadataForValueSpecFailure() {
         let positiveSpec = PredicateSpec<Int>(description: "Positive port") { $0 > 0 }
 

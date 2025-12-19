@@ -1,12 +1,12 @@
-# Using Decision Specs for Fallback Logic
+# Using Decision Bindings for Fallback Logic
 
-Add DecisionSpec-based fallback logic so your app can derive values when configuration is missing.
+Add DecisionBinding fallback logic so your app can derive values when configuration is missing.
 
 ## Overview
 
 You will:
-- Create a DecisionSpec that derives a pet name when the pet is sleeping.
-- Use the decision in `AppConfig` finalization.
+- Create a decision binding that derives a pet name when the pet is sleeping.
+- Let the pipeline apply the decision before finalization.
 - Trigger the fallback by removing `pet.name` from the config.
 
 ## Prerequisites
@@ -19,34 +19,26 @@ You will:
 Update `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`:
 
 ```swift
-import SpecificationCore
-
 // ...
 
-private static let petNameFallbacks: [AnyDecisionSpec<AppConfigDraft, String>] = [
-    AnyDecisionSpec(
-        PredicateSpec<AppConfigDraft>(description: "Sleeping pet") { draft in
-            draft.isSleeping == true
-        }
-        .returning("Sleepy")
+decisionBindings: [
+    AnyDecisionBinding(
+        DecisionBinding(
+            key: "pet.name",
+            keyPath: \AppConfigDraft.petName,
+            decisions: [
+                DecisionEntry(
+                    description: "Sleeping pet",
+                    predicate: { draft in draft.isSleeping == true },
+                    result: "Sleepy"
+                ),
+            ]
+        )
     ),
-]
-
-private static func resolvePetName(from draft: AppConfigDraft) -> String? {
-    for decision in petNameFallbacks {
-        if let name = decision.decide(draft) {
-            return name
-        }
-    }
-    return nil
-}
+],
 ```
 
-In `finalize`, prefer the explicit value and then fall back to the decision result:
-
-```swift
-let petName = draft.petName ?? resolvePetName(from: draft)
-```
+The pipeline now fills the draft before `finalize`, so `petName` can be treated as required.
 
 ## Step 2: Trigger the fallback
 

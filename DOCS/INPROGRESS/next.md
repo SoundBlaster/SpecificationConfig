@@ -1,7 +1,16 @@
-# Next Task: None
+# Next Task: H2 — Add DecisionBinding + DecisionTrace (FirstMatchSpec)
 
-**Status:** None
+**Source:** PRD §9  
+**Priority:** High  
+**Phase:** H  
+**Effort:** L  
+**Dependencies:** B1, B3, C2  
+**Status:** Archived
 
 ## Description
 
-No task selected. Run SELECT to choose the next item from DOCS/Workplan.md.
+Add DecisionBinding and DecisionTrace to support DecisionSpec-based fallbacks and capture which decision matched.
+
+## Next Step
+
+Run SELECT to choose the next task.

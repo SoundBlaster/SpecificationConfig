@@ -46,3 +46,4 @@
 
 ## Phase H
 - H1 — Add spec metadata to diagnostics (description/type name) — archived 2025-12-19
+- H2 — Add DecisionBinding + DecisionTrace (FirstMatchSpec) — archived 2025-12-19

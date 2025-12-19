@@ -154,4 +154,7 @@ public enum ConfigError: Error, Equatable {
 
     /// A post-finalization specification failed.
     case finalSpecFailed(spec: SpecMetadata)
+
+    /// A decision fallback failed to match for a key.
+    case decisionFallbackFailed(key: String)
 }

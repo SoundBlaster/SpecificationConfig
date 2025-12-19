@@ -35,7 +35,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] G2 (High): README “Why this wrapper” + quickstart
 - [x] G3 (Medium): 0.1.0 release checklist + changelog
 - [x] H1 (High): Add spec metadata to diagnostics (description/type name)
-- [ ] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
+- [x] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
 - [ ] H3 (Medium): Add context provider support for specs
 - [ ] H4 (Medium): Demo v5: context-based specs
 - [ ] H5 (Low): Demo v6: property-wrapper derived state

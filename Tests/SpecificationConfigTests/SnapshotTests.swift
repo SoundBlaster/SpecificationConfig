@@ -24,6 +24,11 @@ final class SnapshotTests: XCTestCase {
         let default2 = Provenance.defaultValue
         XCTAssertEqual(default1, default2)
 
+        // Test decision fallback
+        let decision1 = Provenance.decisionFallback
+        let decision2 = Provenance.decisionFallback
+        XCTAssertEqual(decision1, decision2)
+
         // Test unknown
         let unknown1 = Provenance.unknown
         let unknown2 = Provenance.unknown
@@ -32,22 +37,28 @@ final class SnapshotTests: XCTestCase {
         // Test different types not equal
         XCTAssertNotEqual(env1, default1)
         XCTAssertNotEqual(file1, env1)
+        XCTAssertNotEqual(decision1, default1)
     }
 
     func testProvenanceCases() {
-        // Verify all four cases exist and are distinct
+        // Verify all cases exist and are distinct
         let file = Provenance.fileProvider(name: "test.json")
         let env = Provenance.environmentVariable
         let defaultVal = Provenance.defaultValue
+        let decision = Provenance.decisionFallback
         let unknown = Provenance.unknown
 
         // Each should be distinct
         XCTAssertNotEqual(file, env)
         XCTAssertNotEqual(file, defaultVal)
+        XCTAssertNotEqual(file, decision)
         XCTAssertNotEqual(file, unknown)
         XCTAssertNotEqual(env, defaultVal)
+        XCTAssertNotEqual(env, decision)
         XCTAssertNotEqual(env, unknown)
+        XCTAssertNotEqual(defaultVal, decision)
         XCTAssertNotEqual(defaultVal, unknown)
+        XCTAssertNotEqual(decision, unknown)
     }
 
     // MARK: - ResolvedValue Tests
@@ -187,6 +198,24 @@ final class SnapshotTests: XCTestCase {
         // Lookup non-existent key
         let missing = snapshot.value(forKey: "does.not.exist")
         XCTAssertNil(missing)
+    }
+
+    func testSnapshotDecisionTraceLookup() {
+        let trace = DecisionTrace(
+            key: "pet.name",
+            matchedIndex: 0,
+            decisionName: "Sleeping pet",
+            decisionType: "DecisionEntry"
+        )
+
+        let snapshot = Snapshot(
+            resolvedValues: [],
+            decisionTraces: [trace],
+            diagnostics: DiagnosticsReport()
+        )
+
+        XCTAssertEqual(snapshot.decisionTrace(forKey: "pet.name"), trace)
+        XCTAssertNil(snapshot.decisionTrace(forKey: "missing"))
     }
 
     func testSnapshotTimestamp() {

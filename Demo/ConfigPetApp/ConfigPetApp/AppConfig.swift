@@ -1,7 +1,6 @@
 import Configuration
 import Foundation
 import SpecificationConfig
-import SpecificationCore
 
 /// Mutable draft used while bindings populate config values.
 struct AppConfigDraft {
@@ -14,26 +13,6 @@ struct AppConfig {
     let petName: String
     let isSleeping: Bool
 
-    /// Ordered DecisionSpec fallbacks for derived values.
-    private static let petNameFallbacks: [AnyDecisionSpec<AppConfigDraft, String>] = [
-        AnyDecisionSpec(
-            PredicateSpec<AppConfigDraft>(description: "Sleeping pet") { draft in
-                draft.isSleeping == true
-            }
-            .returning("Sleepy")
-        ),
-    ]
-
-    /// Resolves the pet name from configured values or fallback decisions.
-    private static func resolvePetName(from draft: AppConfigDraft) -> String? {
-        for decision in petNameFallbacks {
-            if let name = decision.decide(draft) {
-                return name
-            }
-        }
-        return nil
-    }
-
     /// Spec profile defining bindings, validation, and finalization rules.
     static let profile = SpecProfile<AppConfigDraft, AppConfig>(
         bindings: [
@@ -43,11 +22,9 @@ struct AppConfig {
                     keyPath: \AppConfigDraft.petName,
                     decoder: ConfigReader.string,
                     valueSpecs: [
-                        SpecEntry(
-                            PredicateSpec<String>(description: "Non-empty pet name") { value in
-                                !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            }
-                        ),
+                        SpecEntry(description: "Non-empty pet name") { value in
+                            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                        },
                     ]
                 )
             ),
@@ -60,9 +37,23 @@ struct AppConfig {
                 )
             ),
         ],
+        decisionBindings: [
+            AnyDecisionBinding(
+                DecisionBinding(
+                    key: "pet.name",
+                    keyPath: \AppConfigDraft.petName,
+                    decisions: [
+                        DecisionEntry(
+                            description: "Sleeping pet",
+                            predicate: { draft in draft.isSleeping == true },
+                            result: "Sleepy"
+                        ),
+                    ]
+                )
+            ),
+        ],
         finalize: { draft in
-            let petName = draft.petName ?? resolvePetName(from: draft)
-            guard let petName else {
+            guard let petName = draft.petName else {
                 throw AppConfigError.missingRequiredValue(key: "pet.name")
             }
             guard let isSleeping = draft.isSleeping else {

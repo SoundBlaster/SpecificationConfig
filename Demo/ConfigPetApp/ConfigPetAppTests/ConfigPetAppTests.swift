@@ -1,5 +1,5 @@
-import XCTest
 @testable import ConfigPetApp
+import XCTest
 
 final class ConfigPetAppTests: XCTestCase {
     func testAppConfigProfileHasBindings() {

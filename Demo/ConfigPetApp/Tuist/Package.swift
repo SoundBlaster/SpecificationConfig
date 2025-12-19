@@ -7,7 +7,6 @@ import PackageDescription
     let packageSettings = PackageSettings(
         productTypes: [
             "SpecificationConfig": .framework,
-            "SpecificationCore": .framework,
         ]
     )
 #endif

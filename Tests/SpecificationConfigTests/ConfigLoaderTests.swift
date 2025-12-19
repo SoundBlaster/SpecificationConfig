@@ -1,6 +1,5 @@
 @testable import Configuration
 @testable import SpecificationConfig
-import SpecificationCore
 import XCTest
 
 final class ConfigLoaderTests: XCTestCase {
@@ -219,7 +218,9 @@ final class ConfigLoaderTests: XCTestCase {
             key: "pet.name",
             keyPath: \TestDraft.name,
             decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
-            valueSpecs: [SpecEntry(PredicateSpec<String> { !$0.isEmpty })]
+            valueSpecs: [
+                SpecEntry(description: "Non-empty name") { !$0.isEmpty },
+            ]
         )
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [AnyBinding(nameBinding)],
@@ -269,16 +270,25 @@ final class ConfigLoaderTests: XCTestCase {
             decoder: { reader, key in reader.bool(forKey: ConfigKey(key)) }
         )
 
-        let decisionSpec = PredicateSpec<DecisionDraft>(description: "Sleeping pet") { draft in
-            draft.isSleeping == true
-        }.returning("Sleepy")
-        let decisionFallbacks: [AnyDecisionSpec<DecisionDraft, String>] = [AnyDecisionSpec(decisionSpec)]
-
         let profile = SpecProfile<DecisionDraft, DecisionConfig>(
             bindings: [AnyBinding(nameBinding), AnyBinding(sleepingBinding)],
+            decisionBindings: [
+                AnyDecisionBinding(
+                    DecisionBinding(
+                        key: "pet.name",
+                        keyPath: \DecisionDraft.name,
+                        decisions: [
+                            DecisionEntry(
+                                description: "Sleeping pet",
+                                predicate: { draft in draft.isSleeping == true },
+                                result: "Sleepy"
+                            ),
+                        ]
+                    )
+                ),
+            ],
             finalize: { draft in
-                let name = draft.name ?? decisionFallbacks.compactMap { $0.decide(draft) }.first
-                guard let name else {
+                guard let name = draft.name else {
                     throw DecisionError.missingName
                 }
                 guard let isSleeping = draft.isSleeping else {

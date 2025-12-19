@@ -14,7 +14,6 @@ let project = Project(
             resources: ["config.json"],
             dependencies: [
                 .external(name: "SpecificationConfig"),
-                .external(name: "SpecificationCore"),
             ]
         ),
         .target(

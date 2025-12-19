@@ -23,6 +23,9 @@ public enum Provenance: Sendable, Equatable {
     /// Value came from the binding's default value
     case defaultValue
 
+    /// Value was derived from a decision fallback
+    case decisionFallback
+
     /// Source could not be determined
     ///
     /// Use this when provenance tracking is unavailable or uncertain.
@@ -93,9 +96,9 @@ public struct ResolvedValue: Sendable, Equatable {
 
 /// A snapshot of the resolved configuration state.
 ///
-/// Captures all resolved values, their provenance, and any diagnostics
-/// generated during the build process. Snapshots provide visibility into
-/// where configuration came from and what issues occurred.
+/// Captures resolved values, decision traces, and diagnostics generated during
+/// the build process. Snapshots provide visibility into where configuration
+/// came from, how fallbacks were chosen, and what issues occurred.
 ///
 /// ## Example
 ///
@@ -119,6 +122,9 @@ public struct Snapshot: Sendable {
     /// All resolved configuration values with their provenance
     public let resolvedValues: [ResolvedValue]
 
+    /// Decision traces recorded during configuration resolution.
+    public let decisionTraces: [DecisionTrace]
+
     /// When this snapshot was created
     public let timestamp: Date
 
@@ -139,14 +145,17 @@ public struct Snapshot: Sendable {
     ///
     /// - Parameters:
     ///   - resolvedValues: The resolved configuration values (default: empty)
+    ///   - decisionTraces: Decision traces recorded during resolution (default: empty)
     ///   - timestamp: When the snapshot was created (default: now)
     ///   - diagnostics: Collected diagnostics (default: empty report)
     public init(
         resolvedValues: [ResolvedValue] = [],
+        decisionTraces: [DecisionTrace] = [],
         timestamp: Date = Date(),
         diagnostics: DiagnosticsReport = DiagnosticsReport()
     ) {
         self.resolvedValues = resolvedValues
+        self.decisionTraces = decisionTraces
         self.timestamp = timestamp
         self.diagnostics = diagnostics
     }
@@ -166,5 +175,13 @@ public struct Snapshot: Sendable {
     /// ```
     public func value(forKey key: String) -> ResolvedValue? {
         resolvedValues.first { $0.key == key }
+    }
+
+    /// Finds a decision trace by key.
+    ///
+    /// - Parameter key: The configuration key to lookup.
+    /// - Returns: The decision trace if found, nil otherwise.
+    public func decisionTrace(forKey key: String) -> DecisionTrace? {
+        decisionTraces.first { $0.key == key }
     }
 }

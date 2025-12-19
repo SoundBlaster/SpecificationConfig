@@ -159,6 +159,40 @@ Implement an SPM package **SpecificationConfig** that provides a **generic, key-
 **Acceptance criteria**
 - Demo’s “Reload” button triggers rebuild and updates UI state.
 
+#### FR-7: Spec metadata + composition (SpecificationCore)
+- Encourage value and final specs to carry human-readable descriptions using `PredicateSpec(description:)`.
+- Diagnostics must surface the failing spec’s description (fallback to type name when absent).
+- Document a composable spec bundling approach using `@specs` and/or `allSatisfied()` to keep rule sets readable.
+
+**Acceptance criteria**
+- A failing value spec produces a diagnostic that includes a spec description or type name.
+- A composite spec created via `@specs` yields a single, named diagnostic entry.
+
+#### FR-8: DecisionSpec fallbacks with trace metadata
+- Add optional decision-based fallbacks to the pipeline so apps can derive missing values without hand-rolled loops.
+- Use SpecificationCore `FirstMatchSpec` (or `AnyDecisionSpec`) as the preferred declaration pattern.
+- Record which decision matched (index/description) in `Snapshot` for UI/debugging.
+
+**Acceptance criteria**
+- When a key is missing, a DecisionSpec fallback can produce a value.
+- Snapshot includes decision provenance for derived values (matched index or description).
+
+#### FR-9: Context-aware specs via ContextProviding
+- Allow profiles to accept an injected `AnyContextProvider` (or generic `ContextProviding`) for context-aware specs.
+- Support `ContextProviding.predicate/specification` to avoid manual context threading.
+
+**Acceptance criteria**
+- A spec that depends on `EvaluationContext` can be evaluated during config build.
+- Demo includes at least one context-driven spec (time/flag/counter based).
+
+#### FR-10: Async spec support (optional)
+- Provide an async pipeline variant that can evaluate `AnyAsyncSpecification` collections.
+- Keep the synchronous pipeline as the default path.
+
+**Acceptance criteria**
+- Async value/final specs can be evaluated without blocking the main thread.
+- Sync pipeline behavior remains unchanged.
+
 ---
 
 ### 3.2 Functional requirements (demo app: Config Pet)
@@ -184,6 +218,8 @@ The demo must be implemented in incremental “tutorial steps”:
 | v2 | value specs (non-empty name) + error UI | demonstrate Spec usage |
 | v3 | decision fallback for isSleeping when missing | demonstrate DecisionSpec |
 | v4 | optional watch/hot reload | demonstrate watching updates |
+| v5 | context-based specs (time/flags/counters) | demonstrate ContextProviding + EvaluationContext |
+| v6 | property-wrapper derived state | demonstrate @Satisfies/@Decides usage |
 
 **Acceptance criteria**
 - Each step corresponds to a git tag or branch.
@@ -235,6 +271,10 @@ The demo must be implemented in incremental “tutorial steps”:
 | **FinalConfig** | Strict app-owned config type used by business logic |
 | **Spec** | A SpecificationCore Specification validating a value or object |
 | **DecisionSpec** | A SpecificationCore decision that computes/chooses a value |
+| **DecisionBinding** | A mapping that uses DecisionSpec to derive a value when missing |
+| **DecisionTrace** | Metadata describing which decision matched and why |
+| **SpecMetadata** | Human-readable spec description or identifier used in diagnostics |
+| **ContextProvider** | A `ContextProviding` instance supplying evaluation context |
 | **SpecProfile** | A named set of bindings + finalize + final specs |
 
 ### 4.2 Public API naming rules
@@ -255,8 +295,12 @@ Sources/
   SpecificationConfig/
     Binding.swift
     AnyBinding.swift
+    DecisionBinding.swift
     SpecProfile.swift
     Pipeline.swift
+    AsyncPipeline.swift (optional)
+    SpecMetadata.swift
+    DecisionTrace.swift
     Snapshot.swift
     Diagnostics.swift
     Redaction.swift
@@ -271,6 +315,8 @@ Sources/
         03_ValueSpecs.tutorial
         04_Decisions.tutorial
         05_Watching.tutorial
+        06_ContextSpecs.tutorial
+        07_PropertyWrappers.tutorial
 Tests/
   SpecificationConfigTests/
     PipelineTests.swift
@@ -289,6 +335,13 @@ Demo/
   - default
   - secret flag
   - specs array
+
+#### DecisionBinding (generic)
+- Stores:
+  - target key-path
+  - ordered DecisionSpec fallbacks (FirstMatchSpec or AnyDecisionSpec)
+  - optional spec metadata/description for diagnostics
+  - trace metadata for snapshot
 
 #### AnyBinding (type erasure)
 - Needed to store heterogeneous `Value` types in a single array.
@@ -312,6 +365,8 @@ Demo/
   - value spec failure
   - finalize error
   - final spec failure
+  - decision fallback failure
+  - async spec failure (optional)
 
 ### 5.3 Pipeline algorithm (deterministic)
 
@@ -322,12 +377,16 @@ Demo/
    3) if value exists: run value specs
    4) on success: write to draft via key-path
    5) on failure: append diagnostic, do not mutate draft
-3. If diagnostics contain “fatal” items (configurable; default: any error is fatal):
+3. Apply decision bindings in stable order:
+   1) if target value is missing, evaluate DecisionSpec fallbacks
+   2) on match: write value to draft and record decision trace in snapshot
+   3) on no match: append diagnostic
+4. If diagnostics contain “fatal” items (configurable; default: any error is fatal):
    - return failure report
-4. Call `finalize(draft)`:
+5. Call `finalize(draft)`:
    - on error: return failure report
-5. Run final specs on `FinalConfig`
-6. Return `.success(finalConfig, snapshot)`
+6. Run final specs on `FinalConfig`
+7. Return `.success(finalConfig, snapshot)`
 
 ---
 
@@ -363,6 +422,8 @@ Demo/
 | ENV overrides file | Snapshot shows resolved source = ENV | Unit test |
 | Multiple errors | Report contains all issues in stable order | Determinism test |
 | Secret values | Diagnostics show redacted string | Unit test |
+| Decision fallback used | Snapshot records decision trace | Unit test |
+| Context-based spec fails | Diagnostic includes spec description | Unit test |
 
 ---
 
@@ -377,6 +438,7 @@ Demo/
 | M4 Decision fallback | Missing isSleeping derived | Decision spec demonstrated |
 | M5 Tutorial docs | Step-by-step docs with tags | Reproducible |
 | M6 Release | 0.1.0 tag | Changelog + README |
+| M7 SpecCore DX | Context + DecisionSpec trace + spec metadata | Demo + tests |
 
 ---
 
@@ -458,6 +520,8 @@ Demo/
 | F4 | Add value specs step + doc (`03_ValueSpecs.md`) | Medium | M | SpecificationCore | v2 + docs | B4,C2 | Manual |
 | F5 | Add decision fallback step + doc (`04_Decisions.md`) | Medium | M | DecisionSpec | v3 + docs | C2 | Manual |
 | F6 | Optional watching step + doc (`05_Watching.md`) | Low | L | Watching APIs | v4 + docs | E2 | Manual |
+| F7 | Add context-based spec step + doc (`06_ContextSpecs.md`) | Medium | M | ContextProviding | v5 + docs | H3,E3 | Manual |
+| F8 | Add property-wrapper step + doc (`07_PropertyWrappers.md`) | Low | M | @Satisfies/@Decides | v6 + docs | H2,E3 | Manual |
 
 ---
 
@@ -471,6 +535,19 @@ Demo/
 
 ---
 
+## Phase H — SpecificationCore DX enhancements
+
+| ID | Task | Priority | Effort | Inputs | Output | Dependencies | Verify |
+|---|---|---:|---:|---|---|---|---|
+| H1 | Add spec metadata to diagnostics (description/type name) | High | M | B4 + SpecificationCore | Diagnostics include spec descriptions | B4,C2 | Unit tests |
+| H2 | Add DecisionBinding + DecisionTrace (FirstMatchSpec) | High | L | C2 + SpecProfile | Decision fallback stage + trace | B1,B3,C2 | Unit tests |
+| H3 | Add context provider support for specs | Medium | M | SpecificationCore ContextProviding | Profile accepts AnyContextProvider | C1 | Unit tests |
+| H4 | Demo v5: context-based specs | Medium | M | H3 | Demo uses EvaluationContext-driven spec | H3,E3 | Manual demo |
+| H5 | Demo v6: property-wrapper derived state | Low | M | SpecificationCore wrappers | Demo uses @Satisfies/@Decides | H2,E3 | Manual demo |
+| H6 | Optional async spec pipeline | Low | L | AnyAsyncSpecification | Async build API + tests | C2 | Unit tests |
+
+---
+
 ## 10. Acceptance test plan (end-to-end)
 
 ### 10.1 Wrapper library acceptance
@@ -480,6 +557,9 @@ Demo/
 - [ ] Final specs validate cross-field constraints
 - [ ] Diagnostics are deterministic and machine-readable
 - [ ] Secret values are redacted in diagnostics
+- [ ] Spec diagnostics include description/type name
+- [ ] Decision fallbacks are traced in snapshot
+- [ ] Context-based specs can be evaluated with injected provider
 
 ### 10.2 Demo app acceptance
 - [ ] Running demo reads config.json and displays name + sleeping state

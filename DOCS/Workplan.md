@@ -29,6 +29,14 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
 - [x] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
 - [x] F6 (Low): Optional watching step + doc (`05_Watching.md`)
+- [ ] F7 (Medium): Add context-based spec step + doc (`06_ContextSpecs.md`)
+- [ ] F8 (Low): Add property-wrapper step + doc (`07_PropertyWrappers.md`)
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart
 - [x] G3 (Medium): 0.1.0 release checklist + changelog
+- [ ] H1 (High): Add spec metadata to diagnostics (description/type name)
+- [ ] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
+- [ ] H3 (Medium): Add context provider support for specs
+- [ ] H4 (Medium): Demo v5: context-based specs
+- [ ] H5 (Low): Demo v6: property-wrapper derived state
+- [ ] H6 (Low): Optional async spec pipeline

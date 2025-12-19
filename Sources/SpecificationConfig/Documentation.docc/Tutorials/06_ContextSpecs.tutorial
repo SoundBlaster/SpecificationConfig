@@ -14,8 +14,16 @@
 
         @Steps {
             @Step {
-                List the counters, flags, and overrides that `currentContext()` exposes so you know what diagnostics can refer to.
-                @Code(name: "DemoContextProvider.swift", file: "01-ContextProvider.swift")
+                Create `DemoContextProvider` with reload counters and night overrides.
+                @Code(name: "Context provider state", file: "01-ContextProvider-State.swift")
+            }
+            @Step {
+                Add night-time detection plus a human-readable summary.
+                @Code(name: "Context summary", file: "02-ContextProvider-Summary.swift")
+            }
+            @Step {
+                Build the `EvaluationContext` with counters and flags.
+                @Code(name: "Evaluation context", file: "03-ContextProvider-Context.swift")
             }
         }
     }
@@ -29,8 +37,12 @@
 
         @Steps {
             @Step {
-                Highlight the predicate that checks `context.flag(for: "nightTime")` so pets only sleep when the flag is true and diagnostics point to the flag when it is false.
-                @Code(name: "ContextualSpecEntry.swift", file: "02-ContextualSpec.swift")
+                Add a `ContextualSpecEntry` so pets can only sleep at night.
+                @Code(name: "Contextual spec binding", file: "04-ContextualSpec-Binding.swift")
+            }
+            @Step {
+                Inject `DemoContextProvider` into the profile so specs can query flags.
+                @Code(name: "Context provider wiring", file: "05-ContextProvider-Wiring.swift")
             }
         }
     }
@@ -44,12 +56,12 @@
 
         @Steps {
             @Step {
-                Outline how `ConfigManager.toggleNightMode()` flips the `nightTime` flag, rebuilds the pipeline, and updates `contextDescription` so diagnostics and overrides stay synchronized.
-                @Code(name: "ConfigManager context helpers", file: "03-ContextUIToggle.swift")
+                Expose context helpers on `ConfigManager`.
+                @Code(name: "ConfigManager context helpers", file: "06-ConfigManager-ContextHelpers.swift")
             }
             @Step {
-                Use the rebuild flow (`loadConfig()` → `ConfigPipeline.build`) to reproduce forced night/day validations and observe the counter provided by `DemoContextProvider`.
-                @Code(name: "ConfigManager.swift", file: "02-ConfigManager.swift")
+                Add a context row and night-mode toggle to the UI.
+                @Code(name: "Context UI", file: "07-ContentView-ContextRow.swift")
             }
         }
     }

@@ -14,8 +14,28 @@
 
         @Steps {
             @Step {
-                Implement `AppConfig` with its draft, finalize logic, and the binding list.
-                @Code(name: "AppConfig.swift", file: "01-AppConfig.swift")
+                Create the draft + final config types that hold the pet state.
+                @Code(name: "AppConfig types", file: "01-AppConfig-Types.swift")
+            }
+            @Step {
+                Add a friendly error type for missing required config values.
+                @Code(name: "AppConfigError.swift", file: "02-AppConfig-Error.swift")
+            }
+            @Step {
+                Start the bindings list with `pet.name` and its non-empty value spec.
+                @Code(name: "Pet name binding", file: "03-AppConfig-NameBinding.swift")
+            }
+            @Step {
+                Add the `pet.isSleeping` binding with a default and a contextual rule.
+                @Code(name: "Pet sleep binding", file: "04-AppConfig-SleepBinding.swift")
+            }
+            @Step {
+                Add a decision fallback that derives a name when the pet is sleeping.
+                @Code(name: "Decision fallback", file: "05-AppConfig-Decisions.swift")
+            }
+            @Step {
+                Wire the context provider and finalize closure into the profile.
+                @Code(name: "Profile finalize", file: "06-AppConfig-Finalize.swift")
             }
         }
     }
@@ -29,8 +49,28 @@
 
         @Steps {
             @Step {
-                Add `loadConfig()` that builds with the profile and publishes `buildResult`.
-                @Code(name: "ConfigManager.swift", file: "02-ConfigManager.swift")
+                Declare ConfigManager and publish the core loading state.
+                @Code(name: "ConfigManager state", file: "07-ConfigManager-State.swift")
+            }
+            @Step {
+                Kick off loading in init so config builds on launch.
+                @Code(name: "ConfigManager init", file: "08-ConfigManager-Init.swift")
+            }
+            @Step {
+                Implement loadConfig to create a reader and handle failures.
+                @Code(name: "ConfigManager load", file: "09-ConfigManager-Load.swift")
+            }
+            @Step {
+                Add a build helper that runs ConfigPipeline and updates config.
+                @Code(name: "ConfigManager build", file: "10-ConfigManager-Build.swift")
+            }
+            @Step {
+                Expose status and snapshot helpers used by the UI.
+                @Code(name: "ConfigManager helpers", file: "11-ConfigManager-StatusSnapshot.swift")
+            }
+            @Step {
+                Add sleep override and context helpers for the demo controls.
+                @Code(name: "ConfigManager overrides", file: "12-ConfigManager-OverridesContext.swift")
             }
         }
     }
@@ -44,8 +84,28 @@
 
         @Steps {
             @Step {
-                Implement `ContentView` to bind to `ConfigManager`, show the reload button, and render diagnostics.
-                @Code(name: "ContentView.swift", file: "03-ContentView.swift")
+                Create a left/right split layout for the demo.
+                @Code(name: "ContentView layout", file: "13-ContentView-Layout.swift")
+            }
+            @Step {
+                Add the title, status row, and context row in the left panel.
+                @Code(name: "Header and status", file: "14-ContentView-HeaderStatus.swift")
+            }
+            @Step {
+                Add reload, night mode, and sleep override controls.
+                @Code(name: "Controls", file: "15-ContentView-Controls.swift")
+            }
+            @Step {
+                Render the loaded config values and validation diagnostics.
+                @Code(name: "Config values + diagnostics", file: "16-ContentView-ConfigDiagnostics.swift")
+            }
+            @Step {
+                Show overrides, resolved values, and decision traces for inspection.
+                @Code(name: "Inspection panels", file: "17-ContentView-Inspectors.swift")
+            }
+            @Step {
+                Build the right panel pet preview and helper methods.
+                @Code(name: "Right panel + helpers", file: "18-ContentView-RightPanel.swift")
             }
         }
     }

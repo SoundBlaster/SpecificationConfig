@@ -14,8 +14,12 @@
 
         @Steps {
             @Step {
-                Create a `DecisionBinding` for `pet.name` that returns “Sleepy” when `isSleeping` is true.
-                @Code(name: "DecisionBinding.swift", file: "01-DecisionBinding.swift")
+                Create a `DecisionEntry` that returns "Sleepy" when `isSleeping` is true.
+                @Code(name: "DecisionEntry", file: "01-DecisionEntry.swift")
+            }
+            @Step {
+                Add a `decisionBindings` array to `AppConfig.profile`.
+                @Code(name: "Decision bindings", file: "02-DecisionBindings.swift")
             }
             @Step {
                 Inspect how the decision output resolves when the config omits `pet.name`.

@@ -29,7 +29,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
 - [x] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
 - [x] F6 (Low): Optional watching step + doc (`05_Watching.md`)
-- [ ] F7 (Medium): Add context-based spec step + doc (`06_ContextSpecs.md`)
+- [ ] F7 (Medium) (INPROGRESS): Add context-based spec step + doc (`06_ContextSpecs.md`)
 - [ ] F8 (Low): Add property-wrapper step + doc (`07_PropertyWrappers.md`)
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart

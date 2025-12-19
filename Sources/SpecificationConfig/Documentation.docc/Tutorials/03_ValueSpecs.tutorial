@@ -1,67 +1,24 @@
-# Validating Configuration with Specs
+@Tutorial(time: 10) {
+    @Intro(title: "Validating Configuration with Specs") {
+        Add `SpecEntry` validations so values like `pet.name` must satisfy business rules, and observe diagnostics when they fail.
 
-Add value-level validation rules using SpecificationConfig so bad config values show up as diagnostics.
+        @Image(source: "tutorial-icon", alt: "Value validation illustration")
+    }
 
-## Overview
+    @Section(title: "Add value specs") {
+        @ContentAndMedia {
+            Place value specs on bindings and highlight how pipeline diagnostics report spec violations.
 
-You will:
-- Add a value spec to the `pet.name` binding.
-- See how spec failures surface in the error list panel.
-- Test invalid values locally.
+            @Image(source: "tutorial-icon", alt: "Diagnostics illustration")
+        }
 
-## Prerequisites
-
-- Completed `02_EnvOverrides`
-- Demo app builds and loads `config.json`
-
-## Step 1: Add a value spec to the binding
-
-Update `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`:
-
-```swift
-// ...
-
-AnyBinding(
-    Binding(
-        key: "pet.name",
-        keyPath: \AppConfigDraft.petName,
-        decoder: ConfigReader.string,
-        valueSpecs: [
-            SpecEntry(description: "Non-empty pet name") { value in
-                !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            },
-        ]
-    )
-)
-```
-
-This spec rejects empty or whitespace-only names. When it fails, the pipeline records a diagnostics error.
-
-## Step 2: Trigger a validation failure
-
-Update `Demo/ConfigPetApp/config.json` to use an invalid value:
-
-```json
-{
-  "pet": {
-    "name": "",
-    "isSleeping": true
-  }
+        @Steps {
+            @Step {
+                Update the `pet.name` binding to include a `SpecEntry` that rejects empty or whitespace names.
+            }
+            @Step {
+                Run Config Pet with an invalid name and read the diagnostics list to see the value spec failure.
+            }
+        }
+    }
 }
-```
-
-Run the app and press Reload. The left panel should show a failed build with a spec error in the list.
-
-## Validation
-
-From the repo root:
-
-```bash
-swift build -v
-swift test -v
-swiftformat --lint .
-```
-
-## Next
-
-Proceed to `04_Decisions` to add fallback logic with DecisionBinding.

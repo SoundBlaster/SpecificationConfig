@@ -1,32 +1,34 @@
 @Tutorials(name: "SpecificationConfig Tutorials") {
-    @Intro(title: "Learn the Specification Pattern through Config Pet") {
-        Follow the SpecificationConfig tutorial series to build the Config Pet demo,
-        understand contextual validation, and see how SpecificationKit-style bindings keep
-        your configuration logic testable and declarative.
+    @Intro(title: "Explore SpecificationConfig through Config Pet") {
+        Learn how SpecificationConfig and Swift Configuration work together to build a resilient configuration pipeline for macOS.
+
+        @Image(source: "tutorial-icon", alt: "Config Pet outline")
     }
 
     @Chapter(name: "Getting Started") {
-        Build the minimal Config Pet demo (name + sleeping state + reload button) from v0.
-        @TutorialReference(tutorial: "doc:SpecificationConfig-Intro")
+        Build the MVP (name + sleeping state + reload button) so the pipeline can read `config.json` and show diagnostics.
+        @Image(source: "tutorial-icon", alt: "Getting started illustration")
+        @TutorialReference(tutorial: "doc:00_Intro")
+        @TutorialReference(tutorial: "doc:01_MVP")
     }
 
     @Chapter(name: "ENV Overrides & Value Specs") {
-        Extend the demo with environment overrides and value validations to keep configs safe.
-        @TutorialReference(tutorial: "doc:SpecificationConfig-ENV-ValueSpecs")
+        Extend the reader with environment overrides plus value specs so wicked configuration is rejected before finalization.
+        @Image(source: "tutorial-icon", alt: "Overrides concept art")
+        @TutorialReference(tutorial: "doc:02_EnvOverrides")
+        @TutorialReference(tutorial: "doc:03_ValueSpecs")
     }
 
     @Chapter(name: "Decision Fallbacks") {
-        Learn how to supply DecisionBinding fallbacks for missing values and contextual decisions.
-        @TutorialReference(tutorial: "doc:SpecificationConfig-Decisions")
+        Add decision bindings so the pipeline can produce derived values when input is missing.
+        @Image(source: "tutorial-icon", alt: "Decision graph")
+        @TutorialReference(tutorial: "doc:04_Decisions")
     }
 
     @Chapter(name: "Watching & Contextual Specs") {
-        Optional watching and context-aware specs let you react to runtime flags and reloads.
-        @TutorialReference(tutorial: "doc:SpecificationConfig-Watching-ContextSpecs")
-    }
-
-    @Resources {
-        Learn more about SpecificationConfig APIs.
-        @Link(destination: "doc:SpecificationConfig") { SpecificationConfig Reference }
+        Optional watching plus contextual specs let you react to runtime flags, toggles, and validation contexts.
+        @Image(source: "tutorial-icon", alt: "Contextual specs icon")
+        @TutorialReference(tutorial: "doc:05_Watching")
+        @TutorialReference(tutorial: "doc:06_ContextSpecs")
     }
 }

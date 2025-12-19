@@ -1,0 +1,15 @@
+# Tutorial Table of Contents
+
+Keep this index in sync with `Sources/SpecificationConfig/Documentation.docc/Tutorials/` so Xcode’s Doc browser and DocC know about every step in the Config Pet tutorial series.
+
+## Overview
+
+1. [00_Intro — Introduction to SpecificationConfig and the Config Pet app](00_Intro.tutorial)
+2. [01_MVP — Minimal viable demo (name, isSleeping, reload button)](01_MVP.tutorial)
+3. [02_EnvOverrides — ENV override step](02_EnvOverrides.tutorial)
+4. [03_ValueSpecs — Value specs for validation](03_ValueSpecs.tutorial)
+5. [04_Decisions — Decision spec fallback handling](04_Decisions.tutorial)
+6. [05_Watching — Optional hot-reload/watching guide](05_Watching.tutorial)
+7. [06_ContextSpecs — Context-based spec step with `EvaluationContext`](06_ContextSpecs.tutorial)
+
+Each entry links directly to the corresponding `.tutorial` file so the Doc browser can surface them under the “Tutorials” section.

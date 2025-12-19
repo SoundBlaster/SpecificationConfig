@@ -1,19 +1,58 @@
 # Hot Reload with Configuration Watching
 
-> Placeholder for tutorial content. To be implemented in Phase F (Task F6).
+This optional step shows how to use Swift Configuration's reloading provider to watch `config.json`.
 
 ## Overview
 
-This tutorial will cover implementing hot reload functionality using Swift Configuration's watching capabilities. Your Config Pet app will automatically update when the configuration file changes.
+You will:
+- Create a `ReloadingFileProvider<JSONSnapshot>`.
+- Run it inside a `ServiceGroup` so it can poll for changes.
+- Keep the manual Reload button as a fallback.
 
-## Topics
+## Prerequisites
 
-### Implementation
+- Completed `04_Decisions`
+- Familiar with manual reload in Config Pet
 
-- Coming soon
+## Step 1: Enable the Reloading trait
 
-### Demo Features
+Swift Configuration gates reload providers behind the `Reloading` trait. Enable it in your build:
 
-- Automatic file watching
-- Hot reload without manual button click
-- Real-time configuration updates
+```bash
+swift build --traits Reloading
+```
+
+If you use Xcode or Tuist, add the `Reloading` compilation condition to the Configuration package target.
+
+## Step 2: Create a reloading provider (optional)
+
+Use `ReloadingFileProvider<JSONSnapshot>` to watch the config file:
+
+```swift
+import Configuration
+import ServiceLifecycle
+
+let provider = try await ReloadingFileProvider<JSONSnapshot>(
+    filePath: "./config.json"
+)
+let reader = ConfigReader(provider: provider)
+
+let serviceGroup = ServiceGroup(services: [provider])
+try await serviceGroup.run()
+```
+
+This starts a polling loop (default 15s) and refreshes the provider when the file changes.
+
+## Step 3: Keep a manual fallback
+
+Even with watching, keep the Reload button as a manual fallback to re-run `ConfigPipeline` and update the UI.
+
+## Validation
+
+From the repo root:
+
+```bash
+swift build -v
+swift test -v
+swiftformat --lint .
+```

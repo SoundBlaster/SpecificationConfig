@@ -50,7 +50,9 @@ final class SpecProfileTests: XCTestCase {
                 }
                 return AppConfig(name: name, port: port)
             },
-            finalSpecs: [AnySpecification<AppConfig> { $0.port > 0 }],
+            finalSpecs: [
+                SpecEntry(PredicateSpec<AppConfig>(description: "Port > 0") { $0.port > 0 }),
+            ],
             makeDraft: { Draft() }
         )
 
@@ -68,7 +70,9 @@ final class SpecProfileTests: XCTestCase {
             key: "feature.name",
             keyPath: \Draft.name,
             decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification<String> { !$0.isEmpty }]
+            valueSpecs: [
+                SpecEntry(PredicateSpec<String>(description: "Non-empty") { !$0.isEmpty }),
+            ]
         )
 
         let profile = SpecProfile<Draft, AppConfig>(
@@ -81,8 +85,73 @@ final class SpecProfileTests: XCTestCase {
         )
 
         XCTAssertThrowsError(try profile.applyBindings(reader: makeReader(values: values))) { error in
-            guard case let ConfigError.specFailed(key)? = error as? ConfigError else {
+            guard case let ConfigError.specFailed(key, spec)? = error as? ConfigError else {
                 return XCTFail("Expected ConfigError.specFailed")
+            }
+            XCTAssertEqual(key, "feature.name")
+            XCTAssertEqual(spec.displayName, "Non-empty")
+        }
+    }
+
+    func testContextualValueSpecUsesContextProvider() throws {
+        let values: [AbsoluteConfigKey: ConfigValue] = [
+            "feature.name": "Enabled",
+        ]
+        let context = EvaluationContext(flags: ["featureEnabled": true])
+        let provider = AnyContextProvider(StaticContextProvider(context))
+
+        let nameBinding = Binding<Draft, String>(
+            key: "feature.name",
+            keyPath: \Draft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            contextualValueSpecs: [
+                ContextualSpecEntry(description: "Feature enabled") { context, _ in
+                    context.flag(for: "featureEnabled")
+                },
+            ]
+        )
+
+        let profile = SpecProfile<Draft, AppConfig>(
+            bindings: [AnyBinding(nameBinding)],
+            contextProvider: provider,
+            finalize: { draft in
+                guard let name = draft.name else { throw TestError.missingValue }
+                return AppConfig(name: name, port: 0)
+            },
+            makeDraft: { Draft() }
+        )
+
+        _ = try profile.applyBindings(reader: makeReader(values: values))
+    }
+
+    func testContextualValueSpecRequiresProvider() {
+        let values: [AbsoluteConfigKey: ConfigValue] = [
+            "feature.name": "Enabled",
+        ]
+
+        let nameBinding = Binding<Draft, String>(
+            key: "feature.name",
+            keyPath: \Draft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            contextualValueSpecs: [
+                ContextualSpecEntry(description: "Feature enabled") { context, _ in
+                    context.flag(for: "featureEnabled")
+                },
+            ]
+        )
+
+        let profile = SpecProfile<Draft, AppConfig>(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                guard let name = draft.name else { throw TestError.missingValue }
+                return AppConfig(name: name, port: 0)
+            },
+            makeDraft: { Draft() }
+        )
+
+        XCTAssertThrowsError(try profile.applyBindings(reader: makeReader(values: values))) { error in
+            guard case let ConfigError.contextProviderMissing(key)? = error as? ConfigError else {
+                return XCTFail("Expected ConfigError.contextProviderMissing")
             }
             XCTAssertEqual(key, "feature.name")
         }
@@ -92,12 +161,41 @@ final class SpecProfileTests: XCTestCase {
         let profile = SpecProfile<Draft, AppConfig>(
             bindings: [],
             finalize: { _ in AppConfig(name: "Invalid", port: -1) },
-            finalSpecs: [AnySpecification<AppConfig> { $0.port > 0 }],
+            finalSpecs: [
+                SpecEntry(PredicateSpec<AppConfig>(description: "Port > 0") { $0.port > 0 }),
+            ],
             makeDraft: { Draft() }
         )
 
         XCTAssertThrowsError(try profile.finalizeDraft(Draft())) { error in
-            XCTAssertEqual(error as? ConfigError, .finalSpecFailed)
+            guard case let ConfigError.finalSpecFailed(spec)? = error as? ConfigError else {
+                return XCTFail("Expected ConfigError.finalSpecFailed")
+            }
+            XCTAssertEqual(spec.displayName, "Port > 0")
+        }
+    }
+
+    func testFinalizeDraftRunsContextualFinalSpecs() {
+        let context = EvaluationContext(flags: ["featureEnabled": false])
+        let provider = AnyContextProvider(StaticContextProvider(context))
+
+        let profile = SpecProfile<Draft, AppConfig>(
+            bindings: [],
+            contextProvider: provider,
+            finalize: { _ in AppConfig(name: "Name", port: 0) },
+            contextualFinalSpecs: [
+                ContextualSpecEntry(description: "Feature enabled") { context, _ in
+                    context.flag(for: "featureEnabled")
+                },
+            ],
+            makeDraft: { Draft() }
+        )
+
+        XCTAssertThrowsError(try profile.finalizeDraft(Draft())) { error in
+            guard case let ConfigError.finalSpecFailed(spec)? = error as? ConfigError else {
+                return XCTFail("Expected ConfigError.finalSpecFailed")
+            }
+            XCTAssertEqual(spec.displayName, "Feature enabled")
         }
     }
 

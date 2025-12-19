@@ -61,9 +61,9 @@ public enum BuildResult<Final> {
     public var diagnostics: DiagnosticsReport {
         switch self {
         case let .success(_, snapshot):
-            return snapshot.diagnostics
+            snapshot.diagnostics
         case let .failure(diagnostics, _):
-            return diagnostics
+            diagnostics
         }
     }
 
@@ -71,9 +71,9 @@ public enum BuildResult<Final> {
     public var snapshot: Snapshot {
         switch self {
         case let .success(_, snapshot):
-            return snapshot
+            snapshot
         case let .failure(_, snapshot):
-            return snapshot
+            snapshot
         }
     }
 }
@@ -126,13 +126,17 @@ public enum ConfigPipeline {
     ///     the first error (useful for development/debugging).
     /// - Returns: Build result containing either success (final config + snapshot) or
     ///            failure (diagnostics + partial snapshot).
-    public static func build<Draft, Final>(
-        profile: SpecProfile<Draft, Final>,
+    public static func build<Final>(
+        profile: SpecProfile<some Any, Final>,
         reader: Configuration.ConfigReader,
+        provenanceReporter: ResolvedValueProvenanceReporter? = nil,
         errorHandlingMode: ErrorHandlingMode = .collectAll
     ) -> BuildResult<Final> {
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
+        var decisionTraces: [DecisionTrace] = []
+
+        provenanceReporter?.reset()
 
         // Create draft
         var draft = profile.makeDraft()
@@ -142,11 +146,15 @@ public enum ConfigPipeline {
             do {
                 let (stringifiedValue, usedDefault) = try binding.applyAndCapture(
                     to: &draft,
-                    reader: reader
+                    reader: reader,
+                    contextProvider: profile.contextProvider
                 )
 
-                // Determine provenance based on whether default was used
-                let provenance: Provenance = usedDefault ? .defaultValue : .unknown
+                let provenance = Self.provenance(
+                    forKey: binding.key,
+                    usedDefault: usedDefault,
+                    reporter: provenanceReporter
+                )
 
                 // Track successfully resolved value for snapshot
                 let resolvedValue = ResolvedValue(
@@ -168,6 +176,7 @@ public enum ConfigPipeline {
                     // Stop immediately and return failure
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
                         diagnostics: DiagnosticsReport()
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -190,6 +199,7 @@ public enum ConfigPipeline {
                     // Stop immediately and return failure
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
                         diagnostics: DiagnosticsReport()
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -200,10 +210,45 @@ public enum ConfigPipeline {
             }
         }
 
+        for decisionBinding in profile.decisionBindings {
+            switch decisionBinding.apply(to: &draft) {
+            case .skipped:
+                continue
+            case let .applied(trace, stringifiedValue):
+                decisionTraces.append(trace)
+                let resolved = ResolvedValue(
+                    key: decisionBinding.key,
+                    stringifiedValue: stringifiedValue,
+                    provenance: .decisionFallback,
+                    isSecret: decisionBinding.isSecret
+                )
+                if let index = resolvedValues.firstIndex(where: { $0.key == decisionBinding.key }) {
+                    resolvedValues[index] = resolved
+                } else {
+                    resolvedValues.append(resolved)
+                }
+            case .noMatch:
+                let diagnostic = diagnosticFromConfigError(
+                    .decisionFallbackFailed(key: decisionBinding.key),
+                    key: decisionBinding.key
+                )
+                diagnostics.add(diagnostic)
+                if errorHandlingMode == .failFast {
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                }
+            }
+        }
+
         // Check if we have any errors before finalizing
         if diagnostics.hasErrors {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -219,6 +264,7 @@ public enum ConfigPipeline {
 
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -231,6 +277,7 @@ public enum ConfigPipeline {
 
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
                 diagnostics: DiagnosticsReport()
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
@@ -239,6 +286,7 @@ public enum ConfigPipeline {
         // Success - build final snapshot
         let snapshot = Snapshot(
             resolvedValues: resolvedValues,
+            decisionTraces: decisionTraces,
             diagnostics: diagnostics
         )
 
@@ -256,18 +304,55 @@ public enum ConfigPipeline {
         key: String?
     ) -> DiagnosticItem {
         switch error {
-        case let .specFailed(specKey):
-            return DiagnosticItem(
+        case let .specFailed(specKey, spec):
+            DiagnosticItem(
                 key: key ?? specKey,
                 severity: .error,
-                message: "Value specification failed for key '\(specKey)'"
+                message: "Value specification failed for key '\(specKey)'",
+                context: specContext(spec)
             )
-        case .finalSpecFailed:
-            return DiagnosticItem(
+        case let .finalSpecFailed(spec):
+            DiagnosticItem(
                 key: key,
                 severity: .error,
-                message: "Post-finalization specification failed"
+                message: "Post-finalization specification failed",
+                context: specContext(spec)
+            )
+        case let .decisionFallbackFailed(decisionKey):
+            DiagnosticItem(
+                key: key ?? decisionKey,
+                severity: .error,
+                message: "Decision fallback did not match for key '\(decisionKey)'"
+            )
+        case let .contextProviderMissing(missingKey):
+            DiagnosticItem(
+                key: key ?? missingKey,
+                severity: .error,
+                message: "Context provider required for contextual spec evaluation"
             )
         }
+    }
+
+    private static func specContext(_ metadata: SpecMetadata) -> [String: DiagnosticContextValue] {
+        [
+            "spec": DiagnosticContextValue(metadata.displayName),
+            "specType": DiagnosticContextValue(metadata.typeName),
+        ]
+    }
+
+    private static func provenance(
+        forKey key: String,
+        usedDefault: Bool,
+        reporter: ResolvedValueProvenanceReporter?
+    ) -> Provenance {
+        if usedDefault {
+            return .defaultValue
+        }
+        if let reporter {
+            if let recorded = reporter.provenance(forKey: key) {
+                return recorded
+            }
+        }
+        return .unknown
     }
 }

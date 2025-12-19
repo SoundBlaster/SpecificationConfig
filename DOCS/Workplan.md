@@ -16,18 +16,31 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] C4 (Medium): Add collect-all vs fail-fast option
 - [x] D1 (High): Add minimal helpers for reading primitives
 - [x] D2 (High): Provenance capture strategy
-- [ ] D3 (Medium): Manual reload API (rebuild with same profile/reader)
-- [ ] E1 (High): Create macOS SwiftUI app target (Demo/ConfigPetApp)
-- [ ] E2 (High): Add config file loader (config.json in app working dir)
-- [ ] E3 (High): Implement `AppConfig` + `Draft` + `SpecProfile` for v0
-- [ ] E4 (High): UI split view + Reload button
-- [ ] E5 (High): UI error list panel when build fails
-- [ ] F1 (High): Write `Docs/Tutorial/01_MVP.md` matching v0
-- [ ] F2 (High): Tag repo `tutorial-v0`
-- [ ] F3 (Medium): Add ENV override step + doc (`02_EnvOverrides.md`)
-- [ ] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
-- [ ] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
-- [ ] F6 (Low): Optional watching step + doc (`05_Watching.md`)
-- [ ] G1 (High): GitHub Actions: build + test on macOS
-- [ ] G2 (High): README “Why this wrapper” + quickstart
-- [ ] G3 (Medium): 0.1.0 release checklist + changelog
+- [x] D3 (Medium): Manual reload API (rebuild with same profile/reader)
+- [x] E1 (High): Create macOS SwiftUI app target (Demo/ConfigPetApp)
+- [x] E2 (High): Add config file loader (config.json in app working dir)
+- [x] E2B1 (Medium): Bug — Config file not found error shows double slash path
+- [x] E3 (High): Implement `AppConfig` + `Draft` + `SpecProfile` for v0
+- [x] E4 (High): UI split view + Reload button
+- [x] E5 (High): UI error list panel when build fails
+- [x] F1 (High): Write `Docs/Tutorial/01_MVP.md` matching v0
+- [x] F2 (High): Tag repo `tutorial-v0`
+- [x] F3 (Medium): Add ENV override step + doc (`02_EnvOverrides.md`)
+- [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
+- [x] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
+- [x] F6 (Low): Optional watching step + doc (`05_Watching.md`)
+- [ ] F7 (Medium): Add context-based spec step + doc (`06_ContextSpecs.md`)
+- [ ] F8 (Low): Add property-wrapper step + doc (`07_PropertyWrappers.md`)
+- [x] G1 (High): GitHub Actions: build + test on macOS
+- [x] G2 (High): README “Why this wrapper” + quickstart
+- [x] G3 (Medium): 0.1.0 release checklist + changelog
+- [x] H1 (High): Add spec metadata to diagnostics (description/type name)
+- [x] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
+- [x] H3 (Medium): Add context provider support for specs
+- [x] H4 (Medium): Demo v5: context-based specs
+- [ ] H5 (Low): Demo v6: property-wrapper derived state
+- [ ] H6 (Low): Optional async spec pipeline
+- [x] H7 (Medium): Surface spec metadata & decision trace in demo UI
+- [x] H8 (Medium): Wrap SpecificationCore for common use cases
+- [x] H9 (High): Improve resolved value provenance
+- [x] H10 (Medium): Display overrides panel in demo

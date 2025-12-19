@@ -21,3 +21,35 @@
 ## Phase D
 - D1 — Add minimal helpers for reading primitives — archived 2025-12-18
 - D2 — Provenance capture strategy — archived 2025-12-18
+- D3 — Manual reload API — archived 2025-12-18
+
+## Phase E
+- E1 — Create macOS SwiftUI app target — archived 2025-12-18
+- E2 — Add config file loader — archived 2025-12-18
+- E2B1 — Bug: config path shows double slash in error — archived 2025-12-19
+- E3 — Implement `AppConfig` + `Draft` + `SpecProfile` for v0 — archived 2025-12-18
+- E4 — UI split view + Reload button — archived 2025-12-18
+- E5 — UI error list panel when build fails — archived 2025-12-19
+
+## Phase F
+- F1 — Write `Docs/Tutorial/01_MVP.md` matching v0 — archived 2025-12-19
+- F2 — Tag repo `tutorial-v0` — archived 2025-12-19
+- F3 — Add ENV override step + doc (`02_EnvOverrides.md`) — archived 2025-12-19
+- F4 — Add value specs step + doc (`03_ValueSpecs.md`) — archived 2025-12-19
+- F5 — Add decision fallback step + doc (`04_Decisions.md`) — archived 2025-12-19
+- F6 — Optional watching step + doc (`05_Watching.md`) — archived 2025-12-19
+
+## Phase G
+- G1 — GitHub Actions: build + test on macOS — archived 2025-12-19
+- G2 — README “Why this wrapper” + quickstart — archived 2025-12-19
+- G3 — 0.1.0 release checklist + changelog — archived 2025-12-19
+
+## Phase H
+- H1 — Add spec metadata to diagnostics (description/type name) — archived 2025-12-19
+- H2 — Add DecisionBinding + DecisionTrace (FirstMatchSpec) — archived 2025-12-19
+- H3 — Add context provider support for specs — archived 2025-12-19
+- H4 — Demo v5: context-based specs — archived 2025-12-19
+- H7 — Surface spec metadata & decision trace in demo UI — archived 2025-12-19
+- H8 — Wrap SpecificationCore for common use cases — archived 2025-12-19
+- H9 — Improve resolved value provenance — archived 2025-12-19
+- H10 — Display overrides panel in demo — archived 2025-12-19

@@ -1,19 +1,69 @@
-# Using Decision Specs for Fallback Logic
+# Using Decision Bindings for Fallback Logic
 
-> Placeholder for tutorial content. To be implemented in Phase F (Task F5).
+Add DecisionBinding fallback logic so your app can derive values when configuration is missing.
 
 ## Overview
 
-This tutorial will cover using DecisionSpec for fallback and derivation logic. You'll learn how to provide default values when configuration is missing using SpecificationCore's decision specifications.
+You will:
+- Create a decision binding that derives a pet name when the pet is sleeping.
+- Let the pipeline apply the decision before finalization.
+- Trigger the fallback by removing `pet.name` from the config.
 
-## Topics
+## Prerequisites
 
-### Implementation
+- Completed `03_ValueSpecs`
+- Demo app builds and loads `config.json`
 
-- Coming soon
+## Step 1: Add a decision fallback
 
-### Demo Features
+Update `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`:
 
-- DecisionSpec for default values
-- Fallback logic when isSleeping is missing
-- Computed/derived configuration values
+```swift
+// ...
+
+decisionBindings: [
+    AnyDecisionBinding(
+        DecisionBinding(
+            key: "pet.name",
+            keyPath: \AppConfigDraft.petName,
+            decisions: [
+                DecisionEntry(
+                    description: "Sleeping pet",
+                    predicate: { draft in draft.isSleeping == true },
+                    result: "Sleepy"
+                ),
+            ]
+        )
+    ),
+],
+```
+
+The pipeline now fills the draft before `finalize`, so `petName` can be treated as required.
+
+## Step 2: Trigger the fallback
+
+Edit `Demo/ConfigPetApp/config.json` to remove the name:
+
+```json
+{
+  "pet": {
+    "isSleeping": true
+  }
+}
+```
+
+Run the app and press Reload. The left panel should show `Sleepy` as the pet name.
+
+## Validation
+
+From the repo root:
+
+```bash
+swift build -v
+swift test -v
+swiftformat --lint .
+```
+
+## Next
+
+Proceed to `05_Watching` for optional config watching.

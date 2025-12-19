@@ -22,11 +22,11 @@ public enum DiagnosticSeverity: String, Sendable, Equatable, Comparable {
     private static func orderingIndex(_ severity: DiagnosticSeverity) -> Int {
         switch severity {
         case .error:
-            return 0
+            0
         case .warning:
-            return 1
+            1
         case .info:
-            return 2
+            2
         }
     }
 }
@@ -182,17 +182,17 @@ public struct DiagnosticsReport: Sendable, Equatable {
 
     /// Number of error diagnostics.
     public var errorCount: Int {
-        items.filter { $0.severity == .error }.count
+        items.count(where: { $0.severity == .error })
     }
 
     /// Number of warning diagnostics.
     public var warningCount: Int {
-        items.filter { $0.severity == .warning }.count
+        items.count(where: { $0.severity == .warning })
     }
 
     /// Number of info diagnostics.
     public var infoCount: Int {
-        items.filter { $0.severity == .info }.count
+        items.count(where: { $0.severity == .info })
     }
 
     /// Total number of diagnostics.

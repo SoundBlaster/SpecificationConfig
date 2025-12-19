@@ -128,7 +128,7 @@ final class PipelineTests: XCTestCase {
             key: "app.port",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let profile = SpecProfile(
@@ -154,6 +154,228 @@ final class PipelineTests: XCTestCase {
             XCTAssertFalse(snapshot.hasErrors) // Diagnostics separate from snapshot
             // Snapshot should be empty since binding failed
             XCTAssertEqual(snapshot.resolvedValues.count, 0)
+        }
+    }
+
+    func testDecisionBindingAppliesFallbackAndRecordsTrace() {
+        struct DecisionDraft {
+            var petName: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig: Equatable {
+            let petName: String
+            let isSleeping: Bool
+        }
+
+        enum DecisionError: Error {
+            case missingName
+            case missingSleepFlag
+        }
+
+        let sleepingBinding = Binding(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: ConfigReader.bool
+        )
+
+        let nameFallback = DecisionEntry(
+            description: "Sleeping pet",
+            predicate: { (draft: DecisionDraft) in draft.isSleeping == true },
+            result: "Sleepy"
+        )
+
+        let decisionBinding = DecisionBinding(
+            key: "pet.name",
+            keyPath: \DecisionDraft.petName,
+            decisions: [nameFallback]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(sleepingBinding)],
+            decisionBindings: [AnyDecisionBinding(decisionBinding)],
+            finalize: { draft in
+                guard let petName = draft.petName else {
+                    throw DecisionError.missingName
+                }
+                guard let isSleeping = draft.isSleeping else {
+                    throw DecisionError.missingSleepFlag
+                }
+                return DecisionConfig(petName: petName, isSleeping: isSleeping)
+            },
+            makeDraft: { DecisionDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "pet.isSleeping": true,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(config, snapshot):
+            XCTAssertEqual(config, DecisionConfig(petName: "Sleepy", isSleeping: true))
+            XCTAssertEqual(snapshot.decisionTraces.count, 1)
+            let trace = snapshot.decisionTrace(forKey: "pet.name")
+            XCTAssertEqual(trace?.decisionName, "Sleeping pet")
+            XCTAssertEqual(trace?.matchedIndex, 0)
+            let resolved = snapshot.value(forKey: "pet.name")
+            XCTAssertEqual(resolved?.stringifiedValue, "Sleepy")
+            XCTAssertEqual(resolved?.provenance, .decisionFallback)
+        case .failure:
+            XCTFail("Expected decision fallback to succeed")
+        }
+    }
+
+    func testDecisionBindingNoMatchAddsDiagnostic() {
+        struct DecisionDraft {
+            var petName: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig {
+            let petName: String
+            let isSleeping: Bool
+        }
+
+        enum DecisionError: Error {
+            case missingName
+            case missingSleepFlag
+        }
+
+        let sleepingBinding = Binding(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: ConfigReader.bool
+        )
+
+        let nameFallback = DecisionEntry(
+            description: "Sleeping pet",
+            predicate: { (draft: DecisionDraft) in draft.isSleeping == true },
+            result: "Sleepy"
+        )
+
+        let decisionBinding = DecisionBinding(
+            key: "pet.name",
+            keyPath: \DecisionDraft.petName,
+            decisions: [nameFallback]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(sleepingBinding)],
+            decisionBindings: [AnyDecisionBinding(decisionBinding)],
+            finalize: { draft in
+                guard let petName = draft.petName else {
+                    throw DecisionError.missingName
+                }
+                guard let isSleeping = draft.isSleeping else {
+                    throw DecisionError.missingSleepFlag
+                }
+                return DecisionConfig(petName: petName, isSleeping: isSleeping)
+            },
+            makeDraft: { DecisionDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "pet.isSleeping": false,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected decision fallback failure")
+        case let .failure(diagnostics, snapshot):
+            XCTAssertTrue(diagnostics.hasErrors)
+            XCTAssertEqual(snapshot.decisionTraces.count, 0)
+            let error = diagnostics.diagnostics.first { $0.key == "pet.name" }
+            XCTAssertTrue(error?.message.contains("Decision fallback") ?? false)
+        }
+    }
+
+    func testPipelineReportsMissingContextProvider() {
+        struct ContextDraft {
+            var name: String?
+        }
+
+        struct ContextConfig: Equatable {
+            let name: String
+        }
+
+        enum ContextError: Error {
+            case missingName
+        }
+
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \ContextDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            contextualValueSpecs: [
+                ContextualSpecEntry(description: "Feature enabled") { context, _ in
+                    context.flag(for: "featureEnabled")
+                },
+            ]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                guard let name = draft.name else {
+                    throw ContextError.missingName
+                }
+                return ContextConfig(name: name)
+            },
+            makeDraft: { ContextDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.name": "TestApp",
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected missing context provider failure")
+        case let .failure(diagnostics, _):
+            let error = diagnostics.diagnostics.first { $0.key == "app.name" }
+            XCTAssertTrue(error?.message.contains("Context provider") ?? false)
+        }
+    }
+
+    func testDiagnosticsIncludeSpecMetadataForValueSpecFailure() {
+        let positiveSpec = PredicateSpec<Int>(description: "Positive port") { $0 > 0 }
+
+        let portBinding = Binding(
+            key: "app.port",
+            keyPath: \TestDraft.port,
+            decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
+            valueSpecs: [SpecEntry(positiveSpec)]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(portBinding)],
+            finalize: { try TestConfig(draft: $0) },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.port": -1,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected failure due to spec violation")
+        case let .failure(diagnostics, _):
+            let error = diagnostics.diagnostics.first { $0.key == "app.port" }
+            XCTAssertEqual(error?.context["spec"]?.rawValue, "Positive port")
+            XCTAssertTrue(error?.context["specType"]?.rawValue.contains("PredicateSpec") ?? false)
         }
     }
 
@@ -232,14 +454,14 @@ final class PipelineTests: XCTestCase {
         )
 
         // Final spec that always fails
-        let alwaysFailSpec = PredicateSpec<TestConfig> { _ in false }
+        let alwaysFailSpec = PredicateSpec<TestConfig>(description: "Always fail") { _ in false }
 
         let profile = SpecProfile(
             bindings: [AnyBinding(nameBinding)],
             finalize: { draft in
                 TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
             },
-            finalSpecs: [AnySpecification(alwaysFailSpec)],
+            finalSpecs: [SpecEntry(alwaysFailSpec)],
             makeDraft: { TestDraft() }
         )
 
@@ -257,6 +479,40 @@ final class PipelineTests: XCTestCase {
                 .filter { $0.severity == .error }
                 .map(\.message)
             XCTAssertTrue(errorMessages.contains(where: { $0.contains("specification") }))
+        }
+    }
+
+    func testDiagnosticsIncludeSpecMetadataForFinalSpecFailure() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            defaultValue: "TestApp"
+        )
+
+        let alwaysFailSpec = PredicateSpec<TestConfig>(description: "Always fail") { _ in false }
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            finalSpecs: [SpecEntry(alwaysFailSpec)],
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [:])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected failure due to final spec violation")
+        case let .failure(diagnostics, _):
+            let error = diagnostics.diagnostics.first { $0.message.contains("Post-finalization") }
+            XCTAssertEqual(error?.context["spec"]?.rawValue, "Always fail")
+            XCTAssertTrue(error?.context["specType"]?.rawValue.contains("PredicateSpec") ?? false)
         }
     }
 
@@ -333,6 +589,85 @@ final class PipelineTests: XCTestCase {
         }
     }
 
+    func testResolvedValueProvenanceFromFileProvider() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(
+            name: "config.json",
+            values: [
+                "app.name": "FileValue",
+            ]
+        )
+        let reporter = ResolvedValueProvenanceReporter()
+        let reader = ConfigReader(provider: provider, accessReporter: reporter)
+
+        let result = ConfigPipeline.build(
+            profile: profile,
+            reader: reader,
+            provenanceReporter: reporter
+        )
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(
+                snapshot.resolvedValues.first?.provenance,
+                .fileProvider(name: "config.json")
+            )
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testResolvedValueProvenanceFromEnvironmentVariable() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let envProvider = EnvironmentVariablesProvider(environmentVariables: [
+            "APP_NAME": "EnvValue",
+        ])
+        let reporter = ResolvedValueProvenanceReporter()
+        let reader = ConfigReader(providers: [envProvider], accessReporter: reporter)
+
+        let result = ConfigPipeline.build(
+            profile: profile,
+            reader: reader,
+            provenanceReporter: reporter
+        )
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(
+                snapshot.resolvedValues.first?.provenance,
+                .environmentVariable
+            )
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
     // MARK: - BuildResult Convenience Tests
 
     func testBuildResultDiagnosticsAccessor() {
@@ -399,7 +734,7 @@ final class PipelineTests: XCTestCase {
             key: "app.port",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let nonEmptySpec = PredicateSpec<String> { !$0.isEmpty }
@@ -407,7 +742,7 @@ final class PipelineTests: XCTestCase {
             key: "app.tag",
             keyPath: \TestDraft.name, // Reuse name field
             decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(nonEmptySpec)]
+            valueSpecs: [SpecEntry(nonEmptySpec)]
         )
 
         let profile = SpecProfile(
@@ -461,7 +796,7 @@ final class PipelineTests: XCTestCase {
                 bindingsAttempted.append("key2")
                 return reader.int(forKey: ConfigKey(key))
             },
-            valueSpecs: [AnySpecification(failingSpec)]
+            valueSpecs: [SpecEntry(failingSpec)]
         )
 
         let binding3 = Binding(
@@ -513,14 +848,14 @@ final class PipelineTests: XCTestCase {
             key: "port1",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let binding2 = Binding(
             key: "port2",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let profile = SpecProfile(
@@ -554,21 +889,21 @@ final class PipelineTests: XCTestCase {
             key: "port1",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let binding2 = Binding(
             key: "port2",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let binding3 = Binding(
             key: "port3",
             keyPath: \TestDraft.port,
             decoder: { reader, key in reader.int(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification(positiveSpec)]
+            valueSpecs: [SpecEntry(positiveSpec)]
         )
 
         let profile = SpecProfile(

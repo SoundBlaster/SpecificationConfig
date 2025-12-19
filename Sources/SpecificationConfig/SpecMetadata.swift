@@ -40,12 +40,12 @@ public struct SpecEntry<T>: Specification {
     /// Creates a spec entry from a concrete specification.
     ///
     /// - Parameters:
-    ///   - spec: The concrete specification.
+    ///   - specification: The concrete specification.
     ///   - description: Optional override description.
-    public init<S: Specification>(_ spec: S, description: String? = nil) where S.T == T {
-        let predicateDescription = (spec as? PredicateSpec<T>)?.description
+    public init<S: Specification>(_ specification: S, description: String? = nil) where S.T == T {
+        let predicateDescription = (specification as? PredicateSpec<T>)?.description
         let resolvedDescription = description ?? predicateDescription
-        spec = AnySpecification(spec)
+        spec = AnySpecification(specification)
         metadata = SpecMetadata(
             description: resolvedDescription,
             typeName: String(describing: S.self)

@@ -1,16 +1,16 @@
-# Next Task: H8 — Wrap SpecificationCore for common use cases
+# Next Task: H5 — Demo v6: property-wrapper derived state
 
 **Source:** PRD §9  
-**Priority:** Medium  
+**Priority:** Low  
 **Phase:** H  
 **Effort:** M  
-**Dependencies:** H1, H2, H3  
+**Dependencies:** H2, E3  
 **Status:** Selected
 
 ## Description
 
-Create higher-level helpers on top of SpecificationCore (e.g., wrappers for `SpecEntry`, `ContextualSpecEntry`, and common context providers) so application code can import only `SpecificationConfig` while still getting metadata, decisions, and context-driven specs.
+Continue evolving the Config Pet demo toward v6 by introducing property wrapper helpers (e.g., `@Satisfies`, `@Decides`) that surface derived state from the config pipeline and keep the UI in sync.
 
 ## Next Step
 
-Run PLAN to translate this task into an implementation-ready PRD.
+Run PLAN to create an H5 task PRD that captures the desired wrappers and derived-state behaviors.

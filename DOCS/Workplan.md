@@ -41,4 +41,4 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [ ] H5 (Low): Demo v6: property-wrapper derived state
 - [ ] H6 (Low): Optional async spec pipeline
 - [x] H7 (Medium): Surface spec metadata & decision trace in demo UI
-- [ ] H8 (Medium): Wrap SpecificationCore for common use cases
+- [x] H8 (Medium): Wrap SpecificationCore for common use cases

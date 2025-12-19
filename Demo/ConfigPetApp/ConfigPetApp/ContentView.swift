@@ -109,16 +109,6 @@ struct ContentView: View {
             }
 
             Spacer()
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Task E5 complete: Error list panel")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-
-                Text("Next: F1 - Write MVP tutorial")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
         }
         .font(.body)
     }

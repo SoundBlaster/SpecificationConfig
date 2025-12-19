@@ -1,16 +1,16 @@
-# Next Task: H3 — Add context provider support for specs
+# Next Task: H4 — Demo v5: context-based specs
 
 **Source:** PRD §9  
 **Priority:** Medium  
 **Phase:** H  
 **Effort:** M  
-**Dependencies:** C1  
-**Status:** Archived
+**Dependencies:** H3, E3  
+**Status:** Selected
 
 ## Description
 
-Add context provider support so specs can evaluate against injected context (SpecificationCore ContextProviding).
+Extend the ConfigPet demo to v5 by wiring it to context-aware specs powered by `EvaluationContext` so the UI shows evaluation results that depend on injected context.
 
 ## Next Step
 
-Run SELECT to choose the next task.
+Run PLAN to generate an implementation-ready task PRD for this item.

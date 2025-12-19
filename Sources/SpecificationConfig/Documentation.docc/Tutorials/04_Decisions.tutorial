@@ -1,23 +1,25 @@
 @Tutorial(time: 15) {
     @Intro(title: "Decision Bindings for Fallback Logic") {
-        Show how to use `DecisionBinding` to derive config values when input is missing, keeping the demo resilient.
+        Use `DecisionBinding` to derive values when inputs are missing, keeping your pipeline resilient and declarative.
 
         @Image(source: "tutorial-icon", alt: "Decision binding illustration")
     }
 
-    @Section(title: "Configure fallback details") {
+    @Section(title: "Add decision fallbacks") {
         @ContentAndMedia {
-            Decision bindings run before finalization and can produce contextual results, letting you default values gracefully.
+            Decision bindings run before finalization and can check multiple specs before returning defaults.
 
             @Image(source: "tutorial-icon", alt: "Decision fallback illustration")
         }
 
         @Steps {
             @Step {
-                Add a `DecisionBinding` for `pet.name` that returns “Sleepy” when the pet is sleeping.
+                Create a `DecisionBinding` for `pet.name` that returns “Sleepy” when `isSleeping` is true.
+                @Code(name: "DecisionBinding.swift", file: "04_Decisions/01-DecisionBinding.swift")
             }
             @Step {
-                Remove the name from `config.json`, reload, and verify the UI shows the computed fallback.
+                Inspect how the decision output resolves when the config omits `pet.name`.
+                @Code(name: "Decision test", file: "04_Decisions/02-DecisionTest.swift")
             }
         }
     }

@@ -1,23 +1,73 @@
-@Tutorial(time: 20) {
+@Tutorial(time: 25) {
     @Intro(title: "Contextual Specs with EvaluationContext") {
-        Show how `EvaluationContext` from `DemoContextProvider` influences `ContextualSpecEntry` validation and how the UI surfaces context data.
+        Show how `EvaluationContext` from `DemoContextProvider` powers `ContextualSpecEntry` and how Config Pet’s UI reacts when flags, counters, or overrides change the validation story.
 
         @Image(source: "tutorial-icon", alt: "Contextual specs illustration")
     }
 
-    @Section(title: "Context-driven validation") {
+    @Section(title: "Provide a context for the pipeline") {
         @ContentAndMedia {
-            Describe the provider’s flags/counters, the contextual binding for `pet.isSleeping`, and the UI toggles that show diagnostics.
+            `DemoContextProvider` builds the `EvaluationContext` that flows through `AppConfig.profile` via `AnyContextProvider(DemoContextProvider.shared)`. It tracks launch time, reload counters (`reloadCount`), and the `nightTime`/`sleepOverride` flags that `ContextualSpecEntry` can query.
 
-            @Image(source: "tutorial-icon", alt: "Contextual validation illustration")
+            @Image(source: "tutorial-icon", alt: "Context flags")
         }
 
         @Steps {
             @Step {
-                Explain how `DemoContextProvider` flips `nightTime`, records reloads, and is wired via `AnyContextProvider`.
+                List the counters, flags, and overrides that `currentContext()` exposes so you know what diagnostics can refer to.
+                @Code(name: "DemoContextProvider.swift", file: "06_ContextSpecs/01-ContextProvider.swift")
+            }
+        }
+    }
+
+    @Section(title: "Apply context-aware specs") {
+        @ContentAndMedia {
+            `ContextualSpecEntry` receives the same `EvaluationContext` that `ConfigPipeline.build` forwards during validation. `context.flag(for: "nightTime")` gates whether a sleeping pet is acceptable, and diagnostics mention the flag when the rule fails.
+
+            @Image(source: "tutorial-icon", alt: "Contextual spec lens")
+        }
+
+        @Steps {
+            @Step {
+                Highlight the predicate that checks `context.flag(for: "nightTime")` so pets only sleep when the flag is true and diagnostics point to the flag when it is false.
+                @Code(name: "ContextualSpecEntry.swift", file: "06_ContextSpecs/02-ContextualSpec.swift")
+            }
+        }
+    }
+
+    @Section(title: "Surface context in the UI") {
+        @ContentAndMedia {
+            The demo UI shows `ConfigManager.contextDescription`, the night-mode toggle, and the diagnostics list so you can flip the context and see why the binding accepts or rejects `pet.isSleeping`.
+
+            @Image(source: "tutorial-icon", alt: "Contextual UI illustration")
+        }
+
+        @Steps {
+            @Step {
+                Outline how `ConfigManager.toggleNightMode()` flips the `nightTime` flag, rebuilds the pipeline, and updates `contextDescription` so diagnostics and overrides stay synchronized.
+                @Code(name: "ConfigManager context helpers", file: "06_ContextSpecs/03-ContextUIToggle.swift")
             }
             @Step {
-                Highlight the `ContextualSpecEntry` predicate on `pet.isSleeping` and how context mismatches show errors in the left panel.
+                Use the rebuild flow (`loadConfig()` → `ConfigPipeline.build`) to reproduce forced night/day validations and observe the counter provided by `DemoContextProvider`.
+                @Code(name: "ConfigManager.swift", file: "01_MVP/02-ConfigManager.swift")
+            }
+        }
+    }
+
+    @Section(title: "Validation") {
+        @ContentAndMedia {
+            Run the standard verification commands so the documentation change leaves CI-green and the tutorials compile inside the doc catalog.
+        }
+
+        @Steps {
+            @Step {
+                `swift build -v`
+            }
+            @Step {
+                `swift test -v`
+            }
+            @Step {
+                `swiftformat --lint .`
             }
         }
     }

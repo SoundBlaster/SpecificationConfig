@@ -1,23 +1,25 @@
 @Tutorial(time: 10) {
     @Intro(title: "Validating Configuration with Specs") {
-        Add `SpecEntry` validations so values like `pet.name` must satisfy business rules, and observe diagnostics when they fail.
+        Add `SpecEntry` validations so `config.json` values like `pet.name` must pass business rules, and learn how diagnostics surface failures.
 
         @Image(source: "tutorial-icon", alt: "Value validation illustration")
     }
 
-    @Section(title: "Add value specs") {
+    @Section(title: "Add value specs to bindings") {
         @ContentAndMedia {
-            Place value specs on bindings and highlight how pipeline diagnostics report spec violations.
+            Attach specs to the binding layer so invalid input is caught before finalization and the diagnostics list explains the failure.
 
             @Image(source: "tutorial-icon", alt: "Diagnostics illustration")
         }
 
         @Steps {
             @Step {
-                Update the `pet.name` binding to include a `SpecEntry` that rejects empty or whitespace names.
+                Define the `SpecEntry` that rejects empty or whitespace-only names.
+                @Code(name: "ValueSpecs.swift", file: "03_ValueSpecs/01-ValueSpec.swift")
             }
             @Step {
-                Run Config Pet with an invalid name and read the diagnostics list to see the value spec failure.
+                Supply an invalid JSON sample to provoke the spec failure and review the diagnostics output.
+                @Code(name: "Invalid config", file: "03_ValueSpecs/02-ValueFailure.swift")
             }
         }
     }

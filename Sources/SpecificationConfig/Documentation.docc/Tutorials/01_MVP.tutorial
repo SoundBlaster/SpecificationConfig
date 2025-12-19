@@ -1,27 +1,51 @@
 @Tutorial(time: 20) {
     @Intro(title: "Building the MVP: Config Pet v0") {
-        Build the minimal Config Pet demo that loads `config.json`, runs the configuration pipeline, and presents a split-view UI
-        with reload controls and diagnostics feedback.
+        Build the minimal Config Pet demo that loads `config.json`, runs the configuration pipeline, and then displays the pet status, reload controls, and diagnostics so the validation loop is visible.
 
         @Image(source: "tutorial-icon", alt: "Config Pet intro illustration")
     }
 
-    @Section(title: "Core Steps") {
+    @Section(title: "Define AppConfig and bindings") {
         @ContentAndMedia {
-            Set up `AppConfig` bindings, load the file with `ConfigManager`, and render the pet dashboard so you can see success or errors.
+            Learn how `SpecProfile` binds `pet.name` and `pet.isSleeping`, provides defaults, and finalizes into `AppConfig`.
 
-            @Image(source: "tutorial-icon", alt: "Config Pet architecture diagram")
+            @Image(source: "tutorial-icon", alt: "Bindings diagram")
         }
 
         @Steps {
             @Step {
-                Create `Demo/ConfigPetApp/config.json` with `pet.name` and `pet.isSleeping`, and wire the pipeline.
+                Implement `AppConfig` with its draft, finalize logic, and the binding list.
+                @Code(name: "AppConfig.swift", file: "01_MVP/01-AppConfig.swift")
             }
+        }
+    }
+
+    @Section(title: "Load configuration through ConfigManager") {
+        @ContentAndMedia {
+            Show how `ConfigManager` creates a reader, runs `ConfigPipeline.build`, and exposes both the successful `AppConfig` and diagnostics.
+
+            @Image(source: "tutorial-icon", alt: "Pipeline flow")
+        }
+
+        @Steps {
             @Step {
-                Implement `ConfigManager` so it loads a reader, builds the pipeline, and exposes diagnostics plus reload controls.
+                Add `loadConfig()` that builds with the profile and publishes `buildResult`.
+                @Code(name: "ConfigManager.swift", file: "01_MVP/02-ConfigManager.swift")
             }
+        }
+    }
+
+    @Section(title: "Render the UI with diagnostics") {
+        @ContentAndMedia {
+            Create the split view UI that reports status, reloads, config values, and diagnostic lists alongside the pet preview.
+
+            @Image(source: "tutorial-icon", alt: "Content view screenshot")
+        }
+
+        @Steps {
             @Step {
-                Build the `ContentView` split layout with the status, reload button, and error panel so readers can observe pipeline behavior.
+                Implement `ContentView` to bind to `ConfigManager`, show the reload button, and render diagnostics.
+                @Code(name: "ContentView.swift", file: "01_MVP/03-ContentView.swift")
             }
         }
     }

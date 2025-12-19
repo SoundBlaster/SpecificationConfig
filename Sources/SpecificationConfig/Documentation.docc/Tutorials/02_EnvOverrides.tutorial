@@ -1,24 +1,39 @@
 @Tutorial(time: 15) {
     @Intro(title: "Environment Variable Overrides") {
-        Extend the demo reader so environment variables can override values from `config.json`, demonstrating provider
-        precedence and dynamic overrides.
+        Extend the demo reader so environment variables trump `config.json` values, showing how provider order controls precedence without touching UI code.
 
         @Image(source: "tutorial-icon", alt: "Environment overrides illustration")
     }
 
-    @Section(title: "Override Strategy") {
+    @Section(title: "Create environment-aware readers") {
         @ContentAndMedia {
-            Create helper extensions that combine `EnvironmentVariablesProvider` with in-memory snapshots so overrides win.
+            Compose `EnvironmentVariablesProvider` with `InMemoryProvider` to allow dynamic overrides without rewriting config files.
 
             @Image(source: "tutorial-icon", alt: "Override workflow")
         }
 
         @Steps {
             @Step {
-                Implement `ConfigReader.withEnvironmentOverrides` and update `ConfigFileLoader` to call it.
+                Implement `ConfigReader.withEnvironmentOverrides` that layers the providers for override precedence.
+                @Code(name: "ConfigReader+EnvironmentOverrides.swift", file: "02_EnvOverrides/01-ConfigReader+Env.swift")
+            }
+        }
+    }
+
+    @Section(title: "Wire overrides into the loader") {
+        @ContentAndMedia {
+            Update the loader so it calls the helper, keeping `ConfigManager` unaware of the override details.
+
+            @Image(source: "tutorial-icon", alt: "Loader diagram")
+        }
+
+        @Steps {
+            @Step {
+                Call `ConfigReader.withEnvironmentOverrides(values:)` when creating readers so `.env` values win.
+                @Code(name: "ConfigFileLoader.swift", file: "02_EnvOverrides/02-ConfigFileLoader.swift")
             }
             @Step {
-                Set `PET_NAME`/`PET_IS_SLEEPING` in the run scheme and verify the UI shows the overridden values.
+                Configure scheme environment variables like `PET_NAME`/`PET_IS_SLEEPING` and reload the demo to see overrides.
             }
         }
     }

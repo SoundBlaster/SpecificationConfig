@@ -1,23 +1,25 @@
 @Tutorial(time: 10) {
     @Intro(title: "Hot Reload with Configuration Watching") {
-        Document an optional watching step so `ReloadingFileProvider` and `ServiceGroup` keep `config.json` in sync.
+        Document an optional watching step that uses `ReloadingFileProvider` and `ServiceGroup` so config changes propagate automatically.
 
         @Image(source: "tutorial-icon", alt: "Watching illustration")
     }
 
-    @Section(title: "Optional watching") {
+    @Section(title: "Enable the Reloading trait") {
         @ContentAndMedia {
-            Use Swift Configuration’s `Reloading` trait and service loop to poll the file while keeping the manual reload as a fallback.
+            Swift Configuration gates reload providers behind the `Reloading` trait, so enable the flag before importing `ReloadingFileProvider`.
 
-            @Image(source: "tutorial-icon", alt: "Polling illustration")
+            @Image(source: "tutorial-icon", alt: "Poll illustration")
         }
 
         @Steps {
             @Step {
-                Enable the `Reloading` trait and set up `ReloadingFileProvider<JSONSnapshot>` within a `ServiceGroup`.
+                Create an async helper that instantiates `ReloadingFileProvider<JSONSnapshot>` and exposes it to the app.
+                @Code(name: "WatchingProvider.swift", file: "05_Watching/01-WatchingProvider.swift")
             }
             @Step {
-                Explain why the Reload button remains available for manual builds when watching is disabled.
+                Run the provider inside a `ServiceGroup` so it polls `config.json`, and keep the Reload button as a manual fallback.
+                @Code(name: "ServiceLoop.swift", file: "05_Watching/02-ServiceLoop.swift")
             }
         }
     }

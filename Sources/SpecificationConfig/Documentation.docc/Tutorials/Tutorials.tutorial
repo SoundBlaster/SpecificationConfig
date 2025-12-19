@@ -1,32 +1,32 @@
 @Tutorials(name: "SpecificationConfig Tutorials") {
-    @Intro(title: "Explore SpecificationConfig through Config Pet") {
-        Learn how SpecificationConfig and Swift Configuration work together to build a resilient configuration pipeline for macOS.
+    @Intro(title: "Explore SpecificationConfig with Config Pet") {
+        Learn how SpecificationConfig and Swift Configuration work together inside the Config Pet demo so your configuration pipeline stays resilient and observable.
 
         @Image(source: "tutorial-icon", alt: "Config Pet outline")
     }
 
     @Chapter(name: "Getting Started") {
-        Build the MVP (name + sleeping state + reload button) so the pipeline can read `config.json` and show diagnostics.
+        Build the MVP (app state, diagnostics, reload controls) so the pipeline reads `config.json` and keeps the validation loop visible.
         @Image(source: "tutorial-icon", alt: "Getting started illustration")
         @TutorialReference(tutorial: "doc:00_Intro")
         @TutorialReference(tutorial: "doc:01_MVP")
     }
 
     @Chapter(name: "ENV Overrides & Value Specs") {
-        Extend the reader with environment overrides plus value specs so wicked configuration is rejected before finalization.
+        Layer environment overrides and value specs so overrides win and invalid values are rejected before finalization.
         @Image(source: "tutorial-icon", alt: "Overrides concept art")
         @TutorialReference(tutorial: "doc:02_EnvOverrides")
         @TutorialReference(tutorial: "doc:03_ValueSpecs")
     }
 
     @Chapter(name: "Decision Fallbacks") {
-        Add decision bindings so the pipeline can produce derived values when input is missing.
+        Add decision bindings that derive fallback values when user input is missing so your config stays predictable.
         @Image(source: "tutorial-icon", alt: "Decision graph")
         @TutorialReference(tutorial: "doc:04_Decisions")
     }
 
     @Chapter(name: "Watching & Contextual Specs") {
-        Optional watching plus contextual specs let you react to runtime flags, toggles, and validation contexts.
+        Optional watching plus contextual specs let diagnostics react to runtime flags, toggles, and validation context changes.
         @Image(source: "tutorial-icon", alt: "Contextual specs icon")
         @TutorialReference(tutorial: "doc:05_Watching")
         @TutorialReference(tutorial: "doc:06_ContextSpecs")

@@ -1,79 +1,55 @@
 # Contextual Specs with EvaluationContext
 
-Use `EvaluationContext` data supplied by a `ContextProviding` source to drive validation logic inside SpecificationConfig. This makes specs aware of time, flags, counters, or any other transient context without manually threading those values through every binding.
+Use `EvaluationContext` data supplied by a `ContextProviding` source to drive validation inside `SpecificationConfig`. The binding for a single key can now react differently when the world around the app changes—time of day, feature flags, manual overrides, reload counts—and the demo already ships with that capability wired end-to-end.
 
-The demo already imports `SpecificationConfig`, and the context helpers (context provider, evaluation context, metadata) are exposed through the wrapper API so no `SpecificationCore` import is required in application code.
+## Step 1: Capture context from `DemoContextProvider`
 
-## Overview
+`DemoContextProvider` lives at `Demo/ConfigPetApp/ConfigPetApp/DemoContextProvider.swift` and conforms to `SpecificationCore.ContextProviding`. Its `currentContext()` method builds an `EvaluationContext` that includes:
 
-- Introduce a demo context provider (`DemoContextProvider`) that enumerates night/day state and reload counters.
-- Attach a `ContextualSpecEntry` to a binding so the resolved value must match the current context.
-- Surface the context status in the UI (context label + night toggle) so the effect is visible.
+- `currentDate` / `launchDate` so specs can reason about time windows.
+- Flags such as `flags["nightTime"]` (computed from the system clock plus an optional night override) and `flags["sleepOverride"]` (true whenever the manual override is active).
+- `counters["reloadCount"]` to show how many pipeline runs have occurred.
+- Empty `events`, array `segments`, and other placeholder fields that mirror `EvaluationContext`’s API surface.
 
-## Prerequisites
+Every time `ConfigManager.build(...)` runs the pipeline, it calls `DemoContextProvider.shared.recordReload()` and then passes the provider into `AppConfig.profile` through `AnyContextProvider(DemoContextProvider.shared)`. The tutorial should walk readers through this wiring, explain how `toggleNightOverride()` flips the `nightTime` flag while `contextSummary` surfaces the current flag/counter state, and reference the provider filename so learners can inspect the full implementation.
 
-- Completed `05_Watching`
-- Demo builds and loads `config.json`
+## Step 2: Show the contextual spec on `pet.isSleeping`
 
-## Step 1: Provide EvaluationContext data
-
-Create `DemoContextProvider` that conforms to `SpecificationCore.ContextProviding`, records reload counts, and defines `flags["nightTime"]` from the current hour (plus any manual override).
+Inside `AppConfig.profile` (see `Demo/ConfigPetApp/ConfigPetApp/AppConfig.swift`), the binding for `pet.isSleeping` looks like this:
 
 ```swift
-final class DemoContextProvider: ContextProviding {
-    static let shared = DemoContextProvider()
-    func currentContext() -> EvaluationContext {
-        EvaluationContext(
-            currentDate: Date(),
-            launchDate: launchDate,
-            flags: ["nightTime": isNighttime],
-            counters: ["reloadCount": reloadCount]
-        )
-    }
-}
-```
-
-Wire the provider into `AppConfig.profile`:
-
-```swift
-SpecProfile(
-    bindings: [...],
-    decisionBindings: [...],
-    contextProvider: AnyContextProvider(DemoContextProvider.shared),
-    finalize: { ... },
-    makeDraft: AppConfigDraft.init
+AnyBinding(
+    Binding(
+        key: "pet.isSleeping",
+        keyPath: \AppConfigDraft.isSleeping,
+        decoder: ConfigReader.bool,
+        defaultValue: false,
+        contextualValueSpecs: [
+            ContextualSpecEntry(description: "Pets sleep at night") { context, isSleeping in
+                if context.flag(for: "nightTime") {
+                    return isSleeping
+                }
+                return !isSleeping
+            },
+        ]
+    )
 )
 ```
 
-Each time the pipeline runs, the provider’s `EvaluationContext` feeds the contextual specs below.
+Explain that `ContextualSpecEntry` receives the same `EvaluationContext` produced by `DemoContextProvider`, looks up the `nightTime` flag, and only accepts `isSleeping == true` when that flag is set. When the flag flips back to day, the spec fails and the resulting diagnostics (provided by `BuildResult.failure`) are displayed in the UI. Emphasize how diagnostics call out `ContextualSpecEntry`’s description and why the left panel shows validation errors when context and values conflict.
 
-## Step 2: Add a context-driven spec
+## Step 3: Surface context in the UI
 
-Update the `pet.isSleeping` binding to use `ContextualSpecEntry`. The spec requires pets to sleep during rotated “night” context and stay awake during “day” context.
+`ConfigManager` exposes `contextDescription`, `isNightOverrideActive`, and `overrideEntries`, and `ContentView` renders them in the left panel. The tutorial should describe:
 
-```swift
-Binding(
-    key: "pet.isSleeping",
-    keyPath: \AppConfigDraft.isSleeping,
-    decoder: ConfigReader.bool,
-    contextualValueSpecs: [
-        ContextualSpecEntry(description: "Pets sleep at night") { context, isSleeping in
-            if context.flag(for: "nightTime") {
-                return isSleeping
-            }
-            return !isSleeping
-        },
-    ]
-)
-```
+- The context summary row that shows `ConfigManager.contextDescription` (e.g., “Context: Nighttime · Reloads: 4”) and pulls from `DemoContextProvider.contextSummary`.
+- The `Button` whose label toggles between “Force Night Mode” and “Clear Night Override”, which calls `ConfigManager.toggleNightMode()`, `DemoContextProvider.toggleNightOverride()`, and then rebuilds the pipeline via `rebuildConfig()`.
+- How diagnostics, shown below the loaded configuration, update when the context makes `pet.isSleeping` invalid: a `BuildResult.failure` presents failure diagnostics including the spec name and description (visible through `ConfigManager.failureDiagnostics`).
+- The “Reload” button that calls `ConfigManager.loadConfig()` so the demo can re-read `config.json` after the context change.
 
-When the context changes (via the toggle in the next step), `isSleeping` is validated against the context and failure diagnostics are emitted.
+Spell out that toggling the context simulates a new “EvaluationContext” while keeping the same `config.json`, so you can observe the spec alternating between green success and red diagnostics.
 
-## Step 3: Surface context in the demo UI
-
-Display the current context summary and provide a toggle button in `ContentView`. Show a label such as “Context: Nighttime · Reloads: 4” and add a “Force Night Mode” / “Clear Night Override” button that calls `ConfigManager.toggleNightMode()` (which toggles the provider override and rebuilds the pipeline).
-
-Now run the app:
+## Step 4: Run the demo and observe context-driven validation
 
 ```bash
 cd Demo/ConfigPetApp
@@ -81,18 +57,12 @@ tuist generate
 open ConfigPetApp.xcworkspace
 ```
 
-Build and launch the `ConfigPetApp` scheme. Use the “Toggle Night Mode” button to flip the context. At daytime context, the spec rejects `isSleeping: true` and the left panel surfaces a validation error; at nighttime context the same config passes again.
+Build and launch the `ConfigPetApp` scheme. Use the “Toggle Night Mode” button to switch context. When the context is forced to night, `isSleeping: true` stays valid; when you flip it back to day and leave `isSleeping: true` in the config, the contextual spec produces diagnostics that are listed in the left-hand panel. Reloading ensures the flag state gets picked up by a fresh pipeline run.
 
 ## Validation
-
-From the repo root, run:
 
 ```bash
 swift build -v
 swift test -v
 swiftformat --lint .
 ```
-
-## Next
-
-Proceed to H5 (“Demo v6: property-wrapper derived state”) after the context step is stable.

@@ -60,14 +60,14 @@ Document the v5 “context-based specs” tutorial step so it explicitly teaches
 
 ## 4. Execution Plan (Checklist)
 
-- [ ] Audit `DemoContextProvider.swift`, `AppConfig.swift`, `ConfigManager.swift`, and `ContentView.swift` to capture the facts needed for FR-1 through FR-3.  
-- [ ] Expand `Sources/SpecificationConfig/Documentation.docc/Tutorials/06_ContextSpecs.tutorial` with sections that cover:
-  - Why context providers matter and what data the demo exposes.
-  - How the `pet.isSleeping` binding uses `ContextualSpecEntry` alongside the context flag.  
-  - How the demo UI surfaces context state and how to trigger day/night diagnostics.
-- [ ] Append a “Validation” block with the commands `swift build -v`, `swift test -v`, and `swiftformat --lint .`.
-- [ ] Review the tutorial text for alignment with the `/Demo/ConfigPetApp` code (including button labels and context summary strings).
-- [ ] Run `swift build -v`, `swift test -v`, and `swiftformat --lint .` to prove the docs-only change leaves the repo healthy; capture any issues for follow-up.
+- [x] Audit `DemoContextProvider.swift`, `AppConfig.swift`, `ConfigManager.swift`, and `ContentView.swift` to capture the facts needed for FR-1 through FR-3.  
+- [x] Expand `Sources/SpecificationConfig/Documentation.docc/Tutorials/06_ContextSpecs.tutorial` with sections that cover:
+  - [x] Why context providers matter and what data the demo exposes.
+  - [x] How the `pet.isSleeping` binding uses `ContextualSpecEntry` alongside the context flag.  
+  - [x] How the demo UI surfaces context state and how to trigger day/night diagnostics.
+- [x] Append a “Validation” block with the commands `swift build -v`, `swift test -v`, and `swiftformat --lint .`.
+- [x] Review the tutorial text for alignment with the `/Demo/ConfigPetApp` code (including button labels and context summary strings).
+- [x] Run `swift build -v`, `swift test -v`, and `swiftformat --lint .` to prove the docs-only change leaves the repo healthy; capture any issues for follow-up.
 
 ## 5. Acceptance Criteria
 

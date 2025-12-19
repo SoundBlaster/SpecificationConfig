@@ -13,6 +13,7 @@ A Swift Configuration wrapper powered by SpecificationCore. It builds typed conf
 - Typed mapping from keys to Draft via `WritableKeyPath`.
 - Value-level and final specs powered by SpecificationCore.
 - Deterministic diagnostics and snapshots for UI-friendly reporting.
+- Provenance-aware snapshots: resolved values record provider metadata (file, env, default, decision) so diagnostics can explain where each value actually came from.
 
 ## Quickstart
 

@@ -136,6 +136,9 @@ To modify the configuration:
 ### Task H8: SpecificationCore wrappers
 - Apps now consume `EvaluationContext`, `ContextProviding`, and `AnyContextProvider` directly from `SpecificationConfig`, so the demo only imports one package.
 
+### Task H9: Provenance-rich resolved values
+- The “Resolved Values” section now reports the provider (file, environment variable, default, or decision fallback) so the UI never shows “Source: Unknown.”
+
 ## Troubleshooting
 
 ### Project Not Generating

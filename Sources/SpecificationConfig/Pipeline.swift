@@ -129,11 +129,14 @@ public enum ConfigPipeline {
     public static func build<Final>(
         profile: SpecProfile<some Any, Final>,
         reader: Configuration.ConfigReader,
+        provenanceReporter: ResolvedValueProvenanceReporter? = nil,
         errorHandlingMode: ErrorHandlingMode = .collectAll
     ) -> BuildResult<Final> {
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
         var decisionTraces: [DecisionTrace] = []
+
+        provenanceReporter?.reset()
 
         // Create draft
         var draft = profile.makeDraft()
@@ -147,8 +150,11 @@ public enum ConfigPipeline {
                     contextProvider: profile.contextProvider
                 )
 
-                // Determine provenance based on whether default was used
-                let provenance: Provenance = usedDefault ? .defaultValue : .unknown
+                let provenance = Self.provenance(
+                    forKey: binding.key,
+                    usedDefault: usedDefault,
+                    reporter: provenanceReporter
+                )
 
                 // Track successfully resolved value for snapshot
                 let resolvedValue = ResolvedValue(
@@ -332,5 +338,21 @@ public enum ConfigPipeline {
             "spec": DiagnosticContextValue(metadata.displayName),
             "specType": DiagnosticContextValue(metadata.typeName),
         ]
+    }
+
+    private static func provenance(
+        forKey key: String,
+        usedDefault: Bool,
+        reporter: ResolvedValueProvenanceReporter?
+    ) -> Provenance {
+        if usedDefault {
+            return .defaultValue
+        }
+        if let reporter {
+            if let recorded = reporter.provenance(forKey: key) {
+                return recorded
+            }
+        }
+        return .unknown
     }
 }

@@ -589,6 +589,85 @@ final class PipelineTests: XCTestCase {
         }
     }
 
+    func testResolvedValueProvenanceFromFileProvider() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(
+            name: "config.json",
+            values: [
+                "app.name": "FileValue",
+            ]
+        )
+        let reporter = ResolvedValueProvenanceReporter()
+        let reader = ConfigReader(provider: provider, accessReporter: reporter)
+
+        let result = ConfigPipeline.build(
+            profile: profile,
+            reader: reader,
+            provenanceReporter: reporter
+        )
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(
+                snapshot.resolvedValues.first?.provenance,
+                .fileProvider(name: "config.json")
+            )
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testResolvedValueProvenanceFromEnvironmentVariable() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let envProvider = EnvironmentVariablesProvider(environmentVariables: [
+            "APP_NAME": "EnvValue",
+        ])
+        let reporter = ResolvedValueProvenanceReporter()
+        let reader = ConfigReader(providers: [envProvider], accessReporter: reporter)
+
+        let result = ConfigPipeline.build(
+            profile: profile,
+            reader: reader,
+            provenanceReporter: reporter
+        )
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(
+                snapshot.resolvedValues.first?.provenance,
+                .environmentVariable
+            )
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
     // MARK: - BuildResult Convenience Tests
 
     func testBuildResultDiagnosticsAccessor() {

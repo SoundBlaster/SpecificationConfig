@@ -47,9 +47,11 @@ struct ConfigFileLoader {
 
     /// Creates a ConfigReader from the config file.
     ///
+    /// - Parameters:
+    ///   - accessReporter: Optional reporter to observe configuration accesses.
     /// - Returns: A ConfigReader instance ready to read configuration values.
     /// - Throws: LoadError if the file cannot be found or read.
-    func createReader() throws -> Configuration.ConfigReader {
+    func createReader(accessReporter: (any AccessReporter)? = nil) throws -> Configuration.ConfigReader {
         // Verify file exists
         guard FileManager.default.fileExists(atPath: configFilePath) else {
             throw LoadError.fileNotFound(path: configFilePath)
@@ -70,8 +72,14 @@ struct ConfigFileLoader {
                 result[key] = value
             }
 
+            let fileName = URL(fileURLWithPath: configFilePath).lastPathComponent
+
             // Create reader with environment override precedence
-            return ConfigReader.withEnvironmentOverrides(values: configValues)
+            return ConfigReader.withEnvironmentOverrides(
+                values: configValues,
+                accessReporter: accessReporter,
+                inMemoryProviderName: fileName
+            )
         } catch let error as NSError where error.domain == NSCocoaErrorDomain {
             throw LoadError.invalidJSON(underlying: error)
         } catch {

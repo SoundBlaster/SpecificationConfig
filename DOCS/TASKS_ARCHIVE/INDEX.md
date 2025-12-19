@@ -51,3 +51,4 @@
 - H4 — Demo v5: context-based specs — archived 2025-12-19
 - H7 — Surface spec metadata & decision trace in demo UI — archived 2025-12-19
 - H8 — Wrap SpecificationCore for common use cases — archived 2025-12-19
+- H9 — Improve resolved value provenance — archived 2025-12-19

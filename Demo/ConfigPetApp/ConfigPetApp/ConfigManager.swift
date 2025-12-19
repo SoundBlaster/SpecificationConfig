@@ -19,6 +19,9 @@ class ConfigManager: ObservableObject {
     /// The error that occurred during loading, if any.
     @Published var loadError: Error?
 
+    /// Tracks provenance metadata from the config reader.
+    private var provenanceReporter: ResolvedValueProvenanceReporter?
+
     /// Temporary sleep override applied to the resolved config.
     @Published private var sleepOverride: Bool?
 
@@ -38,15 +41,18 @@ class ConfigManager: ObservableObject {
         sleepOverride = nil
         do {
             let loader = ConfigFileLoader.findConfigFile() ?? ConfigFileLoader()
-            let newReader = try loader.createReader()
+            let reporter = ResolvedValueProvenanceReporter()
+            let newReader = try loader.createReader(accessReporter: reporter)
             reader = newReader
-            build(with: newReader)
+            provenanceReporter = reporter
+            build(with: newReader, provenanceReporter: reporter)
             loadError = nil
         } catch {
             reader = nil
             buildResult = nil
             config = nil
             loadError = error
+            provenanceReporter = nil
         }
     }
 
@@ -132,12 +138,19 @@ class ConfigManager: ObservableObject {
 
     private func rebuildConfig() {
         guard let existingReader = reader else { return }
-        build(with: existingReader)
+        build(with: existingReader, provenanceReporter: provenanceReporter)
     }
 
-    private func build(with reader: ConfigReader) {
+    private func build(
+        with reader: ConfigReader,
+        provenanceReporter: ResolvedValueProvenanceReporter?
+    ) {
         DemoContextProvider.shared.recordReload()
-        let result = ConfigPipeline.build(profile: AppConfig.profile, reader: reader)
+        let result = ConfigPipeline.build(
+            profile: AppConfig.profile,
+            reader: reader,
+            provenanceReporter: provenanceReporter
+        )
         buildResult = result
         if case let .success(config, _) = result {
             self.config = config

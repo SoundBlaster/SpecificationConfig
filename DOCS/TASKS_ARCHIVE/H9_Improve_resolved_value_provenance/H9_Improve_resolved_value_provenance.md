@@ -52,3 +52,5 @@ Improve diagnostics visibility by ensuring the configuration pipeline records ac
 1. Resolved value provenance reflects actual source (file, env, default, decision) in both pipeline snapshots and UI tooltips.
 2. Demo documentation mentions the richer provenance data and explains why “Source” text changed.
 3. Validation commands (tuist/xcodebuild, swift build/test, swiftformat) succeed after the implementation.
+
+**Archived:** 2025-12-19

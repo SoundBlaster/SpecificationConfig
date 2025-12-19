@@ -60,3 +60,5 @@ Demonstrate context-aware validation in ConfigPet by treating the demo configura
 3. DocC tutorial for context specs references the demo changes.
 4. `swift build -v`, `swift test -v`, and `swiftformat --lint .` pass locally.
 5. Task PRD moved to `DOCS/TASKS_ARCHIVE` with index/workplan updated (handled once H4 is done).
+
+**Archived:** 2025-12-19

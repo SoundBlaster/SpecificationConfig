@@ -38,13 +38,9 @@ class ConfigManager: ObservableObject {
         sleepOverride = nil
         do {
             let loader = ConfigFileLoader.findConfigFile() ?? ConfigFileLoader()
-            reader = try loader.createReader()
-            buildResult = reader.map { ConfigPipeline.build(profile: AppConfig.profile, reader: $0) }
-            if case let .success(config, _) = buildResult {
-                self.config = config
-            } else {
-                config = nil
-            }
+            let newReader = try loader.createReader()
+            reader = newReader
+            build(with: newReader)
             loadError = nil
         } catch {
             reader = nil
@@ -97,4 +93,63 @@ class ConfigManager: ObservableObject {
             "No config loaded"
         }
     }
+
+    /// Describes the current evaluation context (day/night, reload count).
+    var contextDescription: String {
+        DemoContextProvider.shared.contextSummary
+    }
+
+    /// Indicates whether a manual night override is active.
+    var isNightOverrideActive: Bool {
+        DemoContextProvider.shared.isNightOverrideActive
+    }
+
+    /// The latest snapshot produced by the configuration pipeline.
+    var snapshot: Snapshot? {
+        buildResult?.snapshot
+    }
+
+    /// Resolved values captured in the latest snapshot.
+    var resolvedValues: [ResolvedValue] {
+        snapshot?.resolvedValues ?? []
+    }
+
+    /// Decision traces recorded in the latest snapshot.
+    var decisionTraces: [DecisionTrace] {
+        snapshot?.decisionTraces ?? []
+    }
+
+    /// Human-readable timestamp of the last snapshot.
+    var snapshotTimestampDescription: String? {
+        guard let timestamp = snapshot?.timestamp else { return nil }
+        return Self.snapshotDateFormatter.string(from: timestamp)
+    }
+
+    func toggleNightMode() {
+        DemoContextProvider.shared.toggleNightOverride()
+        rebuildConfig()
+    }
+
+    private func rebuildConfig() {
+        guard let existingReader = reader else { return }
+        build(with: existingReader)
+    }
+
+    private func build(with reader: ConfigReader) {
+        DemoContextProvider.shared.recordReload()
+        let result = ConfigPipeline.build(profile: AppConfig.profile, reader: reader)
+        buildResult = result
+        if case let .success(config, _) = result {
+            self.config = config
+        } else {
+            config = nil
+        }
+    }
+
+    private static let snapshotDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
+    }()
 }

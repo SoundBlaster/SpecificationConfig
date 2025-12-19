@@ -41,6 +41,20 @@ struct ContentView: View {
                     .foregroundColor(configManager.loadError != nil ? .red : .green)
             }
 
+            HStack {
+                Text("Context:")
+                    .fontWeight(.semibold)
+                Text(configManager.contextDescription)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            Button(configManager.isNightOverrideActive ? "Clear Night Override" : "Force Night Mode") {
+                configManager.toggleNightMode()
+            }
+            .buttonStyle(.bordered)
+            .tint(configManager.isNightOverrideActive ? .yellow : nil)
+
             Button("Reload") {
                 configManager.loadConfig()
             }
@@ -100,10 +114,88 @@ struct ContentView: View {
                             Text(item.formattedDescription())
                                 .font(.footnote)
                                 .foregroundColor(.secondary)
+
+                            if let specName = specDisplayName(for: item) {
+                                Text("Spec: \(specName)")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            if let specType = specTypeName(for: item) {
+                                Text("Type: \(specType)")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         .padding(8)
                         .background(Color(.windowBackgroundColor).opacity(0.6))
                         .cornerRadius(8)
+                    }
+                }
+            }
+
+            if !configManager.resolvedValues.isEmpty {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Resolved Values")
+                            .fontWeight(.semibold)
+                        Spacer()
+                        if let timestamp = configManager.snapshotTimestampDescription {
+                            Text("Snapshot: \(timestamp)")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(configManager.resolvedValues, id: \.key) { value in
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack {
+                                    Text(value.key)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                    Text(value.displayValue)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+
+                                Text("Source: \(provenanceDescription(value.provenance))")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(8)
+                            .background(Color(.windowBackgroundColor).opacity(0.4))
+                            .cornerRadius(6)
+                        }
+                    }
+                }
+            }
+
+            if !configManager.decisionTraces.isEmpty {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Decision Trace")
+                        .fontWeight(.semibold)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(Array(configManager.decisionTraces.enumerated()), id: \.offset) { _, trace in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(trace.key)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Text(decisionTraceDescription(trace))
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(8)
+                            .background(Color(.windowBackgroundColor).opacity(0.4))
+                            .cornerRadius(6)
+                        }
                     }
                 }
             }
@@ -159,6 +251,33 @@ struct ContentView: View {
         case .info:
             .blue
         }
+    }
+
+    private func specDisplayName(for item: DiagnosticItem) -> String? {
+        item.context["spec"]?.displayValue
+    }
+
+    private func specTypeName(for item: DiagnosticItem) -> String? {
+        item.context["specType"]?.displayValue
+    }
+
+    private func provenanceDescription(_ provenance: Provenance) -> String {
+        switch provenance {
+        case let .fileProvider(name):
+            "File: \(name)"
+        case .environmentVariable:
+            "Environment"
+        case .defaultValue:
+            "Default value"
+        case .decisionFallback:
+            "Decision fallback"
+        case .unknown:
+            "Unknown"
+        }
+    }
+
+    private func decisionTraceDescription(_ trace: DecisionTrace) -> String {
+        "\(trace.decisionName) (\(trace.decisionType)) · index \(trace.matchedIndex)"
     }
 }
 

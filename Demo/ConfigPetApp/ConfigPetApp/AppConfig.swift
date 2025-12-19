@@ -1,6 +1,7 @@
 import Configuration
 import Foundation
 import SpecificationConfig
+import SpecificationCore
 
 /// Mutable draft used while bindings populate config values.
 struct AppConfigDraft {
@@ -33,7 +34,15 @@ struct AppConfig {
                     key: "pet.isSleeping",
                     keyPath: \AppConfigDraft.isSleeping,
                     decoder: ConfigReader.bool,
-                    defaultValue: false
+                    defaultValue: false,
+                    contextualValueSpecs: [
+                        ContextualSpecEntry(description: "Pets sleep at night") { context, isSleeping in
+                            if context.flag(for: "nightTime") {
+                                return isSleeping
+                            }
+                            return !isSleeping
+                        },
+                    ]
                 )
             ),
         ],
@@ -52,6 +61,7 @@ struct AppConfig {
                 )
             ),
         ],
+        contextProvider: AnyContextProvider(DemoContextProvider.shared),
         finalize: { draft in
             guard let petName = draft.petName else {
                 throw AppConfigError.missingRequiredValue(key: "pet.name")

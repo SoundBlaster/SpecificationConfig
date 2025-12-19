@@ -129,6 +129,10 @@ To modify the configuration:
 - Diagnostic message formatting
 - Error highlighting
 
+### Task H7: Spec metadata & decision trace
+- Diagnostics now include the spec description/type when a validation spec fails.
+- A new “Resolved Values” and “Decision Trace” section shows where values came from and which decision fallback applied.
+
 ## Troubleshooting
 
 ### Project Not Generating

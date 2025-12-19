@@ -1,7 +1,6 @@
 import Configuration
 import Foundation
 import SpecificationConfig
-import SpecificationCore
 
 /// Mutable draft used while bindings populate config values.
 struct AppConfigDraft {

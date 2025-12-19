@@ -133,6 +133,9 @@ To modify the configuration:
 - Diagnostics now include the spec description/type when a validation spec fails.
 - A new “Resolved Values” and “Decision Trace” section shows where values came from and which decision fallback applied.
 
+### Task H8: SpecificationCore wrappers
+- Apps now consume `EvaluationContext`, `ContextProviding`, and `AnyContextProvider` directly from `SpecificationConfig`, so the demo only imports one package.
+
 ## Troubleshooting
 
 ### Project Not Generating

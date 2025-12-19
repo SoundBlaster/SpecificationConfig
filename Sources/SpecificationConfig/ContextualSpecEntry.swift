@@ -24,7 +24,7 @@ public struct ContextualSpecEntry<Value> {
 
     func isSatisfiedBy(
         _ candidate: Value,
-        using provider: AnyContextProvider<EvaluationContext>
+        using provider: AnyContextProvider
     ) -> Bool {
         predicate(provider.currentContext(), candidate)
     }

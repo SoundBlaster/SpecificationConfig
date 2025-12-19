@@ -22,7 +22,7 @@ public struct SpecProfile<Draft, Final> {
     public let decisionBindings: [AnyDecisionBinding<Draft>]
 
     /// Optional context provider for contextual specs.
-    public let contextProvider: AnyContextProvider<EvaluationContext>?
+    public let contextProvider: AnyContextProvider?
 
     /// The finalize function that converts a populated draft into a final configuration value.
     public let finalize: (Draft) throws -> Final
@@ -49,7 +49,7 @@ public struct SpecProfile<Draft, Final> {
     public init(
         bindings: [AnyBinding<Draft>],
         decisionBindings: [AnyDecisionBinding<Draft>] = [],
-        contextProvider: AnyContextProvider<EvaluationContext>? = nil,
+        contextProvider: AnyContextProvider? = nil,
         finalize: @escaping (Draft) throws -> Final,
         finalSpecs: [SpecEntry<Final>] = [],
         contextualFinalSpecs: [ContextualSpecEntry<Final>] = [],

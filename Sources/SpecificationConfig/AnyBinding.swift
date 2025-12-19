@@ -52,7 +52,7 @@ public struct AnyBinding<Draft> {
     private let _apply: (
         inout Draft,
         Configuration.ConfigReader,
-        AnyContextProvider<EvaluationContext>?
+        AnyContextProvider?
     ) throws -> Void
 
     /// Type-erased application closure that also captures the resolved value.
@@ -60,7 +60,7 @@ public struct AnyBinding<Draft> {
     private let _applyAndCapture: (
         inout Draft,
         Configuration.ConfigReader,
-        AnyContextProvider<EvaluationContext>?
+        AnyContextProvider?
     ) throws -> (String?, Bool)
 
     /// Creates a type-erased binding from a concrete `Binding`.
@@ -174,7 +174,7 @@ public struct AnyBinding<Draft> {
     public func apply(
         to draft: inout Draft,
         reader: Configuration.ConfigReader,
-        contextProvider: AnyContextProvider<EvaluationContext>?
+        contextProvider: AnyContextProvider?
     ) throws {
         try _apply(&draft, reader, contextProvider)
     }
@@ -204,7 +204,7 @@ public struct AnyBinding<Draft> {
     public func applyAndCapture(
         to draft: inout Draft,
         reader: Configuration.ConfigReader,
-        contextProvider: AnyContextProvider<EvaluationContext>?
+        contextProvider: AnyContextProvider?
     ) throws -> (stringifiedValue: String?, usedDefault: Bool) {
         try _applyAndCapture(&draft, reader, contextProvider)
     }

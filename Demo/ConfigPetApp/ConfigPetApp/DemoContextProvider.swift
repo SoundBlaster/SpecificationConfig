@@ -1,5 +1,5 @@
 import Foundation
-import SpecificationCore
+import SpecificationConfig
 
 final class DemoContextProvider: ContextProviding {
     static let shared = DemoContextProvider()

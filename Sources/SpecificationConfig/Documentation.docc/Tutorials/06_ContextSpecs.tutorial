@@ -2,6 +2,8 @@
 
 Use `EvaluationContext` data supplied by a `ContextProviding` source to drive validation logic inside SpecificationConfig. This makes specs aware of time, flags, counters, or any other transient context without manually threading those values through every binding.
 
+The demo already imports `SpecificationConfig`, and the context helpers (context provider, evaluation context, metadata) are exposed through the wrapper API so no `SpecificationCore` import is required in application code.
+
 ## Overview
 
 - Introduce a demo context provider (`DemoContextProvider`) that enumerates night/day state and reload counters.

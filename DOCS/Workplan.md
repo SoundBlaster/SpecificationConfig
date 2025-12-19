@@ -43,4 +43,4 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] H7 (Medium): Surface spec metadata & decision trace in demo UI
 - [x] H8 (Medium): Wrap SpecificationCore for common use cases
 - [x] H9 (High): Improve resolved value provenance
-- [ ] H10 (Medium): Display overrides panel in demo
+- [x] H10 (Medium): Display overrides panel in demo

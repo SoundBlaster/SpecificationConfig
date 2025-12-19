@@ -47,3 +47,5 @@ Provide a separate “Overrides” component that surfaces temporary or manual v
 1. Demo UI shows manual override list separate from resolved values, and the list reacts to the plus/minus of overrides (wake-up button).  
 2. Documentation clarifies that the override panel is the real-time state distinct from the config provenance.  
 3. Validation commands (`swift build -v`, `swift test -v`, `swiftformat --lint .`) continue to pass after the UI additions.
+
+**Archived:** 2025-12-19

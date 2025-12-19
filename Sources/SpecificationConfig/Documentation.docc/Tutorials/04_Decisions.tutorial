@@ -15,11 +15,11 @@
         @Steps {
             @Step {
                 Create a `DecisionBinding` for `pet.name` that returns “Sleepy” when `isSleeping` is true.
-                @Code(name: "DecisionBinding.swift", file: "04_Decisions/01-DecisionBinding.swift")
+                @Code(name: "DecisionBinding.swift", file: "01-DecisionBinding.swift")
             }
             @Step {
                 Inspect how the decision output resolves when the config omits `pet.name`.
-                @Code(name: "Decision test", file: "04_Decisions/02-DecisionTest.swift")
+                @Code(name: "Decision test", file: "02-DecisionTest.swift")
             }
         }
     }

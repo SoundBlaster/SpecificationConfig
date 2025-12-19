@@ -15,11 +15,11 @@
         @Steps {
             @Step {
                 Create an async helper that instantiates `ReloadingFileProvider<JSONSnapshot>` and exposes it to the app.
-                @Code(name: "WatchingProvider.swift", file: "05_Watching/01-WatchingProvider.swift")
+                @Code(name: "WatchingProvider.swift", file: "01-WatchingProvider.swift")
             }
             @Step {
                 Run the provider inside a `ServiceGroup` so it polls `config.json`, and keep the Reload button as a manual fallback.
-                @Code(name: "ServiceLoop.swift", file: "05_Watching/02-ServiceLoop.swift")
+                @Code(name: "ServiceLoop.swift", file: "02-ServiceLoop.swift")
             }
         }
     }

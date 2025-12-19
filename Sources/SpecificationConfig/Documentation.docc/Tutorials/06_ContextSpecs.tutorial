@@ -15,7 +15,7 @@
         @Steps {
             @Step {
                 List the counters, flags, and overrides that `currentContext()` exposes so you know what diagnostics can refer to.
-                @Code(name: "DemoContextProvider.swift", file: "06_ContextSpecs/01-ContextProvider.swift")
+                @Code(name: "DemoContextProvider.swift", file: "01-ContextProvider.swift")
             }
         }
     }
@@ -30,7 +30,7 @@
         @Steps {
             @Step {
                 Highlight the predicate that checks `context.flag(for: "nightTime")` so pets only sleep when the flag is true and diagnostics point to the flag when it is false.
-                @Code(name: "ContextualSpecEntry.swift", file: "06_ContextSpecs/02-ContextualSpec.swift")
+                @Code(name: "ContextualSpecEntry.swift", file: "02-ContextualSpec.swift")
             }
         }
     }
@@ -45,11 +45,11 @@
         @Steps {
             @Step {
                 Outline how `ConfigManager.toggleNightMode()` flips the `nightTime` flag, rebuilds the pipeline, and updates `contextDescription` so diagnostics and overrides stay synchronized.
-                @Code(name: "ConfigManager context helpers", file: "06_ContextSpecs/03-ContextUIToggle.swift")
+                @Code(name: "ConfigManager context helpers", file: "03-ContextUIToggle.swift")
             }
             @Step {
                 Use the rebuild flow (`loadConfig()` → `ConfigPipeline.build`) to reproduce forced night/day validations and observe the counter provided by `DemoContextProvider`.
-                @Code(name: "ConfigManager.swift", file: "01_MVP/02-ConfigManager.swift")
+                @Code(name: "ConfigManager.swift", file: "02-ConfigManager.swift")
             }
         }
     }

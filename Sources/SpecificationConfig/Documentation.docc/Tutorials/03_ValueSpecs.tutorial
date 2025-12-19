@@ -15,11 +15,11 @@
         @Steps {
             @Step {
                 Define the `SpecEntry` that rejects empty or whitespace-only names.
-                @Code(name: "ValueSpecs.swift", file: "03_ValueSpecs/01-ValueSpec.swift")
+                @Code(name: "ValueSpecs.swift", file: "01-ValueSpec.swift")
             }
             @Step {
                 Supply an invalid JSON sample to provoke the spec failure and review the diagnostics output.
-                @Code(name: "Invalid config", file: "03_ValueSpecs/02-ValueFailure.swift")
+                @Code(name: "Invalid config", file: "02-ValueFailure.swift")
             }
         }
     }

@@ -15,7 +15,7 @@
         @Steps {
             @Step {
                 Implement `AppConfig` with its draft, finalize logic, and the binding list.
-                @Code(name: "AppConfig.swift", file: "01_MVP/01-AppConfig.swift")
+                @Code(name: "AppConfig.swift", file: "01-AppConfig.swift")
             }
         }
     }
@@ -30,7 +30,7 @@
         @Steps {
             @Step {
                 Add `loadConfig()` that builds with the profile and publishes `buildResult`.
-                @Code(name: "ConfigManager.swift", file: "01_MVP/02-ConfigManager.swift")
+                @Code(name: "ConfigManager.swift", file: "02-ConfigManager.swift")
             }
         }
     }
@@ -45,7 +45,7 @@
         @Steps {
             @Step {
                 Implement `ContentView` to bind to `ConfigManager`, show the reload button, and render diagnostics.
-                @Code(name: "ContentView.swift", file: "01_MVP/03-ContentView.swift")
+                @Code(name: "ContentView.swift", file: "03-ContentView.swift")
             }
         }
     }

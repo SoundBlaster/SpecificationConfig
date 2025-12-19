@@ -15,7 +15,7 @@
         @Steps {
             @Step {
                 Implement `ConfigReader.withEnvironmentOverrides` that layers the providers for override precedence.
-                @Code(name: "ConfigReader+EnvironmentOverrides.swift", file: "02_EnvOverrides/01-ConfigReader+Env.swift")
+                @Code(name: "ConfigReader+EnvironmentOverrides.swift", file: "01-ConfigReader+Env.swift")
             }
         }
     }
@@ -30,7 +30,7 @@
         @Steps {
             @Step {
                 Call `ConfigReader.withEnvironmentOverrides(values:)` when creating readers so `.env` values win.
-                @Code(name: "ConfigFileLoader.swift", file: "02_EnvOverrides/02-ConfigFileLoader.swift")
+                @Code(name: "ConfigFileLoader.swift", file: "02-ConfigFileLoader.swift")
             }
             @Step {
                 Configure scheme environment variables like `PET_NAME`/`PET_IS_SLEEPING` and reload the demo to see overrides.

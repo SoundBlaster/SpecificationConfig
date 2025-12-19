@@ -1,15 +1,32 @@
-# Tutorial Table of Contents
+@Tutorials(name: "SpecificationConfig Tutorials") {
+    @Intro(title: "Learn the Specification Pattern through Config Pet") {
+        Follow the SpecificationConfig tutorial series to build the Config Pet demo,
+        understand contextual validation, and see how SpecificationKit-style bindings keep
+        your configuration logic testable and declarative.
+    }
 
-Keep this index in sync with `Sources/SpecificationConfig/Documentation.docc/Tutorials/` so Xcode’s Doc browser and DocC know about every step in the Config Pet tutorial series.
+    @Chapter(name: "Getting Started") {
+        Build the minimal Config Pet demo (name + sleeping state + reload button) from v0.
+        @TutorialReference(tutorial: "doc:SpecificationConfig-Intro")
+    }
 
-## Overview
+    @Chapter(name: "ENV Overrides & Value Specs") {
+        Extend the demo with environment overrides and value validations to keep configs safe.
+        @TutorialReference(tutorial: "doc:SpecificationConfig-ENV-ValueSpecs")
+    }
 
-1. [00_Intro — Introduction to SpecificationConfig and the Config Pet app](00_Intro.tutorial)
-2. [01_MVP — Minimal viable demo (name, isSleeping, reload button)](01_MVP.tutorial)
-3. [02_EnvOverrides — ENV override step](02_EnvOverrides.tutorial)
-4. [03_ValueSpecs — Value specs for validation](03_ValueSpecs.tutorial)
-5. [04_Decisions — Decision spec fallback handling](04_Decisions.tutorial)
-6. [05_Watching — Optional hot-reload/watching guide](05_Watching.tutorial)
-7. [06_ContextSpecs — Context-based spec step with `EvaluationContext`](06_ContextSpecs.tutorial)
+    @Chapter(name: "Decision Fallbacks") {
+        Learn how to supply DecisionBinding fallbacks for missing values and contextual decisions.
+        @TutorialReference(tutorial: "doc:SpecificationConfig-Decisions")
+    }
 
-Each entry links directly to the corresponding `.tutorial` file so the Doc browser can surface them under the “Tutorials” section.
+    @Chapter(name: "Watching & Contextual Specs") {
+        Optional watching and context-aware specs let you react to runtime flags and reloads.
+        @TutorialReference(tutorial: "doc:SpecificationConfig-Watching-ContextSpecs")
+    }
+
+    @Resources {
+        Learn more about SpecificationConfig APIs.
+        @Link(destination: "doc:SpecificationConfig") { SpecificationConfig Reference }
+    }
+}

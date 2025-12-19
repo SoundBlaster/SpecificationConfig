@@ -256,18 +256,27 @@ public enum ConfigPipeline {
         key: String?
     ) -> DiagnosticItem {
         switch error {
-        case let .specFailed(specKey):
+        case let .specFailed(specKey, spec):
             DiagnosticItem(
                 key: key ?? specKey,
                 severity: .error,
-                message: "Value specification failed for key '\(specKey)'"
+                message: "Value specification failed for key '\(specKey)'",
+                context: specContext(spec)
             )
-        case .finalSpecFailed:
+        case let .finalSpecFailed(spec):
             DiagnosticItem(
                 key: key,
                 severity: .error,
-                message: "Post-finalization specification failed"
+                message: "Post-finalization specification failed",
+                context: specContext(spec)
             )
         }
+    }
+
+    private static func specContext(_ metadata: SpecMetadata) -> [String: DiagnosticContextValue] {
+        [
+            "spec": DiagnosticContextValue(metadata.displayName),
+            "specType": DiagnosticContextValue(metadata.typeName),
+        ]
     }
 }

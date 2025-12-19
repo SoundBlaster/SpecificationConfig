@@ -19,8 +19,8 @@ public struct SpecProfile<Draft, Final> {
     /// The finalize function that converts a populated draft into a final configuration value.
     public let finalize: (Draft) throws -> Final
 
-    /// Optional specifications that validate the finalized configuration.
-    public let finalSpecs: [AnySpecification<Final>]
+    /// Optional specifications that validate the finalized configuration, with metadata.
+    public let finalSpecs: [SpecEntry<Final>]
 
     /// Factory closure that creates an empty draft before bindings are applied.
     public let makeDraft: () -> Draft
@@ -30,12 +30,12 @@ public struct SpecProfile<Draft, Final> {
     /// - Parameters:
     ///   - bindings: Ordered bindings to apply to the draft.
     ///   - finalize: Closure that converts a populated draft into a final configuration value.
-    ///   - finalSpecs: Optional specifications to validate the finalized configuration.
+    ///   - finalSpecs: Optional specs with metadata to validate the finalized configuration.
     ///   - makeDraft: Factory closure that creates a new draft before bindings are applied.
     public init(
         bindings: [AnyBinding<Draft>],
         finalize: @escaping (Draft) throws -> Final,
-        finalSpecs: [AnySpecification<Final>] = [],
+        finalSpecs: [SpecEntry<Final>] = [],
         makeDraft: @escaping () -> Draft
     ) {
         self.bindings = bindings
@@ -92,7 +92,7 @@ public struct SpecProfile<Draft, Final> {
     private func validate(_ finalValue: Final) throws {
         for spec in finalSpecs {
             if !spec.isSatisfiedBy(finalValue) {
-                throw ConfigError.finalSpecFailed
+                throw ConfigError.finalSpecFailed(spec: spec.metadata)
             }
         }
     }

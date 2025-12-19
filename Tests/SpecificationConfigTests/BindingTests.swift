@@ -88,7 +88,7 @@ final class BindingTests: XCTestCase {
 
         // Test with a non-empty spec array (using type-erased specs)
         // Note: Actual spec instances will be created by applications using SpecificationCore
-        let specsArray: [AnySpecification<String>] = []
+        let specsArray: [SpecEntry<String>] = []
         let binding2 = Binding<TestDraft, String>(
             key: "user.name",
             keyPath: \TestDraft.name,

@@ -43,9 +43,11 @@ struct AppConfig {
                     keyPath: \AppConfigDraft.petName,
                     decoder: ConfigReader.string,
                     valueSpecs: [
-                        AnySpecification { value in
-                            !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        },
+                        SpecEntry(
+                            PredicateSpec<String>(description: "Non-empty pet name") { value in
+                                !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            }
+                        ),
                     ]
                 )
             ),

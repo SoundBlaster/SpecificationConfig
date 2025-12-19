@@ -34,7 +34,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart
 - [x] G3 (Medium): 0.1.0 release checklist + changelog
-- [ ] H1 (High): Add spec metadata to diagnostics (description/type name)
+- [x] H1 (High): Add spec metadata to diagnostics (description/type name)
 - [ ] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
 - [ ] H3 (Medium): Add context provider support for specs
 - [ ] H4 (Medium): Demo v5: context-based specs

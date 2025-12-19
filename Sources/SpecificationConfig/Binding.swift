@@ -8,7 +8,7 @@ import SpecificationCore
 /// - Where to write the decoded value (via KeyPath)
 /// - How to decode the raw config value into a typed `Value`
 /// - An optional default value
-/// - Value-level validation specs from SpecificationCore
+/// - Value-level validation specs with metadata for diagnostics
 /// - Whether the value should be redacted in diagnostics (secrets)
 ///
 /// Example:
@@ -47,9 +47,9 @@ public struct Binding<Draft, Value> {
 
     /// Value-level validation specs to run on the decoded value.
     ///
-    /// These specs are from SpecificationCore and validate individual values before
-    /// they're written to the Draft. Empty array means no validation.
-    public let valueSpecs: [AnySpecification<Value>]
+    /// These specs validate individual values before they're written to the Draft.
+    /// Metadata (description/type name) is used for diagnostics. Empty array means no validation.
+    public let valueSpecs: [SpecEntry<Value>]
 
     /// Whether this value is a secret and should be redacted in diagnostics.
     ///
@@ -64,14 +64,14 @@ public struct Binding<Draft, Value> {
     ///   - keyPath: Where to write the decoded value in the Draft
     ///   - decoder: Closure to decode the config value
     ///   - defaultValue: Optional default value if key is missing
-    ///   - valueSpecs: Validation specs to apply to the decoded value
+    ///   - valueSpecs: Validation specs (with metadata) to apply to the decoded value
     ///   - isSecret: Whether to redact this value in diagnostics
     public init(
         key: String,
         keyPath: WritableKeyPath<Draft, Value?>,
         decoder: @escaping (Configuration.ConfigReader, String) throws -> Value?,
         defaultValue: Value? = nil,
-        valueSpecs: [AnySpecification<Value>] = [],
+        valueSpecs: [SpecEntry<Value>] = [],
         isSecret: Bool = false
     ) {
         self.key = key

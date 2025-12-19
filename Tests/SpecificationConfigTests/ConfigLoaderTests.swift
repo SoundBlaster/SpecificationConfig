@@ -219,7 +219,7 @@ final class ConfigLoaderTests: XCTestCase {
             key: "pet.name",
             keyPath: \TestDraft.name,
             decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
-            valueSpecs: [AnySpecification<String> { !$0.isEmpty }]
+            valueSpecs: [SpecEntry(PredicateSpec<String> { !$0.isEmpty })]
         )
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [AnyBinding(nameBinding)],

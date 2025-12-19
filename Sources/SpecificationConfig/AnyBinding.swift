@@ -75,8 +75,7 @@ public struct AnyBinding<Draft> {
                 // Run all value specs
                 for spec in binding.valueSpecs {
                     if !spec.isSatisfiedBy(value) {
-                        // For now, throw a simple error (B4 will add proper types)
-                        throw ConfigError.specFailed(key: binding.key)
+                        throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
                     }
                 }
 
@@ -108,7 +107,7 @@ public struct AnyBinding<Draft> {
                 // Run all value specs
                 for spec in binding.valueSpecs {
                     if !spec.isSatisfiedBy(value) {
-                        throw ConfigError.specFailed(key: binding.key)
+                        throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
                     }
                 }
 
@@ -151,8 +150,8 @@ public struct AnyBinding<Draft> {
 /// Temporary error type for B2 (will be replaced by proper Diagnostics in B4)
 public enum ConfigError: Error, Equatable {
     /// A value-level specification failed while applying bindings.
-    case specFailed(key: String)
+    case specFailed(key: String, spec: SpecMetadata)
 
     /// A post-finalization specification failed.
-    case finalSpecFailed
+    case finalSpecFailed(spec: SpecMetadata)
 }

@@ -1,13 +1,21 @@
-# Introduction to SpecificationConfig
+@Tutorial(time: 5) {
+    @Intro(title: "Introduction to SpecificationConfig") {
+        This tutorial introduces SpecificationConfig and the Config Pet demo, highlighting how configuration readers, specs, and diagnostics combine to keep business rules testable.
 
-> Placeholder for tutorial content. To be implemented in Phase F.
+        @Image(source: "tutorial-icon", alt: "Config Pet tutorial emblem")
+    }
 
-## Overview
+    @Section(title: "What You'll Learn") {
+        @ContentAndMedia {
+            Follow along as each subsequent tutorial teaches you how bindings, overrides, value specs, decisions, and contextual diagnostics work together inside Config Pet.
 
-This tutorial will introduce SpecificationConfig and guide you through building a complete configuration-driven application called Config Pet. You'll learn how to combine Swift Configuration with SpecificationCore for type-safe, validated configuration management.
+            @Image(source: "tutorial-icon", alt: "Config Pet tutorial emblem")
+        }
 
-## Topics
-
-### Getting Started
-
-- Coming soon
+        @Steps {
+            @Step {
+                Preview the upcoming tutorial map so you can follow each chapter in order before diving into the code.
+            }
+        }
+    }
+}

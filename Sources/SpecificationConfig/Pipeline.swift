@@ -122,7 +122,7 @@ public enum ConfigPipeline {
     ///   - profile: The specification profile defining bindings, finalization, and specs.
     ///   - reader: The configuration reader supplying values.
     ///   - provenanceReporter: Records provider metadata for each resolved configuration key.
-    ///  - errorHandlingMode: Strategy for handling binding errors. Default is `.collectAll`,
+    ///   - errorHandlingMode: Strategy for handling binding errors. Default is `.collectAll`,
     ///     which collects all binding errors before failing. Use `.failFast` to stop at
     ///     the first error (useful for development/debugging).
     /// - Returns: Build result containing either success (final config + snapshot) or

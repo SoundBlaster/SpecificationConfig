@@ -19,11 +19,11 @@
             }
             @Step {
                 Instantiate the environment and in-memory providers.
-                @Code(name: "Override providers", file: "02-ConfigReader-EnvProviders.swift")
+                @Code(name: "ConfigReader-EnvProviders.swift", file: "02-ConfigReader-EnvProviders.swift")
             }
             @Step {
                 Return a reader that evaluates environment first.
-                @Code(name: "Env-first reader", file: "03-ConfigReader-EnvReturn.swift")
+                @Code(name: "ConfigReader-EnvReturn.swift", file: "03-ConfigReader-EnvReturn.swift")
             }
         }
     }
@@ -38,11 +38,11 @@
         @Steps {
             @Step {
                 Capture a provider label from the config file name.
-                @Code(name: "Provider label", file: "04-ConfigFileLoader-ProviderName.swift")
+                @Code(name: "ConfigFileLoader-ProviderName.swift", file: "04-ConfigFileLoader-ProviderName.swift")
             }
             @Step {
                 Return `ConfigReader.withEnvironmentOverrides(values:)` so `.env` values win.
-                @Code(name: "Env-aware reader", file: "05-ConfigFileLoader-EnvReader.swift")
+                @Code(name: "ConfigFileLoader-EnvReader.swift", file: "05-ConfigFileLoader-EnvReader.swift")
             }
             @Step {
                 Configure scheme environment variables like `PET_NAME`/`PET_IS_SLEEPING` and reload the demo to see overrides.

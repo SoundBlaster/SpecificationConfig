@@ -24,6 +24,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] E4 (High): UI split view + Reload button
 - [x] E5 (High): UI error list panel when build fails
 - [x] F1 (High): Write `Docs/Tutorial/01_MVP.md` matching v0
+- [x] F1B1 (Medium): Bug — DocC tutorials: missing syntax highlighting, missing code examples, broken entry link
 - [x] F2 (High): Tag repo `tutorial-v0`
 - [x] F3 (Medium): Add ENV override step + doc (`02_EnvOverrides.md`)
 - [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)

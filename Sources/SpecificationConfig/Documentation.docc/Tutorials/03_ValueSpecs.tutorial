@@ -15,15 +15,15 @@
         @Steps {
             @Step {
                 Define the `SpecEntry` that rejects empty or whitespace-only names.
-                @Code(name: "SpecEntry", file: "01-ValueSpec-Entry.swift")
+                @Code(name: "ValueSpec-Entry.swift", file: "01-ValueSpec-Entry.swift")
             }
             @Step {
                 Attach the spec to the `pet.name` binding.
-                @Code(name: "Binding with specs", file: "02-ValueSpec-Binding.swift")
+                @Code(name: "ValueSpec-Binding.swift", file: "02-ValueSpec-Binding.swift")
             }
             @Step {
                 Supply an invalid JSON sample to provoke the spec failure and review the diagnostics output.
-                @Code(name: "Invalid config", file: "03-ValueFailure.swift")
+                @Code(name: "ValueFailure.swift", file: "03-ValueFailure.swift")
             }
         }
     }

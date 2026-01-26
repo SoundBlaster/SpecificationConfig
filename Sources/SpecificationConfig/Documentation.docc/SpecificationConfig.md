@@ -159,7 +159,7 @@ let profile = SpecProfile<AppDraft, AppConfig>(
 
 Start with the Config Pet walkthroughs:
 
-- <doc:Tutorials> - Tutorial map and entry point
+- <doc://SpecificationConfig/tutorials/Tutorials> - Tutorial map and entry point
 - <doc:01_MVP> - Build the MVP with bindings, pipeline, and diagnostics
 - <doc:02_EnvOverrides> - Environment overrides and provider precedence
 - <doc:03_ValueSpecs> - Value specs and diagnostics

@@ -15,15 +15,15 @@
         @Steps {
             @Step {
                 Create `DemoContextProvider` with reload counters and night overrides.
-                @Code(name: "Context provider state", file: "01-ContextProvider-State.swift")
+                @Code(name: "ContextProvider-State.swift", file: "01-ContextProvider-State.swift")
             }
             @Step {
                 Add night-time detection plus a human-readable summary.
-                @Code(name: "Context summary", file: "02-ContextProvider-Summary.swift")
+                @Code(name: "ContextProvider-Summary.swift", file: "02-ContextProvider-Summary.swift")
             }
             @Step {
                 Build the `EvaluationContext` with counters and flags.
-                @Code(name: "Evaluation context", file: "03-ContextProvider-Context.swift")
+                @Code(name: "ContextProvider-Context.swift", file: "03-ContextProvider-Context.swift")
             }
         }
     }
@@ -38,11 +38,11 @@
         @Steps {
             @Step {
                 Add a `ContextualSpecEntry` so pets can only sleep at night.
-                @Code(name: "Contextual spec binding", file: "04-ContextualSpec-Binding.swift")
+                @Code(name: "ContextualSpec-Binding.swift", file: "04-ContextualSpec-Binding.swift")
             }
             @Step {
                 Inject `DemoContextProvider` into the profile so specs can query flags.
-                @Code(name: "Context provider wiring", file: "05-ContextProvider-Wiring.swift")
+                @Code(name: "ContextProvider-Wiring.swift", file: "05-ContextProvider-Wiring.swift")
             }
         }
     }
@@ -57,11 +57,11 @@
         @Steps {
             @Step {
                 Expose context helpers on `ConfigManager`.
-                @Code(name: "ConfigManager context helpers", file: "06-ConfigManager-ContextHelpers.swift")
+                @Code(name: "ConfigManager-ContextHelpers.swift", file: "06-ConfigManager-ContextHelpers.swift")
             }
             @Step {
                 Add a context row and night-mode toggle to the UI.
-                @Code(name: "Context UI", file: "07-ContentView-ContextRow.swift")
+                @Code(name: "ContentView-ContextRow.swift", file: "07-ContentView-ContextRow.swift")
             }
         }
     }

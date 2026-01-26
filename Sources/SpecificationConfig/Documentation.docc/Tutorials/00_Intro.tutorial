@@ -16,6 +16,10 @@
             @Step {
                 Preview the upcoming tutorial map so you can follow each chapter in order before diving into the code.
             }
+            @Step {
+                Skim a tiny pipeline build to see how bindings and validation hang together.
+                @Code(name: "ConfigPet-Preview.swift", file: "01-ConfigPet-Preview.swift")
+            }
         }
     }
 }

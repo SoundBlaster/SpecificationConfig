@@ -15,7 +15,7 @@
         @Steps {
             @Step {
                 Create the draft + final config types that hold the pet state.
-                @Code(name: "AppConfig types", file: "01-AppConfig-Types.swift")
+                @Code(name: "AppConfig-Types.swift", file: "01-AppConfig-Types.swift")
             }
             @Step {
                 Add a friendly error type for missing required config values.
@@ -23,19 +23,19 @@
             }
             @Step {
                 Start the bindings list with `pet.name` and its non-empty value spec.
-                @Code(name: "Pet name binding", file: "03-AppConfig-NameBinding.swift")
+                @Code(name: "AppConfig-NameBinding.swift", file: "03-AppConfig-NameBinding.swift")
             }
             @Step {
                 Add the `pet.isSleeping` binding with a default and a contextual rule.
-                @Code(name: "Pet sleep binding", file: "04-AppConfig-SleepBinding.swift")
+                @Code(name: "AppConfig-SleepBinding.swift", file: "04-AppConfig-SleepBinding.swift")
             }
             @Step {
                 Add a decision fallback that derives a name when the pet is sleeping.
-                @Code(name: "Decision fallback", file: "05-AppConfig-Decisions.swift")
+                @Code(name: "AppConfig-Decisions.swift", file: "05-AppConfig-Decisions.swift")
             }
             @Step {
                 Wire the context provider and finalize closure into the profile.
-                @Code(name: "Profile finalize", file: "06-AppConfig-Finalize.swift")
+                @Code(name: "AppConfig-Finalize.swift", file: "06-AppConfig-Finalize.swift")
             }
         }
     }
@@ -50,27 +50,27 @@
         @Steps {
             @Step {
                 Declare ConfigManager and publish the core loading state.
-                @Code(name: "ConfigManager state", file: "07-ConfigManager-State.swift")
+                @Code(name: "ConfigManager-State.swift", file: "07-ConfigManager-State.swift")
             }
             @Step {
                 Kick off loading in init so config builds on launch.
-                @Code(name: "ConfigManager init", file: "08-ConfigManager-Init.swift")
+                @Code(name: "ConfigManager-Init.swift", file: "08-ConfigManager-Init.swift")
             }
             @Step {
                 Implement loadConfig to create a reader and handle failures.
-                @Code(name: "ConfigManager load", file: "09-ConfigManager-Load.swift")
+                @Code(name: "ConfigManager-Load.swift", file: "09-ConfigManager-Load.swift")
             }
             @Step {
                 Add a build helper that runs ConfigPipeline and updates config.
-                @Code(name: "ConfigManager build", file: "10-ConfigManager-Build.swift")
+                @Code(name: "ConfigManager-Build.swift", file: "10-ConfigManager-Build.swift")
             }
             @Step {
                 Expose status and snapshot helpers used by the UI.
-                @Code(name: "ConfigManager helpers", file: "11-ConfigManager-StatusSnapshot.swift")
+                @Code(name: "ConfigManager-StatusSnapshot.swift", file: "11-ConfigManager-StatusSnapshot.swift")
             }
             @Step {
                 Add sleep override and context helpers for the demo controls.
-                @Code(name: "ConfigManager overrides", file: "12-ConfigManager-OverridesContext.swift")
+                @Code(name: "ConfigManager-OverridesContext.swift", file: "12-ConfigManager-OverridesContext.swift")
             }
         }
     }
@@ -85,27 +85,27 @@
         @Steps {
             @Step {
                 Create a left/right split layout for the demo.
-                @Code(name: "ContentView layout", file: "13-ContentView-Layout.swift")
+                @Code(name: "ContentView-Layout.swift", file: "13-ContentView-Layout.swift")
             }
             @Step {
                 Add the title, status row, and context row in the left panel.
-                @Code(name: "Header and status", file: "14-ContentView-HeaderStatus.swift")
+                @Code(name: "ContentView-HeaderStatus.swift", file: "14-ContentView-HeaderStatus.swift")
             }
             @Step {
                 Add reload, night mode, and sleep override controls.
-                @Code(name: "Controls", file: "15-ContentView-Controls.swift")
+                @Code(name: "ContentView-Controls.swift", file: "15-ContentView-Controls.swift")
             }
             @Step {
                 Render the loaded config values and validation diagnostics.
-                @Code(name: "Config values + diagnostics", file: "16-ContentView-ConfigDiagnostics.swift")
+                @Code(name: "ContentView-ConfigDiagnostics.swift", file: "16-ContentView-ConfigDiagnostics.swift")
             }
             @Step {
                 Show overrides, resolved values, and decision traces for inspection.
-                @Code(name: "Inspection panels", file: "17-ContentView-Inspectors.swift")
+                @Code(name: "ContentView-Inspectors.swift", file: "17-ContentView-Inspectors.swift")
             }
             @Step {
                 Build the right panel pet preview and helper methods.
-                @Code(name: "Right panel + helpers", file: "18-ContentView-RightPanel.swift")
+                @Code(name: "ContentView-RightPanel.swift", file: "18-ContentView-RightPanel.swift")
             }
         }
     }

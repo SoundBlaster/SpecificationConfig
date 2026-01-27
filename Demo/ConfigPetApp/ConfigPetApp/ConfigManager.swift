@@ -49,6 +49,7 @@ class ConfigManager: ObservableObject {
     func loadConfig() {
         sleepOverrideTask?.cancel()
         sleepOverride = nil
+        DemoContextProvider.shared.setSleepOverride(nil)
         do {
             let loader = ConfigFileLoader.findConfigFile() ?? ConfigFileLoader()
             let reporter = ResolvedValueProvenanceReporter()
@@ -83,11 +84,13 @@ class ConfigManager: ObservableObject {
         guard config != nil else { return }
         sleepOverrideTask?.cancel()
         sleepOverride = false
+        DemoContextProvider.shared.setSleepOverride(sleepOverride)
         sleepOverrideTask = Task { [duration] in
             let nanoseconds = UInt64(duration * 1_000_000_000)
             try? await Task.sleep(nanoseconds: nanoseconds)
             await MainActor.run {
                 self.sleepOverride = nil
+                DemoContextProvider.shared.setSleepOverride(nil)
             }
         }
     }

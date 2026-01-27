@@ -63,6 +63,20 @@ public struct AnyBinding<Draft> {
         AnyContextProvider?
     ) throws -> (String?, Bool)
 
+    /// Type-erased async application closure.
+    private let _applyAsync: (
+        inout Draft,
+        Configuration.ConfigReader,
+        AnyContextProvider?
+    ) async throws -> Void
+
+    /// Type-erased async application closure that also captures the resolved value.
+    private let _applyAndCaptureAsync: (
+        inout Draft,
+        Configuration.ConfigReader,
+        AnyContextProvider?
+    ) async throws -> (String?, Bool)
+
     /// Creates a type-erased binding from a concrete `Binding`.
     ///
     /// - Parameter binding: The binding to wrap and type-erase
@@ -152,6 +166,102 @@ public struct AnyBinding<Draft> {
 
             return (stringifiedValue, usedDefault)
         }
+
+        // Async apply closure
+        _applyAsync = { draft, reader, contextProvider in
+            // Decode the value
+            let decodedValue = try binding.decoder(reader, binding.key)
+
+            // Use default if needed
+            let valueToValidate = decodedValue ?? binding.defaultValue
+
+            // If we have a value, validate and write it
+            if let value = valueToValidate {
+                // Run all value specs
+                for spec in binding.valueSpecs {
+                    if !spec.isSatisfiedBy(value) {
+                        throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                    }
+                }
+
+                if !binding.contextualValueSpecs.isEmpty {
+                    guard let provider = contextProvider else {
+                        throw ConfigError.contextProviderMissing(key: binding.key)
+                    }
+
+                    for spec in binding.contextualValueSpecs {
+                        if !spec.isSatisfiedBy(value, using: provider) {
+                            throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    }
+                }
+
+                for spec in binding.asyncValueSpecs {
+                    let isSatisfied = try await spec.isSatisfiedBy(value)
+                    if !isSatisfied {
+                        throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
+                    }
+                }
+
+                // Write validated value to draft
+                draft[keyPath: binding.keyPath] = value
+            }
+        }
+
+        // Async apply with capture closure
+        _applyAndCaptureAsync = { draft, reader, contextProvider in
+            var usedDefault = false
+            var stringifiedValue: String?
+
+            // Decode the value
+            let decodedValue = try binding.decoder(reader, binding.key)
+
+            // Use default if needed
+            let valueToValidate: Value?
+            if decodedValue == nil, let defaultValue = binding.defaultValue {
+                valueToValidate = defaultValue
+                usedDefault = true
+            } else {
+                valueToValidate = decodedValue
+            }
+
+            // If we have a value, validate and write it
+            if let value = valueToValidate {
+                // Run all value specs
+                for spec in binding.valueSpecs {
+                    if !spec.isSatisfiedBy(value) {
+                        throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                    }
+                }
+
+                if !binding.contextualValueSpecs.isEmpty {
+                    guard let provider = contextProvider else {
+                        throw ConfigError.contextProviderMissing(key: binding.key)
+                    }
+
+                    for spec in binding.contextualValueSpecs {
+                        if !spec.isSatisfiedBy(value, using: provider) {
+                            throw ConfigError.specFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    }
+                }
+
+                for spec in binding.asyncValueSpecs {
+                    let isSatisfied = try await spec.isSatisfiedBy(value)
+                    if !isSatisfied {
+                        throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
+                    }
+                }
+
+                // Stringify the value
+                stringifiedValue = String(describing: value)
+
+                // Write validated value to draft
+                draft[keyPath: binding.keyPath] = value
+            }
+
+            return (stringifiedValue, usedDefault)
+        }
     }
 
     /// Applies this binding to a draft by reading from the config reader.
@@ -208,6 +318,37 @@ public struct AnyBinding<Draft> {
     ) throws -> (stringifiedValue: String?, usedDefault: Bool) {
         try _applyAndCapture(&draft, reader, contextProvider)
     }
+
+    /// Applies this binding to a draft with async specs and an optional context provider.
+    ///
+    /// - Parameters:
+    ///   - draft: The draft configuration object to mutate
+    ///   - reader: The configuration reader to read values from
+    ///   - contextProvider: Optional provider for contextual specs
+    /// - Throws: Decode errors or validation failures
+    public func applyAsync(
+        to draft: inout Draft,
+        reader: Configuration.ConfigReader,
+        contextProvider: AnyContextProvider?
+    ) async throws {
+        try await _applyAsync(&draft, reader, contextProvider)
+    }
+
+    /// Applies this binding to a draft and captures the resolved value for provenance tracking.
+    ///
+    /// - Parameters:
+    ///   - draft: The draft configuration object to mutate
+    ///   - reader: The configuration reader to read values from
+    ///   - contextProvider: Optional provider for contextual specs
+    /// - Returns: A tuple of (stringified value, whether default was used)
+    /// - Throws: Decode errors or validation failures
+    public func applyAndCaptureAsync(
+        to draft: inout Draft,
+        reader: Configuration.ConfigReader,
+        contextProvider: AnyContextProvider?
+    ) async throws -> (stringifiedValue: String?, usedDefault: Bool) {
+        try await _applyAndCaptureAsync(&draft, reader, contextProvider)
+    }
 }
 
 /// Temporary error type for B2 (will be replaced by proper Diagnostics in B4)
@@ -217,6 +358,12 @@ public enum ConfigError: Error, Equatable {
 
     /// A post-finalization specification failed.
     case finalSpecFailed(spec: SpecMetadata)
+
+    /// An async value-level specification failed.
+    case asyncSpecFailed(key: String, spec: SpecMetadata)
+
+    /// An async post-finalization specification failed.
+    case asyncFinalSpecFailed(spec: SpecMetadata)
 
     /// A decision fallback failed to match for a key.
     case decisionFallbackFailed(key: String)

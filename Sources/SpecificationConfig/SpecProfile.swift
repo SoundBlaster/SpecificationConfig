@@ -30,6 +30,9 @@ public struct SpecProfile<Draft, Final> {
     /// Optional specifications that validate the finalized configuration, with metadata.
     public let finalSpecs: [SpecEntry<Final>]
 
+    /// Optional async specifications that validate the finalized configuration.
+    public let asyncFinalSpecs: [AsyncSpecEntry<Final>]
+
     /// Optional contextual specs that validate the finalized configuration.
     public let contextualFinalSpecs: [ContextualSpecEntry<Final>]
 
@@ -44,6 +47,7 @@ public struct SpecProfile<Draft, Final> {
     ///   - contextProvider: Optional context provider for contextual specs.
     ///   - finalize: Closure that converts a populated draft into a final configuration value.
     ///   - finalSpecs: Optional specs with metadata to validate the finalized configuration.
+    ///   - asyncFinalSpecs: Optional async specs to validate the finalized configuration.
     ///   - contextualFinalSpecs: Optional context-aware specs for the finalized configuration.
     ///   - makeDraft: Factory closure that creates a new draft before bindings are applied.
     public init(
@@ -52,6 +56,7 @@ public struct SpecProfile<Draft, Final> {
         contextProvider: AnyContextProvider? = nil,
         finalize: @escaping (Draft) throws -> Final,
         finalSpecs: [SpecEntry<Final>] = [],
+        asyncFinalSpecs: [AsyncSpecEntry<Final>] = [],
         contextualFinalSpecs: [ContextualSpecEntry<Final>] = [],
         makeDraft: @escaping () -> Draft
     ) {
@@ -60,6 +65,7 @@ public struct SpecProfile<Draft, Final> {
         self.contextProvider = contextProvider
         self.finalize = finalize
         self.finalSpecs = finalSpecs
+        self.asyncFinalSpecs = asyncFinalSpecs
         self.contextualFinalSpecs = contextualFinalSpecs
         self.makeDraft = makeDraft
     }

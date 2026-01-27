@@ -51,6 +51,11 @@ public struct Binding<Draft, Value> {
     /// Metadata (description/type name) is used for diagnostics. Empty array means no validation.
     public let valueSpecs: [SpecEntry<Value>]
 
+    /// Async value-level validation specs to run on the decoded value.
+    ///
+    /// These specs are evaluated only when using the async pipeline.
+    public let asyncValueSpecs: [AsyncSpecEntry<Value>]
+
     /// Context-aware validation specs evaluated with an EvaluationContext.
     ///
     /// These specs evaluate both the candidate value and the injected context provider.
@@ -70,6 +75,7 @@ public struct Binding<Draft, Value> {
     ///   - decoder: Closure to decode the config value
     ///   - defaultValue: Optional default value if key is missing
     ///   - valueSpecs: Validation specs (with metadata) to apply to the decoded value
+    ///   - asyncValueSpecs: Async validation specs evaluated in the async pipeline
     ///   - contextualValueSpecs: Context-aware validation specs evaluated with EvaluationContext
     ///   - isSecret: Whether to redact this value in diagnostics
     public init(
@@ -78,6 +84,7 @@ public struct Binding<Draft, Value> {
         decoder: @escaping (Configuration.ConfigReader, String) throws -> Value?,
         defaultValue: Value? = nil,
         valueSpecs: [SpecEntry<Value>] = [],
+        asyncValueSpecs: [AsyncSpecEntry<Value>] = [],
         contextualValueSpecs: [ContextualSpecEntry<Value>] = [],
         isSecret: Bool = false
     ) {
@@ -86,6 +93,7 @@ public struct Binding<Draft, Value> {
         self.decoder = decoder
         self.defaultValue = defaultValue
         self.valueSpecs = valueSpecs
+        self.asyncValueSpecs = asyncValueSpecs
         self.contextualValueSpecs = contextualValueSpecs
         self.isSecret = isSecret
     }

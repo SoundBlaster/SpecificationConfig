@@ -1161,4 +1161,80 @@ final class PipelineTests: XCTestCase {
             XCTFail("Expected success")
         }
     }
+
+    // MARK: - Async Pipeline Tests
+
+    func testAsyncPipelineFailsOnAsyncValueSpec() async {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            asyncValueSpecs: [
+                AsyncSpecEntry(description: "Async non-empty") { value in
+                    !value.isEmpty
+                },
+            ]
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.name": "",
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = await ConfigPipeline.buildAsync(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected failure due to async value spec violation")
+        case let .failure(diagnostics, _):
+            XCTAssertTrue(diagnostics.hasErrors)
+            let error = diagnostics.diagnostics.first { $0.message.contains("Async specification") }
+            XCTAssertEqual(error?.context["spec"]?.rawValue, "Async non-empty")
+        }
+    }
+
+    func testAsyncPipelineFailsOnAsyncFinalSpec() async {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+            defaultValue: "TestApp"
+        )
+
+        let asyncFinalSpec = AsyncSpecEntry<TestConfig>(description: "Async final fail") { _ in
+            false
+        }
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            finalSpecs: [],
+            asyncFinalSpecs: [asyncFinalSpec],
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [:])
+        let reader = ConfigReader(provider: provider)
+
+        let result = await ConfigPipeline.buildAsync(profile: profile, reader: reader)
+
+        switch result {
+        case .success:
+            XCTFail("Expected failure due to async final spec violation")
+        case let .failure(diagnostics, _):
+            XCTAssertTrue(diagnostics.hasErrors)
+            let error = diagnostics.diagnostics.first { $0.message.contains("Async post-finalization") }
+            XCTAssertEqual(error?.context["spec"]?.rawValue, "Async final fail")
+        }
+    }
 }

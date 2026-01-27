@@ -294,6 +294,200 @@ public enum ConfigPipeline {
         return .success(final: final, snapshot: snapshot)
     }
 
+    /// Builds a configuration using the profile and reader, awaiting async specs.
+    ///
+    /// This mirrors `build` but evaluates async value specs and async final specs
+    /// using async/await.
+    public static func buildAsync<Final>(
+        profile: SpecProfile<some Any, Final>,
+        reader: Configuration.ConfigReader,
+        provenanceReporter: ResolvedValueProvenanceReporter? = nil,
+        errorHandlingMode: ErrorHandlingMode = .collectAll
+    ) async -> BuildResult<Final> {
+        var diagnostics = DiagnosticsReport()
+        var resolvedValues: [ResolvedValue] = []
+        var decisionTraces: [DecisionTrace] = []
+
+        provenanceReporter?.reset()
+
+        // Create draft
+        var draft = profile.makeDraft()
+
+        // Apply bindings, collecting resolved values and diagnostics
+        for binding in profile.bindings {
+            do {
+                let (stringifiedValue, usedDefault) = try await binding.applyAndCaptureAsync(
+                    to: &draft,
+                    reader: reader,
+                    contextProvider: profile.contextProvider
+                )
+
+                let provenance = Self.provenance(
+                    forKey: binding.key,
+                    usedDefault: usedDefault,
+                    reporter: provenanceReporter
+                )
+
+                // Track successfully resolved value for snapshot
+                let resolvedValue = ResolvedValue(
+                    key: binding.key,
+                    stringifiedValue: stringifiedValue ?? "<nil>",
+                    provenance: provenance,
+                    isSecret: binding.isSecret
+                )
+                resolvedValues.append(resolvedValue)
+
+            } catch let error as ConfigError {
+                let diagnostic = diagnosticFromConfigError(error, key: binding.key)
+                diagnostics.add(diagnostic)
+
+                switch errorHandlingMode {
+                case .failFast:
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                case .collectAll:
+                    continue
+                }
+
+            } catch {
+                diagnostics.add(
+                    key: binding.key,
+                    severity: .error,
+                    message: "Binding application failed: \(error.localizedDescription)"
+                )
+
+                switch errorHandlingMode {
+                case .failFast:
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                case .collectAll:
+                    continue
+                }
+            }
+        }
+
+        for decisionBinding in profile.decisionBindings {
+            switch decisionBinding.apply(to: &draft) {
+            case .skipped:
+                continue
+            case let .applied(trace, stringifiedValue):
+                decisionTraces.append(trace)
+                let resolved = ResolvedValue(
+                    key: decisionBinding.key,
+                    stringifiedValue: stringifiedValue,
+                    provenance: .decisionFallback,
+                    isSecret: decisionBinding.isSecret
+                )
+                if let index = resolvedValues.firstIndex(where: { $0.key == decisionBinding.key }) {
+                    resolvedValues[index] = resolved
+                } else {
+                    resolvedValues.append(resolved)
+                }
+            case .noMatch:
+                let diagnostic = diagnosticFromConfigError(
+                    .decisionFallbackFailed(key: decisionBinding.key),
+                    key: decisionBinding.key
+                )
+                diagnostics.add(diagnostic)
+                if errorHandlingMode == .failFast {
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                }
+            }
+        }
+
+        // Check if we have any errors before finalizing
+        if diagnostics.hasErrors {
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+        }
+
+        // Finalize draft
+        let final: Final
+        do {
+            final = try profile.finalizeDraft(draft)
+        } catch let error as ConfigError {
+            let diagnostic = diagnosticFromConfigError(error, key: nil)
+            diagnostics.add(diagnostic)
+
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+
+        } catch {
+            diagnostics.add(
+                severity: .error,
+                message: "Finalization failed: \(error.localizedDescription)"
+            )
+
+            let snapshot = Snapshot(
+                resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
+                diagnostics: DiagnosticsReport()
+            )
+            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+        }
+
+        for spec in profile.asyncFinalSpecs {
+            do {
+                let isSatisfied = try await spec.isSatisfiedBy(final)
+                if !isSatisfied {
+                    let diagnostic = diagnosticFromConfigError(
+                        .asyncFinalSpecFailed(spec: spec.metadata),
+                        key: nil
+                    )
+                    diagnostics.add(diagnostic)
+                    let snapshot = Snapshot(
+                        resolvedValues: resolvedValues,
+                        decisionTraces: decisionTraces,
+                        diagnostics: DiagnosticsReport()
+                    )
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                }
+            } catch {
+                diagnostics.add(
+                    severity: .error,
+                    message: "Async specification failed: \(error.localizedDescription)",
+                    context: specContext(spec.metadata)
+                )
+                let snapshot = Snapshot(
+                    resolvedValues: resolvedValues,
+                    decisionTraces: decisionTraces,
+                    diagnostics: DiagnosticsReport()
+                )
+                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            }
+        }
+
+        // Success - build final snapshot
+        let snapshot = Snapshot(
+            resolvedValues: resolvedValues,
+            decisionTraces: decisionTraces,
+            diagnostics: diagnostics
+        )
+
+        return .success(final: final, snapshot: snapshot)
+    }
+
     /// Converts a ConfigError into a DiagnosticItem.
     ///
     /// - Parameters:
@@ -317,6 +511,20 @@ public enum ConfigPipeline {
                 key: key,
                 severity: .error,
                 message: "Post-finalization specification failed",
+                context: specContext(spec)
+            )
+        case let .asyncSpecFailed(specKey, spec):
+            DiagnosticItem(
+                key: key ?? specKey,
+                severity: .error,
+                message: "Async specification failed for key '\(specKey)'",
+                context: specContext(spec)
+            )
+        case let .asyncFinalSpecFailed(spec):
+            DiagnosticItem(
+                key: key,
+                severity: .error,
+                message: "Async post-finalization specification failed",
                 context: specContext(spec)
             )
         case let .decisionFallbackFailed(decisionKey):

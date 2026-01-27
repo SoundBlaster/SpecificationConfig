@@ -15,6 +15,12 @@ public typealias DecisionSpec = SpecificationCore.DecisionSpec
 /// Type-erased decision helper available in SpecificationCore.
 public typealias AnyDecisionSpec = SpecificationCore.AnyDecisionSpec
 
+/// Async specification protocol re-exported from SpecificationCore.
+public typealias AsyncSpecification = SpecificationCore.AsyncSpecification
+
+/// Type-erased async specification helper available in SpecificationCore.
+public typealias AnyAsyncSpecification = SpecificationCore.AnyAsyncSpecification
+
 /// Convenience helpers for working with decision entries without importing SpecificationCore.
 public enum SpecificationCoreHelpers {
     /// Creates a `DecisionEntry` from a predicate.

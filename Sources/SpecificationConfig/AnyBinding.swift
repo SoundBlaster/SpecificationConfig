@@ -197,8 +197,17 @@ public struct AnyBinding<Draft> {
                 }
 
                 for spec in binding.asyncValueSpecs {
-                    let isSatisfied = try await spec.isSatisfiedBy(value)
-                    if !isSatisfied {
+                    do {
+                        let isSatisfied = try await spec.isSatisfiedBy(value)
+                        if !isSatisfied {
+                            throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    } catch let error as ConfigError {
+                        // Re-throw ConfigError as-is
+                        throw error
+                    } catch {
+                        // Wrap non-ConfigError exceptions from async specs as asyncSpecFailed
+                        // to avoid misclassifying spec evaluation errors as decode failures
                         throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
                     }
                 }
@@ -247,8 +256,17 @@ public struct AnyBinding<Draft> {
                 }
 
                 for spec in binding.asyncValueSpecs {
-                    let isSatisfied = try await spec.isSatisfiedBy(value)
-                    if !isSatisfied {
+                    do {
+                        let isSatisfied = try await spec.isSatisfiedBy(value)
+                        if !isSatisfied {
+                            throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
+                        }
+                    } catch let error as ConfigError {
+                        // Re-throw ConfigError as-is
+                        throw error
+                    } catch {
+                        // Wrap non-ConfigError exceptions from async specs as asyncSpecFailed
+                        // to avoid misclassifying spec evaluation errors as decode failures
                         throw ConfigError.asyncSpecFailed(key: binding.key, spec: spec.metadata)
                     }
                 }

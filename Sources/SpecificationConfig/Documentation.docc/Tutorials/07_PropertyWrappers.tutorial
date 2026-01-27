@@ -1,0 +1,75 @@
+@Tutorial(time: 15) {
+    @Intro(title: "Property Wrappers for Live Specs") {
+        Use `@Satisfies` and `@Decides` from SpecificationCore when you want a lightweight, always-up-to-date view of specs and decisions that ride on the same `EvaluationContext` used by the pipeline.
+
+        @Image(source: "tutorial-icon", alt: "Property wrapper overview")
+    }
+
+    @Section(title: "Gate UI with @Satisfies") {
+        @ContentAndMedia {
+            `@Satisfies` evaluates a spec every time the property is accessed. Combine it with `DemoContextProvider.shared` to mirror the Config Pet day/night context without adding new bindings.
+
+            @Image(source: "tutorial-icon", alt: "Satisfies wrapper")
+        }
+
+        @Steps {
+            @Step {
+                Attach `@Satisfies` to a predicate spec that checks the `nightTime` flag in the evaluation context.
+                @Code(name: "Satisfies.swift", file: "01-Satisfies.swift")
+            }
+        }
+    }
+
+    @Section(title: "Derive values with @Decides") {
+        @ContentAndMedia {
+            `@Decides` picks a result from ordered decision rules and always returns a fallback. Use it when you want a derived label or tier that tracks the same context as your pipeline decisions.
+
+            @Image(source: "tutorial-icon", alt: "Decides wrapper")
+        }
+
+        @Steps {
+            @Step {
+                Build a decision list that returns different labels based on `nightTime` and the manual override flag.
+                @Code(name: "Decides.swift", file: "02-Decides.swift")
+            }
+            @Step {
+                Read the wrapped value for the fallback result, or `$`-projected value when you need to know whether a rule matched.
+            }
+        }
+    }
+
+    @Section(title: "Watch it change in the demo") {
+        @ContentAndMedia {
+            In Config Pet, tap “Force Night Mode” / “Clear Night Override” to flip the context, then hit “Reload” to rebuild. Any `@Satisfies`/`@Decides` properties backed by `DemoContextProvider.shared` will reflect the updated `nightTime` flag the next time they’re read.
+
+            @Image(source: "tutorial-icon", alt: "Context-driven wrappers")
+        }
+
+        @Steps {
+            @Step {
+                Toggle night mode to confirm the `nightTime` flag updates.
+            }
+            @Step {
+                Reload to compare diagnostics from day vs. night context.
+            }
+        }
+    }
+
+    @Section(title: "Validation") {
+        @ContentAndMedia {
+            Run the standard verification commands so the documentation change leaves CI-green and the tutorials compile inside the doc catalog.
+        }
+
+        @Steps {
+            @Step {
+                `swift build -v`
+            }
+            @Step {
+                `swift test -v`
+            }
+            @Step {
+                `swiftformat --lint .`
+            }
+        }
+    }
+}

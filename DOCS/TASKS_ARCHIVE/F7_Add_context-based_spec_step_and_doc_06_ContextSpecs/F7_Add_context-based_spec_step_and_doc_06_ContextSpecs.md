@@ -81,3 +81,5 @@ Document the v5 “context-based specs” tutorial step so it explicitly teaches
 - Tutorial file updated and saved under `Sources/SpecificationConfig/Documentation.docc/Tutorials/06_ContextSpecs.tutorial`.  
 - `DOCS/INPROGRESS/F7_Add_context-based_spec_step_and_doc_06_ContextSpecs.md` still reflects work-in-progress state until ARCHIVE.  
 - Verification commands (`swift build -v`, `swift test -v`, `swiftformat --lint .`) executed successfully.  
+
+**Archived:** 2026-01-26

@@ -1,16 +1,15 @@
-# Next Task: F7 — Add context-based spec step + doc (`06_ContextSpecs.md`)
+# Next Task: H5 — Demo v6: property-wrapper derived state
 
 **Source:** PRD §9
-**Priority:** Medium
-**Phase:** F
-**Effort:** Medium
-**Dependencies:** H3, E3
+**Priority:** Low
+**Phase:** H
+**Effort:** M
+**Dependencies:** H2, E3
 **Status:** Selected
 
 ## Description
 
-Document the v5 context-based specs tutorial step (06_ContextSpecs.md) so it highlights how `ContextProviding` and `EvaluationContext` influence configuration evaluation when time, feature flags, or counters govern decisions.
-This step should align with the demo work done for previewing context-aware specs, ensuring the tutorial mirrors the behavior already demonstrated in the demo (per dependencies H3/E3).
+Extend the Config Pet demo to use SpecificationCore property wrappers (`@Satisfies`, `@Decides`) so derived state is calculated from the same evaluation context used by the pipeline.
 
 ## Next Step
 

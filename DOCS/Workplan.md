@@ -30,8 +30,8 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] F4 (Medium): Add value specs step + doc (`03_ValueSpecs.md`)
 - [x] F5 (Medium): Add decision fallback step + doc (`04_Decisions.md`)
 - [x] F6 (Low): Optional watching step + doc (`05_Watching.md`)
-- [ ] F7 (Medium) (INPROGRESS): Add context-based spec step + doc (`06_ContextSpecs.md`)
-- [ ] F8 (Low): Add property-wrapper step + doc (`07_PropertyWrappers.md`)
+- [x] F7 (Medium) (INPROGRESS): Add context-based spec step + doc (`06_ContextSpecs.md`)
+- [x] F8 (Low) (INPROGRESS): Add property-wrapper step + doc (`07_PropertyWrappers.md`)
 - [x] G1 (High): GitHub Actions: build + test on macOS
 - [x] G2 (High): README “Why this wrapper” + quickstart
 - [x] G3 (Medium): 0.1.0 release checklist + changelog
@@ -39,7 +39,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
 - [x] H3 (Medium): Add context provider support for specs
 - [x] H4 (Medium): Demo v5: context-based specs
-- [ ] H5 (Low): Demo v6: property-wrapper derived state
+- [ ] H5 (Low) (INPROGRESS): Demo v6: property-wrapper derived state
 - [ ] H6 (Low): Optional async spec pipeline
 - [x] H7 (Medium): Surface spec metadata & decision trace in demo UI
 - [x] H8 (Medium): Wrap SpecificationCore for common use cases

@@ -31,4 +31,10 @@
         @TutorialReference(tutorial: "doc:05_Watching")
         @TutorialReference(tutorial: "doc:06_ContextSpecs")
     }
+
+    @Chapter(name: "Property Wrappers") {
+        Use `@Satisfies` and `@Decides` to derive live flags and labels from the same evaluation context.
+        @Image(source: "tutorial-icon", alt: "Property wrappers icon")
+        @TutorialReference(tutorial: "doc:07_PropertyWrappers")
+    }
 }

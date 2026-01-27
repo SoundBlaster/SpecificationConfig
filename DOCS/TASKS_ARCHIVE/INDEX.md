@@ -39,6 +39,8 @@
 - F5 — Add decision fallback step + doc (`04_Decisions.md`) — archived 2025-12-19
 - F6 — Optional watching step + doc (`05_Watching.md`) — archived 2025-12-19
 - F1B1 — Bug: DocC tutorials (highlighting, examples, entry link) — archived 2026-01-26
+- F7 — Add context-based spec step + doc (`06_ContextSpecs.md`) — archived 2026-01-26
+- F8 — Add property-wrapper step + doc (`07_PropertyWrappers.md`) — archived 2026-01-26
 
 ## Phase G
 - G1 — GitHub Actions: build + test on macOS — archived 2025-12-19

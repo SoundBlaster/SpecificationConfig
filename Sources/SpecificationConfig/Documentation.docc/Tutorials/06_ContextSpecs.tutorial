@@ -7,7 +7,7 @@
 
     @Section(title: "Provide a context for the pipeline") {
         @ContentAndMedia {
-            `DemoContextProvider` builds the `EvaluationContext` that flows through `AppConfig.profile` via `AnyContextProvider(DemoContextProvider.shared)`. It tracks launch time, reload counters (`reloadCount`), and the `nightTime`/`sleepOverride` flags that `ContextualSpecEntry` can query.
+            `DemoContextProvider` builds the `EvaluationContext` that flows through `AppConfig.profile` via `AnyContextProvider(DemoContextProvider.shared)`. It supplies `currentDate`, `launchDate`, counters like `reloadCount`, and flags such as `nightTime` (derived from system time or the manual override) plus `sleepOverride` so `ContextualSpecEntry` can reason about time-sensitive rules.
 
             @Image(source: "tutorial-icon", alt: "Context flags")
         }
@@ -49,7 +49,7 @@
 
     @Section(title: "Surface context in the UI") {
         @ContentAndMedia {
-            The demo UI shows `ConfigManager.contextDescription`, the night-mode toggle, and the diagnostics list so you can flip the context and see why the binding accepts or rejects `pet.isSleeping`.
+            The demo UI shows `ConfigManager.contextDescription` (for example, “Nighttime · Reloads: 3”), the night override button, and diagnostics so you can flip the context and see why the binding accepts or rejects `pet.isSleeping`. Tap “Force Night Mode”/“Clear Night Override” to call `ConfigManager.toggleNightMode()`, then use “Reload” (`ConfigManager.loadConfig()`) to rebuild and compare the diagnostics in day vs. night context.
 
             @Image(source: "tutorial-icon", alt: "Contextual UI illustration")
         }

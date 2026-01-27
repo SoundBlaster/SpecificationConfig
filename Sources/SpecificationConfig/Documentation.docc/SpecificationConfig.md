@@ -166,6 +166,7 @@ Start with the Config Pet walkthroughs:
 - <doc:04_Decisions> - Decision bindings for fallbacks
 - <doc:05_Watching> - Optional hot reload wiring
 - <doc:06_ContextSpecs> - Contextual specs and UI feedback
+- <doc:07_PropertyWrappers> - Property wrappers for live spec evaluation
 
 ## Getting Started
 

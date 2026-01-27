@@ -5,29 +5,28 @@ import XCTest
 
 /// Tests for improved error diagnostics distinguishing decode vs validation failures.
 final class ErrorDiagnosticsTests: XCTestCase {
-    
     // MARK: - Test Types
-    
+
     struct TestDraft {
         var name: String?
         var count: Int?
         var url: URL?
     }
-    
+
     struct TestConfig {
         let name: String
         let count: Int
         let url: URL
     }
-    
+
     enum TestError: Error {
         case missingName
         case missingCount
         case missingURL
     }
-    
+
     // MARK: - Tests
-    
+
     func testDecodeFailureProducesSpecificError() throws {
         // Given: A config with a decoder that throws an error
         struct DecodeError: Error, LocalizedError {
@@ -35,13 +34,13 @@ final class ErrorDiagnosticsTests: XCTestCase {
                 "Expected integer value but got string"
             }
         }
-        
+
         let provider = InMemoryProvider(values: [
             AbsoluteConfigKey(stringLiteral: "name"): ConfigValue(stringLiteral: "TestName"),
             AbsoluteConfigKey(stringLiteral: "count"): ConfigValue(stringLiteral: "not-a-number"),
         ])
         let reader = ConfigReader(provider: provider)
-        
+
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [
                 AnyBinding(
@@ -77,33 +76,33 @@ final class ErrorDiagnosticsTests: XCTestCase {
             },
             makeDraft: TestDraft.init
         )
-        
+
         // When: Building the config
         let result: BuildResult<TestConfig> = ConfigPipeline.build(profile: profile, reader: reader)
-        
+
         // Then: Build fails with decode error
         guard case let .failure(diagnostics, _) = result else {
             XCTFail("Expected failure due to decode error")
             return
         }
-        
+
         XCTAssertTrue(diagnostics.hasErrors)
         XCTAssertEqual(diagnostics.errorCount, 1)
-        
+
         // Verify the error is a decode error with specific context
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
-        
+
         let decodeError = errors.first!
         XCTAssertEqual(decodeError.key, "count")
         XCTAssertTrue(decodeError.displayMessage.contains("decode"), "Error message should mention decode")
         XCTAssertTrue(decodeError.displayMessage.contains("count"), "Error message should mention the key")
-        
+
         // Verify context contains error type information
         XCTAssertNotNil(decodeError.context["errorType"])
         XCTAssertEqual(decodeError.context["errorType"]?.displayValue, "Decode Error")
     }
-    
+
     func testValidationFailureProducesSpecificError() throws {
         // Given: A config with valid values but failing validation spec
         let provider = InMemoryProvider(values: [
@@ -111,7 +110,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
             AbsoluteConfigKey(stringLiteral: "count"): ConfigValue(integerLiteral: 42),
         ])
         let reader = ConfigReader(provider: provider)
-        
+
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [
                 AnyBinding(
@@ -143,33 +142,33 @@ final class ErrorDiagnosticsTests: XCTestCase {
             },
             makeDraft: TestDraft.init
         )
-        
+
         // When: Building the config
         let result: BuildResult<TestConfig> = ConfigPipeline.build(profile: profile, reader: reader)
-        
+
         // Then: Build fails with validation error
         guard case let .failure(diagnostics, _) = result else {
             XCTFail("Expected failure due to validation error")
             return
         }
-        
+
         XCTAssertTrue(diagnostics.hasErrors)
         XCTAssertEqual(diagnostics.errorCount, 1)
-        
+
         // Verify the error is a validation spec failure
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
-        
+
         let validationError = errors.first!
         XCTAssertEqual(validationError.key, "name")
         XCTAssertTrue(validationError.displayMessage.contains("specification"), "Error message should mention specification")
         XCTAssertFalse(validationError.displayMessage.contains("decode"), "Error message should NOT mention decode")
-        
+
         // Verify context contains spec information
         XCTAssertNotNil(validationError.context["spec"])
         XCTAssertEqual(validationError.context["spec"]?.displayValue, "Name must not be empty")
     }
-    
+
     func testBothDecodeAndValidationErrorsDistinguishable() throws {
         // Given: A config with both decode and validation failures
         struct DecodeError: Error, LocalizedError {
@@ -177,13 +176,13 @@ final class ErrorDiagnosticsTests: XCTestCase {
                 "Expected integer value but got string"
             }
         }
-        
+
         let provider = InMemoryProvider(values: [
             AbsoluteConfigKey(stringLiteral: "name"): ConfigValue(stringLiteral: ""), // Empty - will fail validation
             AbsoluteConfigKey(stringLiteral: "count"): ConfigValue(stringLiteral: "not-a-number"), // Will fail decode
         ])
         let reader = ConfigReader(provider: provider)
-        
+
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [
                 AnyBinding(
@@ -225,22 +224,22 @@ final class ErrorDiagnosticsTests: XCTestCase {
             },
             makeDraft: TestDraft.init
         )
-        
+
         // When: Building the config
         let result: BuildResult<TestConfig> = ConfigPipeline.build(profile: profile, reader: reader)
-        
+
         // Then: Build fails with both types of errors
         guard case let .failure(diagnostics, _) = result else {
             XCTFail("Expected failure")
             return
         }
-        
+
         XCTAssertTrue(diagnostics.hasErrors)
         // We should have 2 errors: one validation error (name), one decode error (count)
         XCTAssertEqual(diagnostics.errorCount, 2, "Should have both validation and decode errors")
-        
+
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
-        
+
         // Find the validation error (for name)
         let validationError = errors.first { $0.key == "name" }
         XCTAssertNotNil(validationError, "Should have validation error for name")
@@ -248,7 +247,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
             XCTAssertTrue(validationError.displayMessage.contains("specification"))
             XCTAssertNotNil(validationError.context["spec"])
         }
-        
+
         // Find the decode error (for count)
         let decodeError = errors.first { $0.key == "count" }
         XCTAssertNotNil(decodeError, "Should have decode error for count")
@@ -257,7 +256,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
             XCTAssertNotNil(decodeError.context["errorType"])
         }
     }
-    
+
     func testDecodeErrorContainsUnderlyingErrorDetails() throws {
         // Given: A config that will throw a custom decoder error
         struct CustomDecodeError: Error, LocalizedError {
@@ -265,12 +264,12 @@ final class ErrorDiagnosticsTests: XCTestCase {
                 "Invalid URL format: expected https:// protocol"
             }
         }
-        
+
         let provider = InMemoryProvider(values: [
             AbsoluteConfigKey(stringLiteral: "url"): ConfigValue(stringLiteral: "not-a-valid-url"),
         ])
         let reader = ConfigReader(provider: provider)
-        
+
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [
                 AnyBinding(
@@ -293,21 +292,21 @@ final class ErrorDiagnosticsTests: XCTestCase {
             },
             makeDraft: TestDraft.init
         )
-        
+
         // When: Building the config
         let result: BuildResult<TestConfig> = ConfigPipeline.build(profile: profile, reader: reader)
-        
+
         // Then: Build fails with decode error containing details
         guard case let .failure(diagnostics, _) = result else {
             XCTFail("Expected failure")
             return
         }
-        
+
         XCTAssertTrue(diagnostics.hasErrors)
-        
+
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
-        
+
         let error = errors.first!
         XCTAssertEqual(error.key, "url")
         // Error message should include the underlying custom error message

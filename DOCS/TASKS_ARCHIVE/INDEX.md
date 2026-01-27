@@ -67,3 +67,6 @@
 - R5 — ConfigFileLoader error classification — archived 2026-01-27
 - R6 — Align sleep override UI/comment — archived 2026-01-27
 - R7 — DemoContextProvider thread safety — archived 2026-01-27
+
+## Reviews
+- Project Code Review — SpecificationConfig comprehensive review — archived 2026-01-27

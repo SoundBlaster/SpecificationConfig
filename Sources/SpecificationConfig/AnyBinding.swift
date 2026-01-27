@@ -370,7 +370,7 @@ public enum ConfigError: Error, Equatable {
 
     /// A contextual spec was declared but no context provider was supplied.
     case contextProviderMissing(key: String?)
-    
+
     /// Decoding the configuration value failed.
     ///
     /// This error indicates that reading and decoding the value from the config provider

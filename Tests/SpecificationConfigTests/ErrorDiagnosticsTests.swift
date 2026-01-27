@@ -313,7 +313,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         XCTAssertTrue(error.displayMessage.contains("https://"))
         XCTAssertNotNil(error.context["underlyingError"])
     }
-    
+
     func testAsyncSpecErrorNotMisclassifiedAsDecodeFailure() async throws {
         // Given: An async spec that throws a non-ConfigError during evaluation
         struct NetworkError: Error, LocalizedError {
@@ -321,19 +321,19 @@ final class ErrorDiagnosticsTests: XCTestCase {
                 "Network timeout during validation"
             }
         }
-        
+
         struct ThrowingAsyncSpec: AsyncSpecification {
-            func isSatisfiedBy(_ candidate: String) async throws -> Bool {
+            func isSatisfiedBy(_: String) async throws -> Bool {
                 // Simulate a network/validation error that's not a ConfigError
                 throw NetworkError()
             }
         }
-        
+
         let provider = InMemoryProvider(values: [
             AbsoluteConfigKey(stringLiteral: "name"): ConfigValue(stringLiteral: "ValidName"),
         ])
         let reader = ConfigReader(provider: provider)
-        
+
         let profile = SpecProfile<TestDraft, TestConfig>(
             bindings: [
                 AnyBinding(
@@ -356,28 +356,32 @@ final class ErrorDiagnosticsTests: XCTestCase {
             },
             makeDraft: TestDraft.init
         )
-        
+
         // When: Building async config
         let result: BuildResult<TestConfig> = await ConfigPipeline.buildAsync(profile: profile, reader: reader)
-        
+
         // Then: Error should be classified as asyncSpecFailed, NOT decodeFailed
         guard case let .failure(diagnostics, _) = result else {
             XCTFail("Expected failure")
             return
         }
-        
+
         XCTAssertTrue(diagnostics.hasErrors)
         XCTAssertEqual(diagnostics.errorCount, 1)
-        
+
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         let error = errors.first!
-        
+
         // Verify it's an async spec failure, not a decode failure
-        XCTAssertTrue(error.displayMessage.contains("Async specification failed"), 
-                     "Error should be async spec failure, not decode failure. Got: \(error.displayMessage)")
-        XCTAssertFalse(error.displayMessage.contains("decode"), 
-                      "Error should NOT mention decode. Got: \(error.displayMessage)")
-        
+        XCTAssertTrue(
+            error.displayMessage.contains("Async specification failed"),
+            "Error should be async spec failure, not decode failure. Got: \(error.displayMessage)"
+        )
+        XCTAssertFalse(
+            error.displayMessage.contains("decode"),
+            "Error should NOT mention decode. Got: \(error.displayMessage)"
+        )
+
         // Should have spec context, not decode error context
         XCTAssertNotNil(error.context["spec"])
         XCTAssertNil(error.context["errorType"], "Should not have decode error context")

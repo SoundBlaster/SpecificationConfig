@@ -63,3 +63,4 @@
 - R1 — Failure snapshot diagnostics behavior — archived 2026-01-27
 - R2 — Provenance mapping resolver — archived 2026-01-27
 - R3 — Deterministic snapshot stringification — archived 2026-01-27
+- R4 — Stabilize ConfigError API — archived 2026-01-27

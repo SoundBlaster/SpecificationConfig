@@ -8,11 +8,21 @@ import Foundation
 /// pipeline then uses this metadata to populate `ResolvedValue.provenance`
 /// so UIs can explain whether a value came from a file, environment, or default.
 public final class ResolvedValueProvenanceReporter: AccessReporter, @unchecked Sendable {
+    /// Maps provider names to provenance values.
+    public typealias Resolver = (String) -> Provenance
+
     private let lock = NSLock()
     private var provenanceByKey: [String: Provenance] = [:]
+    private let resolveProvenance: Resolver
 
     /// Creates a new reporter.
-    public init() {}
+    ///
+    /// - Parameter resolver: Optional custom mapping for provider names.
+    ///   Defaults to the built-in resolver that detects environment providers
+    ///   and extracts names from bracketed provider descriptions.
+    public init(resolver: @escaping Resolver = ResolvedValueProvenanceReporter.defaultResolver) {
+        resolveProvenance = resolver
+    }
 
     /// Resets the recorded provenance for a fresh build cycle.
     public func reset() {
@@ -45,7 +55,7 @@ public final class ResolvedValueProvenanceReporter: AccessReporter, @unchecked S
                 continue
             }
 
-            let provenance = Self.provenance(fromProviderName: providerResult.providerName)
+            let provenance = resolveProvenance(providerResult.providerName)
             lock.lock()
             provenanceByKey[key] = provenance
             lock.unlock()
@@ -53,7 +63,7 @@ public final class ResolvedValueProvenanceReporter: AccessReporter, @unchecked S
         }
     }
 
-    private static func provenance(fromProviderName providerName: String) -> Provenance {
+    public static func defaultResolver(providerName: String) -> Provenance {
         if providerName.contains("EnvironmentVariablesProvider") {
             return .environmentVariable
         }

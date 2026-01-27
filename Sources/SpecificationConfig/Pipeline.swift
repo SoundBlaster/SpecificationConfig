@@ -178,7 +178,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 case .collectAll:
@@ -201,7 +201,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 case .collectAll:
@@ -238,7 +238,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 }
@@ -250,7 +250,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
         }
@@ -266,7 +266,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
 
@@ -279,7 +279,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
         }
@@ -346,7 +346,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 case .collectAll:
@@ -365,7 +365,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 case .collectAll:
@@ -401,7 +401,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 }
@@ -413,7 +413,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
         }
@@ -429,7 +429,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
 
@@ -442,7 +442,7 @@ public enum ConfigPipeline {
             let snapshot = Snapshot(
                 resolvedValues: resolvedValues,
                 decisionTraces: decisionTraces,
-                diagnostics: DiagnosticsReport()
+                diagnostics: diagnostics
             )
             return .failure(diagnostics: diagnostics, snapshot: snapshot)
         }
@@ -459,7 +459,7 @@ public enum ConfigPipeline {
                     let snapshot = Snapshot(
                         resolvedValues: resolvedValues,
                         decisionTraces: decisionTraces,
-                        diagnostics: DiagnosticsReport()
+                        diagnostics: diagnostics
                     )
                     return .failure(diagnostics: diagnostics, snapshot: snapshot)
                 }
@@ -472,7 +472,7 @@ public enum ConfigPipeline {
                 let snapshot = Snapshot(
                     resolvedValues: resolvedValues,
                     decisionTraces: decisionTraces,
-                    diagnostics: DiagnosticsReport()
+                    diagnostics: diagnostics
                 )
                 return .failure(diagnostics: diagnostics, snapshot: snapshot)
             }

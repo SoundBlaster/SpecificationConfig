@@ -151,7 +151,8 @@ final class PipelineTests: XCTestCase {
         case let .failure(diagnostics, snapshot):
             XCTAssertTrue(diagnostics.hasErrors)
             XCTAssertEqual(diagnostics.errorCount, 1)
-            XCTAssertFalse(snapshot.hasErrors) // Diagnostics separate from snapshot
+            XCTAssertTrue(snapshot.hasErrors)
+            XCTAssertEqual(snapshot.diagnostics, diagnostics)
             // Snapshot should be empty since binding failed
             XCTAssertEqual(snapshot.resolvedValues.count, 0)
         }
@@ -662,6 +663,49 @@ final class PipelineTests: XCTestCase {
             XCTAssertEqual(
                 snapshot.resolvedValues.first?.provenance,
                 .environmentVariable
+            )
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testResolvedValueProvenanceUsesCustomResolver() {
+        let nameBinding = Binding(
+            key: "app.name",
+            keyPath: \TestDraft.name,
+            decoder: { reader, key in reader.string(forKey: ConfigKey(key)) }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(nameBinding)],
+            finalize: { draft in
+                TestConfig(name: draft.name ?? "", port: 3000, isEnabled: false)
+            },
+            makeDraft: { TestDraft() }
+        )
+
+        let provider = InMemoryProvider(
+            name: "CustomProvider",
+            values: [
+                "app.name": "CustomValue",
+            ]
+        )
+        let reporter = ResolvedValueProvenanceReporter { _ in
+            .fileProvider(name: "override")
+        }
+        let reader = ConfigReader(provider: provider, accessReporter: reporter)
+
+        let result = ConfigPipeline.build(
+            profile: profile,
+            reader: reader,
+            provenanceReporter: reporter
+        )
+
+        switch result {
+        case let .success(_, snapshot):
+            XCTAssertEqual(
+                snapshot.resolvedValues.first?.provenance,
+                .fileProvider(name: "override")
             )
         case .failure:
             XCTFail("Expected success")

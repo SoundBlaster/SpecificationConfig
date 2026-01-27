@@ -188,11 +188,13 @@ public enum ConfigPipeline {
 
             } catch {
                 // Handle other errors (decode errors, etc.)
-                diagnostics.add(
+                // Wrap decode errors in ConfigError for better diagnostics
+                let configError = ConfigError.decodeFailed(
                     key: binding.key,
-                    severity: .error,
-                    message: "Binding application failed: \(error.localizedDescription)"
+                    underlyingError: error.localizedDescription
                 )
+                let diagnostic = diagnosticFromConfigError(configError, key: binding.key)
+                diagnostics.add(diagnostic)
 
                 // Mode-specific error handling
                 switch errorHandlingMode {
@@ -354,11 +356,14 @@ public enum ConfigPipeline {
                 }
 
             } catch {
-                diagnostics.add(
+                // Handle other errors (decode errors, etc.)
+                // Wrap decode errors in ConfigError for better diagnostics
+                let configError = ConfigError.decodeFailed(
                     key: binding.key,
-                    severity: .error,
-                    message: "Binding application failed: \(error.localizedDescription)"
+                    underlyingError: error.localizedDescription
                 )
+                let diagnostic = diagnosticFromConfigError(configError, key: binding.key)
+                diagnostics.add(diagnostic)
 
                 switch errorHandlingMode {
                 case .failFast:
@@ -538,6 +543,16 @@ public enum ConfigPipeline {
                 key: key ?? missingKey,
                 severity: .error,
                 message: "Context provider required for contextual spec evaluation"
+            )
+        case let .decodeFailed(decodeKey, underlyingError):
+            DiagnosticItem(
+                key: key ?? decodeKey,
+                severity: .error,
+                message: "Failed to decode configuration value for key '\(decodeKey)': \(underlyingError)",
+                context: [
+                    "errorType": DiagnosticContextValue("Decode Error"),
+                    "underlyingError": DiagnosticContextValue(underlyingError),
+                ]
             )
         }
     }

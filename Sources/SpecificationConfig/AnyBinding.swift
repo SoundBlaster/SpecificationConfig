@@ -370,4 +370,17 @@ public enum ConfigError: Error, Equatable {
 
     /// A contextual spec was declared but no context provider was supplied.
     case contextProviderMissing(key: String?)
+    
+    /// Decoding the configuration value failed.
+    ///
+    /// This error indicates that reading and decoding the value from the config provider
+    /// failed, before any validation could occur. Examples include:
+    /// - Type mismatch (expected Int, got String)
+    /// - Invalid format (malformed URL, invalid JSON)
+    /// - Missing required nested keys
+    ///
+    /// - Parameters:
+    ///   - key: The configuration key that failed to decode
+    ///   - underlyingError: The original error from the decoder or provider
+    case decodeFailed(key: String, underlyingError: String)
 }

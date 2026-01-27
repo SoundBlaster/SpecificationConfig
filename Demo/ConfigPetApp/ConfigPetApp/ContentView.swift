@@ -72,6 +72,29 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
             }
 
+            Divider()
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Derived State")
+                    .fontWeight(.semibold)
+
+                HStack {
+                    Text("Night Spec:")
+                    Text(configManager.isNightTimeDerived ? "Satisfied" : "Not satisfied")
+                        .foregroundColor(configManager.isNightTimeDerived ? .green : .secondary)
+                }
+
+                HStack {
+                    Text("Sleep Label:")
+                    Text(configManager.sleepLabelDerived)
+                        .foregroundColor(.primary)
+                }
+
+                Text("Decision: \(configManager.sleepLabelDecisionSource)")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
+
             if let config = configManager.effectiveConfig {
                 Divider()
 

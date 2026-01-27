@@ -39,7 +39,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] H2 (High): Add DecisionBinding + DecisionTrace (FirstMatchSpec)
 - [x] H3 (Medium): Add context provider support for specs
 - [x] H4 (Medium): Demo v5: context-based specs
-- [ ] H5 (Low) (INPROGRESS): Demo v6: property-wrapper derived state
+- [x] H5 (Low): Demo v6: property-wrapper derived state
 - [ ] H6 (Low): Optional async spec pipeline
 - [x] H7 (Medium): Surface spec metadata & decision trace in demo UI
 - [x] H8 (Medium): Wrap SpecificationCore for common use cases

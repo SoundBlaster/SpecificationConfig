@@ -7,6 +7,7 @@ final class DemoContextProvider: ContextProviding {
     private let launchDate = Date()
     private var reloadCount = 0
     private var nightOverride: Bool?
+    private var sleepOverride: Bool?
 
     private let calendar = Calendar(identifier: .gregorian)
 
@@ -28,6 +29,10 @@ final class DemoContextProvider: ContextProviding {
         nightOverride = value
     }
 
+    func setSleepOverride(_ value: Bool?) {
+        sleepOverride = value
+    }
+
     private var isNighttime: Bool {
         if let override = nightOverride {
             return override
@@ -47,6 +52,10 @@ final class DemoContextProvider: ContextProviding {
         nightOverride != nil
     }
 
+    var isSleepOverrideActive: Bool {
+        sleepOverride != nil
+    }
+
     var isNightModeActive: Bool {
         isNighttime
     }
@@ -60,7 +69,9 @@ final class DemoContextProvider: ContextProviding {
             events: [:],
             flags: [
                 "nightTime": isNighttime,
-                "sleepOverride": nightOverride ?? false,
+                "sleepOverride": sleepOverride ?? false,
+                "sleepOverrideActive": sleepOverride != nil,
+                "sleepOverrideSleeping": sleepOverride ?? false,
             ],
             segments: []
         )

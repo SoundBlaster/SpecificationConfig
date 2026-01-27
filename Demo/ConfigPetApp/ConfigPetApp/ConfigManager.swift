@@ -22,7 +22,7 @@ class ConfigManager: ObservableObject {
     /// Tracks provenance metadata from the config reader.
     private var provenanceReporter: ResolvedValueProvenanceReporter?
 
-    /// Temporary sleep override applied to the resolved config.
+    /// Temporary wake override applied to the resolved config.
     @Published private var sleepOverride: Bool?
 
     private var sleepOverrideTask: Task<Void, Never>?
@@ -74,12 +74,12 @@ class ConfigManager: ObservableObject {
         return AppConfig(petName: config.petName, isSleeping: sleepOverride)
     }
 
-    /// Indicates whether a temporary sleep override is active.
+    /// Indicates whether a temporary wake override is active.
     var isSleepOverrideActive: Bool {
         sleepOverride != nil
     }
 
-    /// Forces the pet to sleep for a short duration.
+    /// Forces the pet to stay awake for a short duration.
     func triggerSleepOverride(duration: TimeInterval = 10) {
         guard config != nil else { return }
         sleepOverrideTask?.cancel()

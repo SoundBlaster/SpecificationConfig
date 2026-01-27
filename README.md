@@ -5,15 +5,21 @@
 [![Swift 6.0+](https://img.shields.io/badge/Swift-6.0%2B-orange.svg)](https://swift.org)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20iOS-lightgrey.svg)](https://github.com/SoundBlaster/SpecificationConfig)
 
-A Swift Configuration wrapper powered by SpecificationCore. It builds typed config values from key-path bindings, validates with specs, and emits deterministic diagnostics.
+A Swift Configuration wrapper powered by SpecificationCore. It builds typed config values from key-path bindings and emits diagnostics plus snapshots.
 
-## Why this wrapper
+## Manifest
 
-- Explicit injection: app code owns Draft/Final types, bindings, and specs.
-- Typed mapping from keys to Draft via `WritableKeyPath`.
-- Value-level and final specs powered by SpecificationCore.
-- Deterministic diagnostics and snapshots for UI-friendly reporting.
-- Provenance-aware snapshots: resolved values record provider metadata (file, env, default, decision) so diagnostics can explain where each value actually came from.
+- Product: `SpecificationConfig` (Swift Package)
+- Platforms: macOS 15+, iOS 18+
+- Dependencies: `swift-configuration`, `SpecificationCore`, `swift-docc-plugin`
+
+## Features
+
+- Typed bindings from config keys to Draft via `WritableKeyPath`
+- Value and final specs with diagnostics and deterministic ordering
+- Provenance-aware snapshots (file/env/default/decision)
+- Decision bindings with trace metadata
+- Redaction support for secret values
 
 ## Quickstart
 
@@ -62,38 +68,16 @@ let reader = ConfigReader(provider: provider)
 let result = ConfigPipeline.build(profile: profile, reader: reader)
 ```
 
-## Demo app (Config Pet)
-
-The demo app lives under `Demo/ConfigPetApp` and bundles `config.json`.
-
-```bash
-cd Demo/ConfigPetApp
-
-tuist install
-
-tuist generate
-
-open ConfigPetApp.xcworkspace
-```
-
-Run the `ConfigPetApp` scheme and update `Demo/ConfigPetApp/config.json` to test reloads.
-
 ## Documentation
 
-DocC tutorials live under `Sources/SpecificationConfig/Documentation.docc/Tutorials/`.
-Start with `01_MVP.tutorial` for the v0 walkthrough.
-
-## Requirements
-
-- Swift 6.0 or later
-- Xcode 16.2 (Xcode 26.0) or later (for development on macOS)
+All details live in DocC under `Sources/SpecificationConfig/Documentation.docc/`.
 
 ## Building and Testing
 
 ```bash
 swift build -v
 swift test -v
-swiftformat --lint .
+swiftformat --lint . # if installed
 ```
 
 ## License

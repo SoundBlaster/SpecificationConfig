@@ -80,7 +80,9 @@ struct ConfigFileLoader {
                 accessReporter: accessReporter,
                 inMemoryProviderName: fileName
             )
-        } catch let error as NSError where error.domain == NSCocoaErrorDomain {
+        } catch let error as NSError
+            where error.domain == NSCocoaErrorDomain && error.code == NSPropertyListReadCorruptError
+        {
             throw LoadError.invalidJSON(underlying: error)
         } catch {
             throw LoadError.readerCreationFailed(underlying: error)

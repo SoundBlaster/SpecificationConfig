@@ -158,7 +158,7 @@ public struct AnyBinding<Draft> {
                 }
 
                 // Stringify the value
-                stringifiedValue = String(describing: value)
+                stringifiedValue = binding.stringify(value)
 
                 // Write validated value to draft
                 draft[keyPath: binding.keyPath] = value
@@ -254,7 +254,7 @@ public struct AnyBinding<Draft> {
                 }
 
                 // Stringify the value
-                stringifiedValue = String(describing: value)
+                stringifiedValue = binding.stringify(value)
 
                 // Write validated value to draft
                 draft[keyPath: binding.keyPath] = value
@@ -351,7 +351,7 @@ public struct AnyBinding<Draft> {
     }
 }
 
-/// Temporary error type for B2 (will be replaced by proper Diagnostics in B4)
+/// Error type surfaced by bindings, profiles, and pipeline validation.
 public enum ConfigError: Error, Equatable {
     /// A value-level specification failed while applying bindings.
     case specFailed(key: String, spec: SpecMetadata)

@@ -58,3 +58,12 @@
 - H10 — Display overrides panel in demo — archived 2025-12-19
 - H5 — Demo v6: property-wrapper derived state — archived 2026-01-27
 - H6 — Optional async spec pipeline — archived 2026-01-27
+
+## Phase R
+- R1 — Failure snapshot diagnostics behavior — archived 2026-01-27
+- R2 — Provenance mapping resolver — archived 2026-01-27
+- R3 — Deterministic snapshot stringification — archived 2026-01-27
+- R4 — Stabilize ConfigError API — archived 2026-01-27
+- R5 — ConfigFileLoader error classification — archived 2026-01-27
+- R6 — Align sleep override UI/comment — archived 2026-01-27
+- R7 — DemoContextProvider thread safety — archived 2026-01-27

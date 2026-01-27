@@ -5,6 +5,7 @@ final class DemoContextProvider: ContextProviding {
     static let shared = DemoContextProvider()
 
     private let launchDate = Date()
+    private let lock = NSLock()
     private var reloadCount = 0
     private var nightOverride: Bool?
     private var sleepOverride: Bool?
@@ -14,66 +15,105 @@ final class DemoContextProvider: ContextProviding {
     private init() {}
 
     func recordReload() {
-        reloadCount += 1
+        withLock {
+            reloadCount += 1
+        }
     }
 
     func toggleNightOverride() {
-        if let override = nightOverride {
-            nightOverride = override ? false : nil
-        } else {
-            nightOverride = true
+        withLock {
+            if let override = nightOverride {
+                nightOverride = override ? false : nil
+            } else {
+                nightOverride = true
+            }
         }
     }
 
     func setNightOverride(_ value: Bool?) {
-        nightOverride = value
+        withLock {
+            nightOverride = value
+        }
     }
 
     func setSleepOverride(_ value: Bool?) {
-        sleepOverride = value
+        withLock {
+            sleepOverride = value
+        }
     }
 
     private var isNighttime: Bool {
-        if let override = nightOverride {
-            return override
-        }
-        let hour = calendar.component(.hour, from: Date())
-        return hour < 6 || hour >= 19
+        let override = withLock { nightOverride }
+        return isNighttime(override: override)
     }
 
     var contextSummary: String {
-        let reloads = reloadCount
+        let state = snapshotState()
+        let isNighttime = isNighttime(override: state.nightOverride)
         return isNighttime
-            ? "Nighttime · Reloads: \(reloads)"
-            : "Daytime · Reloads: \(reloads)"
+            ? "Nighttime · Reloads: \(state.reloadCount)"
+            : "Daytime · Reloads: \(state.reloadCount)"
     }
 
     var isNightOverrideActive: Bool {
-        nightOverride != nil
+        withLock { nightOverride != nil }
     }
 
     var isSleepOverrideActive: Bool {
-        sleepOverride != nil
+        withLock { sleepOverride != nil }
     }
 
     var isNightModeActive: Bool {
-        isNighttime
+        let override = withLock { nightOverride }
+        return isNighttime(override: override)
     }
 
     func currentContext() -> EvaluationContext {
+        let state = snapshotState()
+        let isNighttime = isNighttime(override: state.nightOverride)
         EvaluationContext(
             currentDate: Date(),
             launchDate: launchDate,
             userData: [:],
-            counters: ["reloadCount": reloadCount],
+            counters: ["reloadCount": state.reloadCount],
             events: [:],
             flags: [
                 "nightTime": isNighttime,
-                "sleepOverride": sleepOverride ?? false,
-                "sleepOverrideActive": sleepOverride != nil,
-                "sleepOverrideSleeping": sleepOverride ?? false,
+                "sleepOverride": state.sleepOverride ?? false,
+                "sleepOverrideActive": state.sleepOverride != nil,
+                "sleepOverrideSleeping": state.sleepOverride ?? false,
             ],
             segments: []
         )
+    }
+
+    private struct State {
+        let reloadCount: Int
+        let nightOverride: Bool?
+        let sleepOverride: Bool?
+    }
+
+    private func snapshotState() -> State {
+        withLock {
+            State(
+                reloadCount: reloadCount,
+                nightOverride: nightOverride,
+                sleepOverride: sleepOverride
+            )
+        }
+    }
+
+    private func withLock<T>(_ body: () -> T) -> T {
+        lock.lock()
+        defer { lock.unlock() }
+        return body()
+    }
+
+    private func isNighttime(override: Bool?) -> Bool {
+        if let override {
+            return override
+        }
+        let hour = calendar.component(.hour, from: Date())
+        return hour < 6 || hour >= 19
     }
 }

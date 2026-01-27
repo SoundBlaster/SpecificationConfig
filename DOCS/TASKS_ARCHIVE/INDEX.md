@@ -56,3 +56,4 @@
 - H8 — Wrap SpecificationCore for common use cases — archived 2025-12-19
 - H9 — Improve resolved value provenance — archived 2025-12-19
 - H10 — Display overrides panel in demo — archived 2025-12-19
+- H5 — Demo v6: property-wrapper derived state — archived 2026-01-27

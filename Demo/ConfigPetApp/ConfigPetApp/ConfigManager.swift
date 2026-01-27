@@ -27,6 +27,8 @@ class ConfigManager: ObservableObject {
 
     private var sleepOverrideTask: Task<Void, Never>?
 
+    private let derivedState = DemoDerivedState()
+
     /// Initializes the manager and loads configuration.
     init() {
         loadConfig()
@@ -116,6 +118,21 @@ class ConfigManager: ObservableObject {
     /// Indicates whether a manual night override is active.
     var isNightOverrideActive: Bool {
         DemoContextProvider.shared.isNightOverrideActive
+    }
+
+    /// Indicates whether the derived night-time spec is satisfied.
+    var isNightTimeDerived: Bool {
+        derivedState.isNightTimeDerived
+    }
+
+    /// Derived sleep label driven by decision specs.
+    var sleepLabelDerived: String {
+        derivedState.sleepLabelDerived
+    }
+
+    /// Describes whether the decision used a matching rule or fallback.
+    var sleepLabelDecisionSource: String {
+        derivedState.sleepLabelMatch == nil ? "Fallback" : "Matched"
     }
 
     var overrideEntries: [OverrideEntry] {

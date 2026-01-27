@@ -1,3 +1,28 @@
++++Import(domain=ios)
++++Reasoning(depth=comprehensive)
++++Refine(iterations=2)
++++Verify(criteria=completeness)
++++OutputFormat(
+    type=markdown,
+    sections=[
+        "Context & Assumptions",
+        "Selected Task (ID, Title, source)",
+        "PRD §9 Row Data (priority/effort/deps/outputs)",
+        "Implementation Plan (phased)",
+        "Files & Change Points (Sources/Tests)",
+        "Affected API Surface (types/functions/modules)",
+        "Subtasks Checklist (atomic)",
+        "Acceptance Criteria (per subtask)",
+        "Verification Commands (repo-accurate, from CI)",
+        "Definition of Done (aligned with PRD §12)",
+        "Risks & Open Questions"
+    ]
+)
++++Priority(order=desc)
++++Length(target=long, max_words=2000)
++++Audience(level=expert)
++++Language(lang=en)
+
 # PLAN — Generate Task PRD
 
 **Version:** 1.1.0

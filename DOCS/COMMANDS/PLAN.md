@@ -41,6 +41,7 @@ changed source code during this command (uncommon); the default flow should only
 - Rules: `DOCS/RULES/01_PRD_PROMPT.md`
 - Canonical project PRD: `DOCS/PRD/SpecificationConfig_PRD.md`
 - Optional tracking: `DOCS/Workplan.md` (if you use it)
+- Optional improvements: `DOCS/PRD/IMPROVEMENTS.md` (enhancement opportunities and gaps)
 
 ## Algorithm
 

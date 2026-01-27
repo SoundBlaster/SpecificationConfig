@@ -65,6 +65,7 @@ public struct DecisionBinding<Draft, Value> {
     public let key: String
     public let keyPath: WritableKeyPath<Draft, Value?>
     public let decisions: [DecisionEntry<Draft, Value>]
+    public let stringify: (Value) -> String
     public let isSecret: Bool
 
     /// Creates a decision binding.
@@ -73,16 +74,19 @@ public struct DecisionBinding<Draft, Value> {
     ///   - key: The configuration key to resolve.
     ///   - keyPath: Where to write the derived value in the draft.
     ///   - decisions: Ordered decisions to evaluate when the value is missing.
+    ///   - stringify: Stringifier used when capturing values for snapshots.
     ///   - isSecret: Whether the derived value should be redacted.
     public init(
         key: String,
         keyPath: WritableKeyPath<Draft, Value?>,
         decisions: [DecisionEntry<Draft, Value>],
+        stringify: @escaping (Value) -> String = { String(describing: $0) },
         isSecret: Bool = false
     ) {
         self.key = key
         self.keyPath = keyPath
         self.decisions = decisions
+        self.stringify = stringify
         self.isSecret = isSecret
     }
 
@@ -102,7 +106,7 @@ public struct DecisionBinding<Draft, Value> {
                 )
                 return .applied(
                     trace: trace,
-                    stringifiedValue: String(describing: value)
+                    stringifiedValue: stringify(value)
                 )
             }
         }

@@ -1206,6 +1206,105 @@ final class PipelineTests: XCTestCase {
         }
     }
 
+    func testSnapshotUsesCustomStringifierForBinding() {
+        struct CustomDraft {
+            var port: Int?
+        }
+
+        struct CustomConfig {
+            let port: Int
+        }
+
+        let portBinding = Binding(
+            key: "app.port",
+            keyPath: \CustomDraft.port,
+            decoder: ConfigReader.int,
+            stringify: { "port=\($0)" }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(portBinding)],
+            finalize: { draft in
+                CustomConfig(port: draft.port ?? 0)
+            },
+            makeDraft: { CustomDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "app.port": 8080,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let portValue = snapshot.value(forKey: "app.port")
+            XCTAssertEqual(portValue?.stringifiedValue, "port=8080")
+        case .failure:
+            XCTFail("Expected success")
+        }
+    }
+
+    func testSnapshotUsesCustomStringifierForDecisionBinding() {
+        struct DecisionDraft {
+            var name: String?
+            var isSleeping: Bool?
+        }
+
+        struct DecisionConfig {
+            let name: String
+            let isSleeping: Bool
+        }
+
+        let sleepingBinding = Binding(
+            key: "pet.isSleeping",
+            keyPath: \DecisionDraft.isSleeping,
+            decoder: ConfigReader.bool
+        )
+
+        let fallback = DecisionEntry(
+            description: "Sleeping pet",
+            predicate: { (draft: DecisionDraft) in draft.isSleeping == true },
+            result: "Sleepy"
+        )
+
+        let decisionBinding = DecisionBinding(
+            key: "pet.name",
+            keyPath: \DecisionDraft.name,
+            decisions: [fallback],
+            stringify: { "decision:\($0)" }
+        )
+
+        let profile = SpecProfile(
+            bindings: [AnyBinding(sleepingBinding)],
+            decisionBindings: [AnyDecisionBinding(decisionBinding)],
+            finalize: { draft in
+                DecisionConfig(
+                    name: draft.name ?? "",
+                    isSleeping: draft.isSleeping ?? false
+                )
+            },
+            makeDraft: { DecisionDraft() }
+        )
+
+        let provider = InMemoryProvider(values: [
+            "pet.isSleeping": true,
+        ])
+        let reader = ConfigReader(provider: provider)
+
+        let result = ConfigPipeline.build(profile: profile, reader: reader)
+
+        switch result {
+        case let .success(_, snapshot):
+            let value = snapshot.value(forKey: "pet.name")
+            XCTAssertEqual(value?.stringifiedValue, "decision:Sleepy")
+            XCTAssertEqual(value?.provenance, .decisionFallback)
+        case .failure:
+            XCTFail("Expected decision fallback success")
+        }
+    }
+
     // MARK: - Async Pipeline Tests
 
     func testAsyncPipelineFailsOnAsyncValueSpec() async {

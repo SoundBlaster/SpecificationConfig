@@ -158,7 +158,7 @@ public struct AnyBinding<Draft> {
                 }
 
                 // Stringify the value
-                stringifiedValue = String(describing: value)
+                stringifiedValue = binding.stringify(value)
 
                 // Write validated value to draft
                 draft[keyPath: binding.keyPath] = value
@@ -254,7 +254,7 @@ public struct AnyBinding<Draft> {
                 }
 
                 // Stringify the value
-                stringifiedValue = String(describing: value)
+                stringifiedValue = binding.stringify(value)
 
                 // Write validated value to draft
                 draft[keyPath: binding.keyPath] = value

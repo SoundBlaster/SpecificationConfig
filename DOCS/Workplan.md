@@ -50,7 +50,7 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 
 - [x] R1 (Medium): Decide and implement failure snapshot diagnostics behavior (include diagnostics in failure snapshots or update Snapshot docs/tests to reflect empty diagnostics on failure)
 - [x] R2 (Medium): Replace provenance string parsing with a structured mapping or injectable resolver; add tests for custom provider names
-- [ ] R3 (Medium): Add deterministic stringification hook for snapshot values (Binding/DecisionBinding) or encode via stable format for Encodable
+- [x] R3 (Medium): Add deterministic stringification hook for snapshot values (Binding/DecisionBinding) or encode via stable format for Encodable
 - [ ] R4 (Medium): Stabilize `ConfigError` API (remove “temporary” marker or make internal with new public error type)
 - [ ] R5 (Low): Fix `ConfigFileLoader` error classification to separate JSON parse errors from file I/O failures
 - [ ] R6 (Low): Align demo sleep override UI/comment with actual behavior (wake vs sleep)

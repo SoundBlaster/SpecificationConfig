@@ -61,6 +61,11 @@ public struct Binding<Draft, Value> {
     /// These specs evaluate both the candidate value and the injected context provider.
     public let contextualValueSpecs: [ContextualSpecEntry<Value>]
 
+    /// Stringifier used when capturing values for snapshots.
+    ///
+    /// Defaults to `String(describing:)` to preserve existing behavior.
+    public let stringify: (Value) -> String
+
     /// Whether this value is a secret and should be redacted in diagnostics.
     ///
     /// When `true`, the value will be replaced with `[REDACTED]` in logs, snapshots,
@@ -77,6 +82,7 @@ public struct Binding<Draft, Value> {
     ///   - valueSpecs: Validation specs (with metadata) to apply to the decoded value
     ///   - asyncValueSpecs: Async validation specs evaluated in the async pipeline
     ///   - contextualValueSpecs: Context-aware validation specs evaluated with EvaluationContext
+    ///   - stringify: Stringifier used when capturing values for snapshots
     ///   - isSecret: Whether to redact this value in diagnostics
     public init(
         key: String,
@@ -86,6 +92,7 @@ public struct Binding<Draft, Value> {
         valueSpecs: [SpecEntry<Value>] = [],
         asyncValueSpecs: [AsyncSpecEntry<Value>] = [],
         contextualValueSpecs: [ContextualSpecEntry<Value>] = [],
+        stringify: @escaping (Value) -> String = { String(describing: $0) },
         isSecret: Bool = false
     ) {
         self.key = key
@@ -95,6 +102,7 @@ public struct Binding<Draft, Value> {
         self.valueSpecs = valueSpecs
         self.asyncValueSpecs = asyncValueSpecs
         self.contextualValueSpecs = contextualValueSpecs
+        self.stringify = stringify
         self.isSecret = isSecret
     }
 }

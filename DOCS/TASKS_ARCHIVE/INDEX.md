@@ -65,3 +65,5 @@
 - R3 — Deterministic snapshot stringification — archived 2026-01-27
 - R4 — Stabilize ConfigError API — archived 2026-01-27
 - R5 — ConfigFileLoader error classification — archived 2026-01-27
+- R6 — Align sleep override UI/comment — archived 2026-01-27
+- R7 — DemoContextProvider thread safety — archived 2026-01-27

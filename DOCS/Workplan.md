@@ -53,5 +53,5 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] R3 (Medium): Add deterministic stringification hook for snapshot values (Binding/DecisionBinding) or encode via stable format for Encodable
 - [x] R4 (Medium): Stabilize `ConfigError` API (remove “temporary” marker or make internal with new public error type)
 - [x] R5 (Low): Fix `ConfigFileLoader` error classification to separate JSON parse errors from file I/O failures
-- [ ] R6 (Low): Align demo sleep override UI/comment with actual behavior (wake vs sleep)
-- [ ] R7 (Low): Add thread-safety boundary for `DemoContextProvider` (e.g., @MainActor or actor) to avoid data races
+- [x] R6 (Low): Align demo sleep override UI/comment with actual behavior (wake vs sleep)
+- [x] R7 (Low): Add thread-safety boundary for `DemoContextProvider` (e.g., @MainActor or actor) to avoid data races

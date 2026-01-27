@@ -67,7 +67,7 @@ struct ContentView: View {
             .disabled(configManager.effectiveConfig == nil || configManager.isSleepOverrideActive)
 
             if configManager.isSleepOverrideActive {
-                Text("Temporary sleep override active")
+                Text("Temporary wake override active")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

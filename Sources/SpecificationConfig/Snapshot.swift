@@ -237,7 +237,8 @@ public struct Snapshot: Sendable {
                     oldValue: prev.stringifiedValue,
                     newValue: current.stringifiedValue,
                     oldProvenance: prev.provenance,
-                    newProvenance: current.provenance
+                    newProvenance: current.provenance,
+                    isSecret: prev.isSecret || current.isSecret
                 ))
             }
         }
@@ -289,6 +290,18 @@ public struct ConfigDiff: Sendable, Equatable {
         public let oldProvenance: Provenance
         /// The current provenance
         public let newProvenance: Provenance
+        /// Whether this value is a secret and should be redacted in displays
+        public let isSecret: Bool
+
+        /// The previous value for display, with redaction applied if secret.
+        public var oldDisplayValue: String {
+            isSecret ? "[REDACTED]" : oldValue
+        }
+
+        /// The current value for display, with redaction applied if secret.
+        public var newDisplayValue: String {
+            isSecret ? "[REDACTED]" : newValue
+        }
     }
 
     /// Keys that exist in the current snapshot but not the previous one.

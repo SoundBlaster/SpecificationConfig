@@ -175,7 +175,7 @@ final class PerformanceMetricsTests: XCTestCase {
 
         let asyncDecision = AsyncDecisionEntry<Draft, String>(
             description: "Derive label"
-        ) { draft in
+        ) { draft async in
             draft.mode == "light" ? "Light Mode" : nil
         }
 

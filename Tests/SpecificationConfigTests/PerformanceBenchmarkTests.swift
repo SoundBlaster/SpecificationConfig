@@ -46,7 +46,7 @@ final class PerformanceBenchmarkTests: XCTestCase {
                 decisions: [
                     AsyncDecisionEntry(
                         description: "default",
-                        predicate: { _ in true },
+                        predicate: { _ async in true },
                         result: "computed"
                     ),
                 ]

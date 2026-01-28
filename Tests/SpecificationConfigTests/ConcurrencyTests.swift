@@ -113,7 +113,7 @@ final class ConcurrencyTests: XCTestCase {
 
         let asyncDecision = AsyncDecisionEntry<Draft, String>(
             description: "Derive label from mode"
-        ) { draft in
+        ) { draft async in
             draft.mode == "dark" ? "Dark Mode" : nil
         }
 

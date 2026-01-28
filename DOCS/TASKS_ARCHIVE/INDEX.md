@@ -82,6 +82,7 @@
 - I11 — YAML/TOML Support Examples — archived 2026-01-28
 - I12 — Code Coverage Reporting — archived 2026-01-28
 - I13 — Performance Regression Detection — archived 2026-01-28
+- I14 — Demo App Build in CI — archived 2026-01-28
 
 ## Reviews
 - Project Code Review — SpecificationConfig comprehensive review — archived 2026-01-27

@@ -146,10 +146,47 @@ jobs:
         with:
           xcode-version: "26.0"
 
-      - name: Install Tuist
+      - name: Determine Tuist CLI release
+        id: tuist-version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -Ls https://install.tuist.io | bash
-          tuist version
+          set -euo pipefail
+          TOKEN="${GITHUB_TOKEN:-}"
+          AUTH_HEADER=""
+          if [ -n "${TOKEN}" ]; then
+            AUTH_HEADER="Authorization: Bearer ${TOKEN}"
+            export AUTH_HEADER
+          fi
+          python3 .github/scripts/get-tuist-version.py
+
+      - name: Cache Tuist binary
+        id: cache-tuist
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/tuist/${{ steps.tuist-version.outputs.tuist_version }}
+          key: ${{ runner.os }}-tuist-${{ steps.tuist-version.outputs.tuist_version }}
+
+      - name: Install Tuist
+        env:
+          TUIST_VERSION: ${{ steps.tuist-version.outputs.tuist_version }}
+        run: |
+          set -euo pipefail
+          INSTALL_DIR="${RUNNER_TEMP}/tuist/${TUIST_VERSION}"
+          mkdir -p "${INSTALL_DIR}"
+          if [ ! -x "${INSTALL_DIR}/tuist" ]; then
+            echo "Downloading Tuist ${TUIST_VERSION}"
+            tmpdir=$(mktemp -d)
+            curl -fL -o "${tmpdir}/tuist.zip" "https://github.com/tuist/tuist/releases/download/${TUIST_VERSION}/tuist.zip"
+            unzip -q "${tmpdir}/tuist.zip" -d "${tmpdir}"
+            rsync -a "${tmpdir}/" "${INSTALL_DIR}/"
+            chmod +x "${INSTALL_DIR}/tuist"
+            rm -rf "${tmpdir}"
+          fi
+          echo "${INSTALL_DIR}" >> "$GITHUB_PATH"
+
+      - name: Show Tuist version
+        run: tuist version
 
       - name: Install Demo Dependencies
         working-directory: Demo/ConfigPetApp

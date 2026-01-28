@@ -68,5 +68,20 @@
 - R6 — Align sleep override UI/comment — archived 2026-01-27
 - R7 — DemoContextProvider thread safety — archived 2026-01-27
 
+## Phase I (Improvements)
+- I1 — Async Decision Bindings — archived 2026-01-27
+- I2 — Config Diffing API for Reloads — archived 2026-01-27
+- I3 — Deterministic Error Ordering Golden Tests — archived 2026-01-27
+- I4 — Thread-Safety Audit and Tests — archived 2026-01-28
+- I5 — Performance Metrics in Snapshot — archived 2026-01-28
+- I6 — Optimize Snapshot Lookups — archived 2026-01-28
+- I7 — Decoder Contract Documentation — archived 2026-01-28
+- I8 — Async Spec Documentation — archived 2026-01-28
+- I9 — Schema Validation API — archived 2026-01-28
+- I10 — Config File Watcher Integration — archived 2026-01-28
+- I11 — YAML/TOML Support Examples — archived 2026-01-28
+- I12 — Code Coverage Reporting — archived 2026-01-28
+- I13 — Performance Regression Detection — archived 2026-01-28
+
 ## Reviews
 - Project Code Review — SpecificationConfig comprehensive review — archived 2026-01-27

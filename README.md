@@ -68,6 +68,58 @@ let reader = ConfigReader(provider: provider)
 let result = ConfigPipeline.build(profile: profile, reader: reader)
 ```
 
+## Configuration Sources
+
+SpecificationConfig works with any provider from [swift-configuration](https://github.com/apple/swift-configuration). The examples below show common patterns.
+
+### JSON File
+
+JSON support is enabled by default via the `JSON` trait:
+
+```swift
+import Configuration
+import SpecificationConfig
+import SystemPackage
+
+let provider = try await FileProvider<JSONSnapshot>(
+    filePath: FilePath("/path/to/config.json")
+)
+let reader = ConfigReader(provider: provider)
+let result = ConfigPipeline.build(profile: profile, reader: reader)
+```
+
+### YAML File
+
+Enable the `YAML` trait in your `Package.swift` dependency:
+
+```swift
+.package(url: "https://github.com/apple/swift-configuration", from: "1.0.0", traits: ["YAML"])
+```
+
+Then use `YAMLSnapshot`:
+
+```swift
+let provider = try await FileProvider<YAMLSnapshot>(
+    filePath: FilePath("/path/to/config.yaml")
+)
+let reader = ConfigReader(provider: provider)
+let result = ConfigPipeline.build(profile: profile, reader: reader)
+```
+
+### Stacking Providers
+
+Use multiple providers with precedence (first match wins):
+
+```swift
+let reader = ConfigReader(providers: [
+    EnvironmentVariablesProvider(),                                    // highest priority
+    try await FileProvider<JSONSnapshot>(filePath: FilePath("config.json")), // file values
+    InMemoryProvider(values: ["app.timeout": 30]),                    // defaults
+])
+```
+
+> **Note:** TOML is not currently supported by swift-configuration.
+
 ## Documentation
 
 All details live in DocC under `Sources/SpecificationConfig/Documentation.docc/`.

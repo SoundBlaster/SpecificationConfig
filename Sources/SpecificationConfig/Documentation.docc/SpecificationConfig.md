@@ -155,6 +155,56 @@ let profile = SpecProfile<AppDraft, AppConfig>(
 )
 ```
 
+### Async Specs and Pipeline
+
+Use `ConfigPipeline.buildAsync` when your configuration requires asynchronous
+validation — network checks, database lookups, or remote feature flags.
+
+```swift
+import SpecificationConfig
+
+// Async value spec: validate a URL is reachable
+let binding = Binding(
+    key: "api.endpoint",
+    keyPath: \AppDraft.endpoint,
+    decoder: { reader, key in reader.string(forKey: ConfigKey(key)) },
+    asyncValueSpecs: [
+        AsyncSpecEntry(description: "Endpoint must be reachable") { url in
+            // Async validation — runs only in buildAsync
+            guard let url = URL(string: url) else { return false }
+            let (_, response) = try await URLSession.shared.data(from: url)
+            return (response as? HTTPURLResponse)?.statusCode == 200
+        },
+    ]
+)
+
+// Async decision binding: derive value from remote source
+let asyncDecision = AsyncDecisionEntry<AppDraft, String>(
+    description: "Fetch feature flag"
+) { draft in
+    // Async lookup — e.g., remote config service
+    draft.endpoint != nil ? "enabled" : nil
+}
+
+// Build with async pipeline
+let result = await ConfigPipeline.buildAsync(
+    profile: profile,
+    reader: reader
+)
+```
+
+**When to use `buildAsync`:**
+- Bindings include `asyncValueSpecs` for async validation
+- Profile includes `asyncDecisionBindings` for async fallback resolution
+- Profile includes `asyncFinalSpecs` for async post-finalization checks
+
+**Error handling:** Async specs produce the same diagnostics as sync specs.
+Use `errorHandlingMode: .collectAll` (default) to gather all failures, or
+`.failFast` to stop at the first error.
+
+**Performance:** Async specs are evaluated sequentially (not concurrently).
+Use `snapshot.performanceMetrics` to identify slow bindings or specs.
+
 ## Tutorials
 
 Start with the Config Pet walkthroughs:
@@ -204,6 +254,13 @@ dependencies: [
 - ``AnyDecisionBinding``
 - ``DecisionTrace``
 
+### Async Specs and Decisions
+
+- ``AsyncSpecEntry``
+- ``AsyncDecisionEntry``
+- ``AsyncDecisionBinding``
+- ``AnyAsyncDecisionBinding``
+
 ### Context and Evaluation
 
 - ``EvaluationContext``
@@ -215,4 +272,6 @@ dependencies: [
 - ``Snapshot``
 - ``ResolvedValue``
 - ``Provenance``
+- ``ConfigDiff``
+- ``PerformanceMetrics``
 - ``ResolvedValueProvenanceReporter``

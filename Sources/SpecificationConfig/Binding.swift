@@ -38,8 +38,32 @@ public struct Binding<Draft, Value> {
     /// The decoder closure that reads and transforms the config value.
     ///
     /// This closure receives a `ConfigReader` and the key string, and should return
-    /// the decoded value or `nil` if the key doesn't exist. It can throw errors if
-    /// decoding fails.
+    /// the decoded value or `nil` if the key doesn't exist in configuration.
+    ///
+    /// ## Decoder Contract
+    ///
+    /// - **Return `nil`** when the key is missing from the configuration provider.
+    ///   The pipeline will then fall back to `defaultValue` if one is set.
+    /// - **Return a value** when decoding succeeds and the key exists.
+    /// - **Throw an error** when the key exists but decoding fails (e.g., type
+    ///   mismatch, invalid format, malformed data). The pipeline wraps thrown
+    ///   errors in diagnostics with the key context.
+    ///
+    /// ```swift
+    /// // Example: Decoder that validates format
+    /// decoder: { reader, key in
+    ///     guard let str: String = try reader.string(forKey: ConfigKey(key)) else {
+    ///         return nil // Key missing — fall back to default
+    ///     }
+    ///     guard let url = URL(string: str) else {
+    ///         throw ConfigError.decodeFailed(
+    ///             key: key,
+    ///             underlyingError: "Invalid URL: '\(str)'"
+    ///         )
+    ///     }
+    ///     return url
+    /// }
+    /// ```
     public let decoder: (Configuration.ConfigReader, String) throws -> Value?
 
     /// The default value to use if the key is not found in configuration.

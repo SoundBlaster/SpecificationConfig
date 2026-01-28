@@ -133,9 +133,29 @@ public enum ConfigPipeline {
         provenanceReporter: ResolvedValueProvenanceReporter? = nil,
         errorHandlingMode: ErrorHandlingMode = .collectAll
     ) -> BuildResult<Final> {
+        let clock = ContinuousClock()
+        let totalStart = clock.now
+        var bindingDurations: [String: Duration] = [:]
+        var decisionBindingDurations: [String: Duration] = [:]
+        var finalizationDuration: Duration = .zero
+
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
         var decisionTraces: [DecisionTrace] = []
+
+        func snapshot() -> Snapshot {
+            Snapshot(
+                resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
+                diagnostics: diagnostics,
+                performanceMetrics: PerformanceMetrics(
+                    bindingDurations: bindingDurations,
+                    decisionBindingDurations: decisionBindingDurations,
+                    finalizationDuration: finalizationDuration,
+                    totalDuration: clock.now - totalStart
+                )
+            )
+        }
 
         provenanceReporter?.reset()
 
@@ -144,12 +164,14 @@ public enum ConfigPipeline {
 
         // Apply bindings, collecting resolved values and diagnostics
         for binding in profile.bindings {
+            let bindingStart = clock.now
             do {
                 let (stringifiedValue, usedDefault) = try binding.applyAndCapture(
                     to: &draft,
                     reader: reader,
                     contextProvider: profile.contextProvider
                 )
+                bindingDurations[binding.key] = clock.now - bindingStart
 
                 let provenance = Self.provenance(
                     forKey: binding.key,
@@ -167,6 +189,7 @@ public enum ConfigPipeline {
                 resolvedValues.append(resolvedValue)
 
             } catch let error as ConfigError {
+                bindingDurations[binding.key] = clock.now - bindingStart
                 // Convert ConfigError to diagnostic
                 let diagnostic = diagnosticFromConfigError(error, key: binding.key)
                 diagnostics.add(diagnostic)
@@ -174,20 +197,13 @@ public enum ConfigPipeline {
                 // Mode-specific error handling
                 switch errorHandlingMode {
                 case .failFast:
-                    // Stop immediately and return failure
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 case .collectAll:
-                    // Continue to next binding
                     continue
                 }
 
             } catch {
-                // Handle other errors (decode errors, etc.)
+                bindingDurations[binding.key] = clock.now - bindingStart
                 // Wrap decode errors in ConfigError for better diagnostics
                 let configError = ConfigError.decodeFailed(
                     key: binding.key,
@@ -199,25 +215,21 @@ public enum ConfigPipeline {
                 // Mode-specific error handling
                 switch errorHandlingMode {
                 case .failFast:
-                    // Stop immediately and return failure
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 case .collectAll:
-                    // Continue to next binding
                     continue
                 }
             }
         }
 
         for decisionBinding in profile.decisionBindings {
+            let decisionStart = clock.now
             switch decisionBinding.apply(to: &draft) {
             case .skipped:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 continue
             case let .applied(trace, stringifiedValue):
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 decisionTraces.append(trace)
                 let resolved = ResolvedValue(
                     key: decisionBinding.key,
@@ -231,84 +243,106 @@ public enum ConfigPipeline {
                     resolvedValues.append(resolved)
                 }
             case .noMatch:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 let diagnostic = diagnosticFromConfigError(
                     .decisionFallbackFailed(key: decisionBinding.key),
                     key: decisionBinding.key
                 )
                 diagnostics.add(diagnostic)
                 if errorHandlingMode == .failFast {
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 }
             }
         }
 
         // Check if we have any errors before finalizing
         if diagnostics.hasErrors {
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
         }
 
         // Finalize draft
         let final: Final
+        let finalizeStart = clock.now
         do {
             final = try profile.finalizeDraft(draft)
+            finalizationDuration = clock.now - finalizeStart
         } catch let error as ConfigError {
+            finalizationDuration = clock.now - finalizeStart
             let diagnostic = diagnosticFromConfigError(error, key: nil)
             diagnostics.add(diagnostic)
-
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
 
         } catch {
+            finalizationDuration = clock.now - finalizeStart
             diagnostics.add(
                 severity: .error,
                 message: "Finalization failed: \(error.localizedDescription)"
             )
-
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
         }
 
-        // Success - build final snapshot
-        let snapshot = Snapshot(
-            resolvedValues: resolvedValues,
-            decisionTraces: decisionTraces,
-            diagnostics: diagnostics
-        )
-
-        return .success(final: final, snapshot: snapshot)
+        return .success(final: final, snapshot: snapshot())
     }
 
     /// Builds a configuration using the profile and reader, awaiting async specs.
     ///
-    /// This mirrors `build` but evaluates async value specs and async final specs
-    /// using async/await.
+    /// This mirrors `build` but additionally evaluates async value specs, async
+    /// decision bindings, and async final specs using async/await. Async specs
+    /// are evaluated sequentially (not concurrently).
+    ///
+    /// Use this method when your profile includes:
+    /// - Bindings with `asyncValueSpecs` (e.g., network validation)
+    /// - `asyncDecisionBindings` (e.g., remote feature flag lookups)
+    /// - `asyncFinalSpecs` (e.g., cross-field async validation)
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// let result = await ConfigPipeline.buildAsync(
+    ///     profile: myProfile,
+    ///     reader: configReader
+    /// )
+    /// switch result {
+    /// case let .success(config, snapshot):
+    ///     print("Config: \(config)")
+    ///     if let metrics = snapshot.performanceMetrics {
+    ///         print("Build took \(metrics.totalDuration)")
+    ///     }
+    /// case let .failure(diagnostics, _):
+    ///     for item in diagnostics.diagnostics {
+    ///         print(item.formattedDescription())
+    ///     }
+    /// }
+    /// ```
     public static func buildAsync<Final>(
         profile: SpecProfile<some Any, Final>,
         reader: Configuration.ConfigReader,
         provenanceReporter: ResolvedValueProvenanceReporter? = nil,
         errorHandlingMode: ErrorHandlingMode = .collectAll
     ) async -> BuildResult<Final> {
+        let clock = ContinuousClock()
+        let totalStart = clock.now
+        var bindingDurations: [String: Duration] = [:]
+        var decisionBindingDurations: [String: Duration] = [:]
+        var finalizationDuration: Duration = .zero
+
         var diagnostics = DiagnosticsReport()
         var resolvedValues: [ResolvedValue] = []
         var decisionTraces: [DecisionTrace] = []
+
+        func snapshot() -> Snapshot {
+            Snapshot(
+                resolvedValues: resolvedValues,
+                decisionTraces: decisionTraces,
+                diagnostics: diagnostics,
+                performanceMetrics: PerformanceMetrics(
+                    bindingDurations: bindingDurations,
+                    decisionBindingDurations: decisionBindingDurations,
+                    finalizationDuration: finalizationDuration,
+                    totalDuration: clock.now - totalStart
+                )
+            )
+        }
 
         provenanceReporter?.reset()
 
@@ -317,12 +351,14 @@ public enum ConfigPipeline {
 
         // Apply bindings, collecting resolved values and diagnostics
         for binding in profile.bindings {
+            let bindingStart = clock.now
             do {
                 let (stringifiedValue, usedDefault) = try await binding.applyAndCaptureAsync(
                     to: &draft,
                     reader: reader,
                     contextProvider: profile.contextProvider
                 )
+                bindingDurations[binding.key] = clock.now - bindingStart
 
                 let provenance = Self.provenance(
                     forKey: binding.key,
@@ -340,24 +376,19 @@ public enum ConfigPipeline {
                 resolvedValues.append(resolvedValue)
 
             } catch let error as ConfigError {
+                bindingDurations[binding.key] = clock.now - bindingStart
                 let diagnostic = diagnosticFromConfigError(error, key: binding.key)
                 diagnostics.add(diagnostic)
 
                 switch errorHandlingMode {
                 case .failFast:
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 case .collectAll:
                     continue
                 }
 
             } catch {
-                // Handle other errors (decode errors, etc.)
-                // Wrap decode errors in ConfigError for better diagnostics
+                bindingDurations[binding.key] = clock.now - bindingStart
                 let configError = ConfigError.decodeFailed(
                     key: binding.key,
                     underlyingError: error.localizedDescription
@@ -367,12 +398,7 @@ public enum ConfigPipeline {
 
                 switch errorHandlingMode {
                 case .failFast:
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 case .collectAll:
                     continue
                 }
@@ -380,10 +406,13 @@ public enum ConfigPipeline {
         }
 
         for decisionBinding in profile.decisionBindings {
+            let decisionStart = clock.now
             switch decisionBinding.apply(to: &draft) {
             case .skipped:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 continue
             case let .applied(trace, stringifiedValue):
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 decisionTraces.append(trace)
                 let resolved = ResolvedValue(
                     key: decisionBinding.key,
@@ -397,59 +426,76 @@ public enum ConfigPipeline {
                     resolvedValues.append(resolved)
                 }
             case .noMatch:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
                 let diagnostic = diagnosticFromConfigError(
                     .decisionFallbackFailed(key: decisionBinding.key),
                     key: decisionBinding.key
                 )
                 diagnostics.add(diagnostic)
                 if errorHandlingMode == .failFast {
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
+                }
+            }
+        }
+
+        // Apply async decision bindings
+        for decisionBinding in profile.asyncDecisionBindings {
+            let decisionStart = clock.now
+            switch await decisionBinding.applyAsync(to: &draft) {
+            case .skipped:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
+                continue
+            case let .applied(trace, stringifiedValue):
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
+                decisionTraces.append(trace)
+                let resolved = ResolvedValue(
+                    key: decisionBinding.key,
+                    stringifiedValue: stringifiedValue,
+                    provenance: .decisionFallback,
+                    isSecret: decisionBinding.isSecret
+                )
+                if let index = resolvedValues.firstIndex(where: { $0.key == decisionBinding.key }) {
+                    resolvedValues[index] = resolved
+                } else {
+                    resolvedValues.append(resolved)
+                }
+            case .noMatch:
+                decisionBindingDurations[decisionBinding.key] = clock.now - decisionStart
+                let diagnostic = diagnosticFromConfigError(
+                    .asyncDecisionFallbackFailed(key: decisionBinding.key),
+                    key: decisionBinding.key
+                )
+                diagnostics.add(diagnostic)
+                if errorHandlingMode == .failFast {
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 }
             }
         }
 
         // Check if we have any errors before finalizing
         if diagnostics.hasErrors {
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
         }
 
         // Finalize draft
         let final: Final
+        let finalizeStart = clock.now
         do {
             final = try profile.finalizeDraft(draft)
+            finalizationDuration = clock.now - finalizeStart
         } catch let error as ConfigError {
+            finalizationDuration = clock.now - finalizeStart
             let diagnostic = diagnosticFromConfigError(error, key: nil)
             diagnostics.add(diagnostic)
-
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
 
         } catch {
+            finalizationDuration = clock.now - finalizeStart
             diagnostics.add(
                 severity: .error,
                 message: "Finalization failed: \(error.localizedDescription)"
             )
-
-            let snapshot = Snapshot(
-                resolvedValues: resolvedValues,
-                decisionTraces: decisionTraces,
-                diagnostics: diagnostics
-            )
-            return .failure(diagnostics: diagnostics, snapshot: snapshot)
+            return .failure(diagnostics: diagnostics, snapshot: snapshot())
         }
 
         for spec in profile.asyncFinalSpecs {
@@ -461,12 +507,7 @@ public enum ConfigPipeline {
                         key: nil
                     )
                     diagnostics.add(diagnostic)
-                    let snapshot = Snapshot(
-                        resolvedValues: resolvedValues,
-                        decisionTraces: decisionTraces,
-                        diagnostics: diagnostics
-                    )
-                    return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                    return .failure(diagnostics: diagnostics, snapshot: snapshot())
                 }
             } catch {
                 diagnostics.add(
@@ -474,23 +515,11 @@ public enum ConfigPipeline {
                     message: "Async specification failed: \(error.localizedDescription)",
                     context: specContext(spec.metadata)
                 )
-                let snapshot = Snapshot(
-                    resolvedValues: resolvedValues,
-                    decisionTraces: decisionTraces,
-                    diagnostics: diagnostics
-                )
-                return .failure(diagnostics: diagnostics, snapshot: snapshot)
+                return .failure(diagnostics: diagnostics, snapshot: snapshot())
             }
         }
 
-        // Success - build final snapshot
-        let snapshot = Snapshot(
-            resolvedValues: resolvedValues,
-            decisionTraces: decisionTraces,
-            diagnostics: diagnostics
-        )
-
-        return .success(final: final, snapshot: snapshot)
+        return .success(final: final, snapshot: snapshot())
     }
 
     /// Converts a ConfigError into a DiagnosticItem.
@@ -537,6 +566,12 @@ public enum ConfigPipeline {
                 key: key ?? decisionKey,
                 severity: .error,
                 message: "Decision fallback did not match for key '\(decisionKey)'"
+            )
+        case let .asyncDecisionFallbackFailed(decisionKey):
+            DiagnosticItem(
+                key: key ?? decisionKey,
+                severity: .error,
+                message: "Async decision fallback did not match for key '\(decisionKey)'"
             )
         case let .contextProviderMissing(missingKey):
             DiagnosticItem(

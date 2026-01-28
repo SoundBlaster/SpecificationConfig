@@ -134,6 +134,12 @@ public struct Snapshot: Sendable {
     /// about what went wrong and where.
     public let diagnostics: DiagnosticsReport
 
+    /// Timing data captured during the pipeline build, if available.
+    public let performanceMetrics: PerformanceMetrics?
+
+    /// Pre-computed index for O(1) key lookups.
+    private let resolvedValuesByKey: [String: ResolvedValue]
+
     /// Whether this snapshot contains any errors.
     ///
     /// Returns true if any diagnostic has severity `.error`.
@@ -148,19 +154,26 @@ public struct Snapshot: Sendable {
     ///   - decisionTraces: Decision traces recorded during resolution (default: empty)
     ///   - timestamp: When the snapshot was created (default: now)
     ///   - diagnostics: Collected diagnostics (default: empty report)
+    ///   - performanceMetrics: Timing data from the pipeline build (default: nil)
     public init(
         resolvedValues: [ResolvedValue] = [],
         decisionTraces: [DecisionTrace] = [],
         timestamp: Date = Date(),
-        diagnostics: DiagnosticsReport = DiagnosticsReport()
+        diagnostics: DiagnosticsReport = DiagnosticsReport(),
+        performanceMetrics: PerformanceMetrics? = nil
     ) {
         self.resolvedValues = resolvedValues
+        resolvedValuesByKey = Dictionary(
+            resolvedValues.map { ($0.key, $0) },
+            uniquingKeysWith: { _, last in last }
+        )
         self.decisionTraces = decisionTraces
         self.timestamp = timestamp
         self.diagnostics = diagnostics
+        self.performanceMetrics = performanceMetrics
     }
 
-    /// Finds a resolved value by key.
+    /// Finds a resolved value by key in O(1) time.
     ///
     /// - Parameter key: The configuration key to lookup
     /// - Returns: The resolved value if found, nil otherwise
@@ -174,7 +187,7 @@ public struct Snapshot: Sendable {
     /// }
     /// ```
     public func value(forKey key: String) -> ResolvedValue? {
-        resolvedValues.first { $0.key == key }
+        resolvedValuesByKey[key]
     }
 
     /// Finds a decision trace by key.
@@ -183,5 +196,112 @@ public struct Snapshot: Sendable {
     /// - Returns: The decision trace if found, nil otherwise.
     public func decisionTrace(forKey key: String) -> DecisionTrace? {
         decisionTraces.first { $0.key == key }
+    }
+
+    /// Computes the difference between this snapshot and a previous one.
+    ///
+    /// - Parameter previous: The earlier snapshot to compare against.
+    /// - Returns: A `ConfigDiff` describing added, removed, and modified keys.
+    ///
+    /// ## Example
+    ///
+    /// ```swift
+    /// let diff = currentSnapshot.diff(from: previousSnapshot)
+    /// if !diff.isEmpty {
+    ///     print("Added: \(diff.added.map(\.key))")
+    ///     print("Removed: \(diff.removed.map(\.key))")
+    ///     print("Modified: \(diff.modified.map(\.key))")
+    /// }
+    /// ```
+    public func diff(from previous: Snapshot) -> ConfigDiff {
+        let currentByKey = resolvedValuesByKey
+        let previousByKey = previous.resolvedValuesByKey
+
+        let currentKeys = Set(currentByKey.keys)
+        let previousKeys = Set(previousByKey.keys)
+
+        let added = currentKeys.subtracting(previousKeys)
+            .sorted()
+            .compactMap { currentByKey[$0] }
+
+        let removed = previousKeys.subtracting(currentKeys)
+            .sorted()
+            .compactMap { previousByKey[$0] }
+
+        var modified: [ConfigDiff.ModifiedValue] = []
+        for key in currentKeys.intersection(previousKeys).sorted() {
+            guard let current = currentByKey[key], let prev = previousByKey[key] else { continue }
+            if current.stringifiedValue != prev.stringifiedValue || current.provenance != prev.provenance {
+                modified.append(ConfigDiff.ModifiedValue(
+                    key: key,
+                    oldValue: prev.stringifiedValue,
+                    newValue: current.stringifiedValue,
+                    oldProvenance: prev.provenance,
+                    newProvenance: current.provenance
+                ))
+            }
+        }
+
+        return ConfigDiff(added: added, removed: removed, modified: modified)
+    }
+}
+
+/// Timing data captured during a pipeline build.
+///
+/// Records per-binding, per-decision-binding, finalization, and total durations
+/// to help identify slow decoders or specifications.
+///
+/// ## Example
+///
+/// ```swift
+/// if let metrics = snapshot.performanceMetrics {
+///     print("Total: \(metrics.totalDuration)")
+///     for (key, duration) in metrics.bindingDurations {
+///         print("\(key): \(duration)")
+///     }
+/// }
+/// ```
+public struct PerformanceMetrics: Sendable {
+    /// Time spent applying each binding, keyed by binding key.
+    public let bindingDurations: [String: Duration]
+
+    /// Time spent evaluating each decision binding, keyed by decision binding key.
+    public let decisionBindingDurations: [String: Duration]
+
+    /// Time spent finalizing the draft and running final specs.
+    public let finalizationDuration: Duration
+
+    /// Total pipeline build duration.
+    public let totalDuration: Duration
+}
+
+/// Describes the difference between two configuration snapshots.
+public struct ConfigDiff: Sendable, Equatable {
+    /// A value that was modified between snapshots.
+    public struct ModifiedValue: Sendable, Equatable {
+        /// The configuration key
+        public let key: String
+        /// The previous stringified value
+        public let oldValue: String
+        /// The current stringified value
+        public let newValue: String
+        /// The previous provenance
+        public let oldProvenance: Provenance
+        /// The current provenance
+        public let newProvenance: Provenance
+    }
+
+    /// Keys that exist in the current snapshot but not the previous one.
+    public let added: [ResolvedValue]
+
+    /// Keys that existed in the previous snapshot but not the current one.
+    public let removed: [ResolvedValue]
+
+    /// Keys present in both snapshots whose value or provenance changed.
+    public let modified: [ModifiedValue]
+
+    /// Whether there are no differences between the snapshots.
+    public var isEmpty: Bool {
+        added.isEmpty && removed.isEmpty && modified.isEmpty
     }
 }

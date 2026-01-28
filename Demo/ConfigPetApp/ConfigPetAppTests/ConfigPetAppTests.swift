@@ -96,8 +96,8 @@ final class ConfigPetAppTests: XCTestCase {
         // This is the critical test for the keyPath resolution fix
         let derivedState = DemoDerivedState()
         
-        // Reset to clean state
-        DemoContextProvider.shared.setNightOverride(nil)
+        // Reset to clean state (daytime, no overrides)
+        DemoContextProvider.shared.setNightOverride(false)
         DemoContextProvider.shared.setSleepOverride(nil)
         
         // Access projected value multiple times (simulating reload scenario)
@@ -105,7 +105,7 @@ final class ConfigPetAppTests: XCTestCase {
             let match = derivedState.sleepLabelMatch
             // During daytime with no overrides, should use fallback (nil)
             // The fact that this doesn't crash proves the keyPath resolution works
-            _ = match
+            XCTAssertNil(match, "Should be nil when using fallback value")
         }
         
         // Now with a spec that matches

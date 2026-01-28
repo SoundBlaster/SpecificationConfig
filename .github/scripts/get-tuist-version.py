@@ -13,7 +13,7 @@ def get_latest_tuist_version():
     """Fetch the latest Tuist release version from GitHub API."""
     url = "https://api.github.com/repos/tuist/tuist/releases/latest"
     
-    headers = {}
+    headers = {"User-Agent": "GitHub-Actions-Tuist-Installer"}
     auth_header = os.environ.get("AUTH_HEADER")
     if auth_header:
         headers["Authorization"] = auth_header.replace("Authorization: ", "")
@@ -42,6 +42,8 @@ def main():
         with open(github_output, "a") as f:
             f.write(f"tuist_version={version}\n")
     else:
+        # For local testing only - this won't set the output variable in GitHub Actions
+        print(f"Warning: GITHUB_OUTPUT not set, output variable not created", file=sys.stderr)
         print(f"tuist_version={version}")
 
 

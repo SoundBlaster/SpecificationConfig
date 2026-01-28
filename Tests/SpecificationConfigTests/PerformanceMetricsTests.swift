@@ -39,14 +39,13 @@ final class PerformanceMetricsTests: XCTestCase {
         ]))
 
         let result = ConfigPipeline.build(profile: profile, reader: reader)
-        let metrics = result.snapshot.performanceMetrics
+        let metrics = try XCTUnwrap(result.snapshot.performanceMetrics)
 
-        XCTAssertNotNil(metrics)
-        XCTAssertEqual(metrics!.bindingDurations.count, 2)
-        XCTAssertNotNil(metrics!.bindingDurations["app.name"])
-        XCTAssertNotNil(metrics!.bindingDurations["app.port"])
-        XCTAssertTrue(metrics!.totalDuration > .zero)
-        XCTAssertTrue(metrics!.finalizationDuration >= .zero)
+        XCTAssertEqual(metrics.bindingDurations.count, 2)
+        XCTAssertNotNil(metrics.bindingDurations["app.name"])
+        XCTAssertNotNil(metrics.bindingDurations["app.port"])
+        XCTAssertTrue(metrics.totalDuration > .zero)
+        XCTAssertTrue(metrics.finalizationDuration >= .zero)
     }
 
     func testSyncBuildCapturesDecisionBindingDurations() {
@@ -90,11 +89,10 @@ final class PerformanceMetricsTests: XCTestCase {
         ]))
 
         let result = ConfigPipeline.build(profile: profile, reader: reader)
-        let metrics = result.snapshot.performanceMetrics
+        let metrics = try XCTUnwrap(result.snapshot.performanceMetrics)
 
-        XCTAssertNotNil(metrics)
-        XCTAssertEqual(metrics!.decisionBindingDurations.count, 1)
-        XCTAssertNotNil(metrics!.decisionBindingDurations["label"])
+        XCTAssertEqual(metrics.decisionBindingDurations.count, 1)
+        XCTAssertNotNil(metrics.decisionBindingDurations["label"])
     }
 
     func testSyncBuildMetricsOnFailure() {
@@ -120,11 +118,10 @@ final class PerformanceMetricsTests: XCTestCase {
 
         switch result {
         case let .failure(_, snapshot):
-            let metrics = snapshot.performanceMetrics
-            XCTAssertNotNil(metrics)
-            XCTAssertEqual(metrics!.bindingDurations.count, 1)
-            XCTAssertNotNil(metrics!.bindingDurations["missing"])
-            XCTAssertTrue(metrics!.totalDuration > .zero)
+            let metrics = try XCTUnwrap(snapshot.performanceMetrics)
+            XCTAssertEqual(metrics.bindingDurations.count, 1)
+            XCTAssertNotNil(metrics.bindingDurations["missing"])
+            XCTAssertTrue(metrics.totalDuration > .zero)
         case .success:
             XCTFail("Expected failure")
         }
@@ -158,12 +155,11 @@ final class PerformanceMetricsTests: XCTestCase {
         ]))
 
         let result = await ConfigPipeline.buildAsync(profile: profile, reader: reader)
-        let metrics = result.snapshot.performanceMetrics
+        let metrics = try XCTUnwrap(result.snapshot.performanceMetrics)
 
-        XCTAssertNotNil(metrics)
-        XCTAssertEqual(metrics!.bindingDurations.count, 1)
-        XCTAssertNotNil(metrics!.bindingDurations["name"])
-        XCTAssertTrue(metrics!.totalDuration > .zero)
+        XCTAssertEqual(metrics.bindingDurations.count, 1)
+        XCTAssertNotNil(metrics.bindingDurations["name"])
+        XCTAssertTrue(metrics.totalDuration > .zero)
     }
 
     func testAsyncBuildCapturesAsyncDecisionDurations() async {
@@ -207,11 +203,10 @@ final class PerformanceMetricsTests: XCTestCase {
         ]))
 
         let result = await ConfigPipeline.buildAsync(profile: profile, reader: reader)
-        let metrics = result.snapshot.performanceMetrics
+        let metrics = try XCTUnwrap(result.snapshot.performanceMetrics)
 
-        XCTAssertNotNil(metrics)
-        XCTAssertEqual(metrics!.decisionBindingDurations.count, 1)
-        XCTAssertNotNil(metrics!.decisionBindingDurations["label"])
+        XCTAssertEqual(metrics.decisionBindingDurations.count, 1)
+        XCTAssertNotNil(metrics.decisionBindingDurations["label"])
     }
 
     // MARK: - Snapshot Without Metrics
@@ -250,7 +245,7 @@ final class PerformanceMetricsTests: XCTestCase {
         ]))
 
         let result = ConfigPipeline.build(profile: profile, reader: reader)
-        let metrics = result.snapshot.performanceMetrics!
+        let metrics = try XCTUnwrap(result.snapshot.performanceMetrics)
 
         // Total should be >= sum of binding + finalization durations
         let bindingSum = metrics.bindingDurations.values.reduce(Duration.zero, +)

@@ -426,7 +426,7 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(diff.modified[0].newProvenance, .fileProvider(name: "config.json"))
     }
 
-    func testDiffPreservesSecretFlagForModifiedValues() {
+    func testDiffPreservesSecretFlagForModifiedValues() throws {
         // When a secret value changes, the diff should preserve the isSecret flag
         let previous = Snapshot(resolvedValues: [
             ResolvedValue(
@@ -462,21 +462,19 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(diff.modified.count, 2)
 
         // Find the secret value modification
-        let secretMod = diff.modified.first { $0.key == "api.key" }
-        XCTAssertNotNil(secretMod)
-        XCTAssertTrue(secretMod!.isSecret)
-        XCTAssertEqual(secretMod!.oldDisplayValue, "[REDACTED]")
-        XCTAssertEqual(secretMod!.newDisplayValue, "[REDACTED]")
+        let secretMod = try XCTUnwrap(diff.modified.first { $0.key == "api.key" })
+        XCTAssertTrue(secretMod.isSecret)
+        XCTAssertEqual(secretMod.oldDisplayValue, "[REDACTED]")
+        XCTAssertEqual(secretMod.newDisplayValue, "[REDACTED]")
         // Raw values are still accessible for internal use
-        XCTAssertEqual(secretMod!.oldValue, "old-secret-123")
-        XCTAssertEqual(secretMod!.newValue, "new-secret-456")
+        XCTAssertEqual(secretMod.oldValue, "old-secret-123")
+        XCTAssertEqual(secretMod.newValue, "new-secret-456")
 
         // Find the non-secret value modification
-        let publicMod = diff.modified.first { $0.key == "app.name" }
-        XCTAssertNotNil(publicMod)
-        XCTAssertFalse(publicMod!.isSecret)
-        XCTAssertEqual(publicMod!.oldDisplayValue, "OldApp")
-        XCTAssertEqual(publicMod!.newDisplayValue, "NewApp")
+        let publicMod = try XCTUnwrap(diff.modified.first { $0.key == "app.name" })
+        XCTAssertFalse(publicMod.isSecret)
+        XCTAssertEqual(publicMod.oldDisplayValue, "OldApp")
+        XCTAssertEqual(publicMod.newDisplayValue, "NewApp")
     }
 
     func testDiffMarksAsSecretIfEitherValueIsSecret() {

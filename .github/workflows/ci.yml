@@ -28,11 +28,13 @@ jobs:
               - 'Tests/**'
               - 'Package.swift'
               - 'Package.resolved'
+              - '.github/workflows/**'
             demo:
               - 'Demo/**'
               - 'Sources/**'
               - 'Package.swift'
               - 'Package.resolved'
+              - '.github/workflows/**'
 
   test-macos:
     name: Test on macOS

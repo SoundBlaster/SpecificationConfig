@@ -13,13 +13,13 @@ final class DemoDerivedState {
         provider: DemoContextProvider.shared,
         firstMatch: [
             (
-                DemoDerivedState.sleepOverrideActive
-                    .and(DemoDerivedState.sleepOverrideSleeping),
+                Self.sleepOverrideActive
+                    .and(Self.sleepOverrideSleeping),
                 "Forced Sleep"
             ),
             (
-                DemoDerivedState.sleepOverrideActive
-                    .and(DemoDerivedState.sleepOverrideSleeping.not()),
+                Self.sleepOverrideActive
+                    .and(Self.sleepOverrideSleeping.not()),
                 "Forced Awake"
             ),
             (PredicateSpec<EvaluationContext>.flag("nightTime"), "Sleepy"),

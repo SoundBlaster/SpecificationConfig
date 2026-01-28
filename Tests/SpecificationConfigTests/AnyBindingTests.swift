@@ -4,7 +4,7 @@ import SpecificationCore
 import XCTest
 
 final class AnyBindingTests: XCTestCase {
-    // Test Draft type
+    /// Test Draft type
     struct TestDraft {
         var name: String?
         var age: Int?
@@ -12,7 +12,7 @@ final class AnyBindingTests: XCTestCase {
         var url: URL?
     }
 
-    // Helper to create a ConfigReader for testing
+    /// Helper to create a ConfigReader for testing
     func makeReader(values: [AbsoluteConfigKey: ConfigValue] = [:]) -> ConfigReader {
         let provider = InMemoryProvider(values: values)
         return ConfigReader(provider: provider)

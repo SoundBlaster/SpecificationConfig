@@ -37,7 +37,7 @@ final class ConfigFileWatcherTests: XCTestCase {
         await watcher.stop()
     }
 
-    func testNoCallbackWithoutChange() async throws {
+    func testNoCallbackWithoutChange() async {
         let watcher = ConfigFileWatcher(fileURL: tempFileURL, pollInterval: .milliseconds(50))
         let expectation = XCTestExpectation(description: "onChange should not be called")
         expectation.isInverted = true
@@ -132,5 +132,7 @@ final class ConfigFileWatcherTests: XCTestCase {
 /// Actor to safely count changes from concurrent callback invocations.
 private actor ChangeCounter {
     var count = 0
-    func increment() { count += 1 }
+    func increment() {
+        count += 1
+    }
 }

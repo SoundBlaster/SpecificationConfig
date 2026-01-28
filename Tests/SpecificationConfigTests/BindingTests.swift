@@ -4,7 +4,7 @@ import SpecificationCore
 import XCTest
 
 final class BindingTests: XCTestCase {
-    // Test Draft type for demonstration
+    /// Test Draft type for demonstration
     struct TestDraft {
         var name: String?
         var age: Int?
@@ -99,7 +99,7 @@ final class BindingTests: XCTestCase {
         XCTAssertEqual(binding2.valueSpecs.count, 0)
     }
 
-    func testDecoderClosure() throws {
+    func testDecoderClosure() {
         // Test that decoder closure is stored and can be called
         var decoderCalled = false
         let binding = Binding<TestDraft, Bool>(

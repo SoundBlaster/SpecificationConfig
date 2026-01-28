@@ -9,7 +9,8 @@ final class ConfigPetAppTests: XCTestCase {
     func testConfigFileLoaderInvalidJSONIsClassified() throws {
         let tempDir = try makeTemporaryDirectory()
         let fileURL = tempDir.appendingPathComponent("invalid.json")
-        try "{".data(using: .utf8)!.write(to: fileURL)
+        let data = try XCTUnwrap("{".data(using: .utf8))
+        try data.write(to: fileURL)
 
         let loader = ConfigFileLoader(configFilePath: fileURL.path)
 

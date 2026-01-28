@@ -93,7 +93,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
 
-        let decodeError = errors.first!
+        let decodeError = try XCTUnwrap(errors.first)
         XCTAssertEqual(decodeError.key, "count")
         XCTAssertTrue(decodeError.displayMessage.contains("decode"), "Error message should mention decode")
         XCTAssertTrue(decodeError.displayMessage.contains("count"), "Error message should mention the key")
@@ -159,7 +159,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
 
-        let validationError = errors.first!
+        let validationError = try XCTUnwrap(errors.first)
         XCTAssertEqual(validationError.key, "name")
         XCTAssertTrue(validationError.displayMessage.contains("specification"), "Error message should mention specification")
         XCTAssertFalse(validationError.displayMessage.contains("decode"), "Error message should NOT mention decode")
@@ -169,7 +169,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         XCTAssertEqual(validationError.context["spec"]?.displayValue, "Name must not be empty")
     }
 
-    func testBothDecodeAndValidationErrorsDistinguishable() throws {
+    func testBothDecodeAndValidationErrorsDistinguishable() {
         // Given: A config with both decode and validation failures
         struct DecodeError: Error, LocalizedError {
             var errorDescription: String? {
@@ -307,7 +307,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
         XCTAssertEqual(errors.count, 1)
 
-        let error = errors.first!
+        let error = try XCTUnwrap(errors.first)
         XCTAssertEqual(error.key, "url")
         // Error message should include the underlying custom error message
         XCTAssertTrue(error.displayMessage.contains("https://"))
@@ -370,7 +370,7 @@ final class ErrorDiagnosticsTests: XCTestCase {
         XCTAssertEqual(diagnostics.errorCount, 1)
 
         let errors = diagnostics.diagnostics.filter { $0.severity == .error }
-        let error = errors.first!
+        let error = try XCTUnwrap(errors.first)
 
         // Verify it's an async spec failure, not a decode failure
         XCTAssertTrue(

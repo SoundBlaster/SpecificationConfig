@@ -5,7 +5,7 @@ import XCTest
 final class PerformanceMetricsTests: XCTestCase {
     // MARK: - Sync Pipeline Metrics
 
-    func testSyncBuildCapturesBindingDurations() {
+    func testSyncBuildCapturesBindingDurations() throws {
         struct Draft {
             var name: String?
             var port: Int?
@@ -48,7 +48,7 @@ final class PerformanceMetricsTests: XCTestCase {
         XCTAssertTrue(metrics.finalizationDuration >= .zero)
     }
 
-    func testSyncBuildCapturesDecisionBindingDurations() {
+    func testSyncBuildCapturesDecisionBindingDurations() throws {
         struct Draft {
             var mode: String?
             var label: String?
@@ -95,7 +95,7 @@ final class PerformanceMetricsTests: XCTestCase {
         XCTAssertNotNil(metrics.decisionBindingDurations["label"])
     }
 
-    func testSyncBuildMetricsOnFailure() {
+    func testSyncBuildMetricsOnFailure() throws {
         struct Draft {
             var value: String?
         }
@@ -129,7 +129,7 @@ final class PerformanceMetricsTests: XCTestCase {
 
     // MARK: - Async Pipeline Metrics
 
-    func testAsyncBuildCapturesMetrics() async {
+    func testAsyncBuildCapturesMetrics() async throws {
         struct Draft {
             var name: String?
         }
@@ -162,7 +162,7 @@ final class PerformanceMetricsTests: XCTestCase {
         XCTAssertTrue(metrics.totalDuration > .zero)
     }
 
-    func testAsyncBuildCapturesAsyncDecisionDurations() async {
+    func testAsyncBuildCapturesAsyncDecisionDurations() async throws {
         struct Draft: Sendable {
             var mode: String?
             var label: String?
@@ -216,7 +216,7 @@ final class PerformanceMetricsTests: XCTestCase {
         XCTAssertNil(snapshot.performanceMetrics)
     }
 
-    func testTotalDurationIncludesAllPhases() {
+    func testTotalDurationIncludesAllPhases() throws {
         struct Draft {
             var a: String?
             var b: String?

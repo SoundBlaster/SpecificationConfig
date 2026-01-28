@@ -173,7 +173,7 @@ private struct LargeDraft {
     var v90: String?; var v91: String?; var v92: String?; var v93: String?; var v94: String?
     var v95: String?; var v96: String?; var v97: String?; var v98: String?; var v99: String?
 
-    static let keyPaths: [WritableKeyPath<LargeDraft, String?>] = [
+    nonisolated(unsafe) static let keyPaths: [WritableKeyPath<LargeDraft, String?>] = [
         \.v0, \.v1, \.v2, \.v3, \.v4, \.v5, \.v6, \.v7, \.v8, \.v9,
         \.v10, \.v11, \.v12, \.v13, \.v14, \.v15, \.v16, \.v17, \.v18, \.v19,
         \.v20, \.v21, \.v22, \.v23, \.v24, \.v25, \.v26, \.v27, \.v28, \.v29,

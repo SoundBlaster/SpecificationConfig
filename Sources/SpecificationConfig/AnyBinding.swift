@@ -386,6 +386,9 @@ public enum ConfigError: Error, Equatable {
     /// A decision fallback failed to match for a key.
     case decisionFallbackFailed(key: String)
 
+    /// An async decision fallback failed to match for a key.
+    case asyncDecisionFallbackFailed(key: String)
+
     /// A contextual spec was declared but no context provider was supplied.
     case contextProviderMissing(key: String?)
 

@@ -1,16 +1,12 @@
-# Next Task: None
+# Next Task: I14 — Demo App Build in CI
 
-**Source:** PRD §9
-**Priority:** N/A
-**Phase:** N/A
-**Effort:** N/A
+**Source:** DOCS/PRD/IMPROVEMENTS.md CI/CD Enhancements
+**Priority:** Low
+**Phase:** I
+**Effort:** S
 **Dependencies:** None
-**Status:** Empty
+**Status:** Selected
 
 ## Description
 
-No task selected.
-
-## Next Step
-
-Run SELECT to choose the next task.
+Ensure demo app builds successfully in CI pipeline. Add a CI job that builds the demo macOS SwiftUI app to catch build regressions.

@@ -46,8 +46,34 @@ jobs:
       - name: Build
         run: swift build -v
 
-      - name: Run tests
-        run: swift test -v
+      - name: Run tests with coverage
+        run: swift test -v --enable-code-coverage
+
+      - name: Report code coverage
+        run: |
+          CODECOV_PATH=$(swift test --show-codecov-path)
+          python3 -c "
+          import json, sys
+          with open('$CODECOV_PATH') as f:
+              data = json.load(f)
+          covered = 0
+          total = 0
+          for file_data in data['data'][0]['files']:
+              name = file_data['filename']
+              if '/Sources/SpecificationConfig/' not in name:
+                  continue
+              covered += file_data['summary']['lines']['covered']
+              total += file_data['summary']['lines']['count']
+          if total == 0:
+              print('No source files found for coverage')
+              sys.exit(1)
+          pct = (covered / total) * 100
+          print(f'SpecificationConfig coverage: {pct:.1f}% ({covered}/{total} lines)')
+          if pct < 80:
+              print(f'Coverage {pct:.1f}% is below 80% threshold')
+              sys.exit(1)
+          print('Coverage threshold passed')
+          "
 
       - name: Run Thread Sanitizer
         run: swift test --sanitize=thread

@@ -329,4 +329,179 @@ final class SnapshotTests: XCTestCase {
 
         XCTAssertEqual(snapshot.timestamp, customDate)
     }
+
+    // MARK: - Config Diff Tests
+
+    func testDiffDetectsAddedKeys() {
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .unknown),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .unknown),
+            ResolvedValue(key: "app.port", stringifiedValue: "8080", provenance: .unknown),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertEqual(diff.added.count, 1)
+        XCTAssertEqual(diff.added[0].key, "app.port")
+        XCTAssertTrue(diff.removed.isEmpty)
+        XCTAssertTrue(diff.modified.isEmpty)
+        XCTAssertFalse(diff.isEmpty)
+    }
+
+    func testDiffDetectsRemovedKeys() {
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .unknown),
+            ResolvedValue(key: "app.port", stringifiedValue: "8080", provenance: .unknown),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .unknown),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertTrue(diff.added.isEmpty)
+        XCTAssertEqual(diff.removed.count, 1)
+        XCTAssertEqual(diff.removed[0].key, "app.port")
+        XCTAssertTrue(diff.modified.isEmpty)
+        XCTAssertFalse(diff.isEmpty)
+    }
+
+    func testDiffDetectsModifiedValues() {
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "OldApp", provenance: .unknown),
+            ResolvedValue(key: "app.port", stringifiedValue: "8080", provenance: .unknown),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "NewApp", provenance: .unknown),
+            ResolvedValue(key: "app.port", stringifiedValue: "8080", provenance: .unknown),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertTrue(diff.added.isEmpty)
+        XCTAssertTrue(diff.removed.isEmpty)
+        XCTAssertEqual(diff.modified.count, 1)
+        XCTAssertEqual(diff.modified[0].key, "app.name")
+        XCTAssertEqual(diff.modified[0].oldValue, "OldApp")
+        XCTAssertEqual(diff.modified[0].newValue, "NewApp")
+    }
+
+    func testDiffWithIdenticalSnapshotsReturnsEmpty() {
+        let values = [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .unknown),
+            ResolvedValue(key: "app.port", stringifiedValue: "8080", provenance: .environmentVariable),
+        ]
+
+        let previous = Snapshot(resolvedValues: values)
+        let current = Snapshot(resolvedValues: values)
+
+        let diff = current.diff(from: previous)
+        XCTAssertTrue(diff.isEmpty)
+        XCTAssertTrue(diff.added.isEmpty)
+        XCTAssertTrue(diff.removed.isEmpty)
+        XCTAssertTrue(diff.modified.isEmpty)
+    }
+
+    func testDiffDetectsProvenanceChanges() {
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(key: "app.name", stringifiedValue: "MyApp", provenance: .defaultValue),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(
+                key: "app.name",
+                stringifiedValue: "MyApp",
+                provenance: .fileProvider(name: "config.json")
+            ),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertTrue(diff.added.isEmpty)
+        XCTAssertTrue(diff.removed.isEmpty)
+        XCTAssertEqual(diff.modified.count, 1)
+        XCTAssertEqual(diff.modified[0].key, "app.name")
+        XCTAssertEqual(diff.modified[0].oldProvenance, .defaultValue)
+        XCTAssertEqual(diff.modified[0].newProvenance, .fileProvider(name: "config.json"))
+    }
+
+    func testDiffPreservesSecretFlagForModifiedValues() throws {
+        // When a secret value changes, the diff should preserve the isSecret flag
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(
+                key: "api.key",
+                stringifiedValue: "old-secret-123",
+                provenance: .environmentVariable,
+                isSecret: true
+            ),
+            ResolvedValue(
+                key: "app.name",
+                stringifiedValue: "OldApp",
+                provenance: .defaultValue,
+                isSecret: false
+            ),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(
+                key: "api.key",
+                stringifiedValue: "new-secret-456",
+                provenance: .environmentVariable,
+                isSecret: true
+            ),
+            ResolvedValue(
+                key: "app.name",
+                stringifiedValue: "NewApp",
+                provenance: .defaultValue,
+                isSecret: false
+            ),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertEqual(diff.modified.count, 2)
+
+        // Find the secret value modification
+        let secretMod = try XCTUnwrap(diff.modified.first { $0.key == "api.key" })
+        XCTAssertTrue(secretMod.isSecret)
+        XCTAssertEqual(secretMod.oldDisplayValue, "[REDACTED]")
+        XCTAssertEqual(secretMod.newDisplayValue, "[REDACTED]")
+        // Raw values are still accessible for internal use
+        XCTAssertEqual(secretMod.oldValue, "old-secret-123")
+        XCTAssertEqual(secretMod.newValue, "new-secret-456")
+
+        // Find the non-secret value modification
+        let publicMod = try XCTUnwrap(diff.modified.first { $0.key == "app.name" })
+        XCTAssertFalse(publicMod.isSecret)
+        XCTAssertEqual(publicMod.oldDisplayValue, "OldApp")
+        XCTAssertEqual(publicMod.newDisplayValue, "NewApp")
+    }
+
+    func testDiffMarksAsSecretIfEitherValueIsSecret() {
+        // If a value becomes secret or was previously secret, mark the diff as secret
+        let previous = Snapshot(resolvedValues: [
+            ResolvedValue(
+                key: "api.key",
+                stringifiedValue: "plain-value",
+                provenance: .defaultValue,
+                isSecret: false
+            ),
+        ])
+
+        let current = Snapshot(resolvedValues: [
+            ResolvedValue(
+                key: "api.key",
+                stringifiedValue: "now-secret",
+                provenance: .environmentVariable,
+                isSecret: true
+            ),
+        ])
+
+        let diff = current.diff(from: previous)
+        XCTAssertEqual(diff.modified.count, 1)
+        // Should be marked as secret because current value is secret
+        XCTAssertTrue(diff.modified[0].isSecret)
+        XCTAssertEqual(diff.modified[0].oldDisplayValue, "[REDACTED]")
+        XCTAssertEqual(diff.modified[0].newDisplayValue, "[REDACTED]")
+    }
 }

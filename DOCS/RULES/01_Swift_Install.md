@@ -38,7 +38,7 @@ swiftformat --lint .
 
 ### Option A: Use Docker (Matches CI)
 
-If you have Docker installed, this is the simplest way to match CI’s Swift toolchains:
+If you have Docker installed, this is the simplest way to match CI's Swift toolchains:
 
 ```bash
 docker run --rm -it -v "$PWD":/work -w /work swift:6.0 swift test -v
@@ -46,13 +46,39 @@ docker run --rm -it -v "$PWD":/work -w /work swift:6.0 swift test -v
 
 (CI also tests Swift 5.10; swap the tag if needed.)
 
-### Option B: Install Swift Toolchain
+### Option B: Install via swiftly (Recommended)
 
-Install Swift using the official instructions for your distribution:
+The simplest native installation uses swiftly, the official Swift version manager:
 
-- https://www.swift.org/install/
+```bash
+curl -L https://swift-server.github.io/swiftly/swiftly-install.sh | bash
+source ~/.local/share/swiftly/env.sh
+swiftly install 6.0.3
+```
 
-Then verify:
+### Option C: Manual Install (Ubuntu 24.04)
+
+```bash
+# Install dependencies
+sudo apt update && sudo apt install -y \
+    binutils git gnupg2 libc6-dev libcurl4-openssl-dev \
+    libedit2 libgcc-9-dev libpython3-dev libsqlite3-0 \
+    libstdc++-9-dev libxml2-dev libz3-dev pkg-config \
+    tzdata unzip zlib1g-dev
+
+# Download and extract Swift
+cd /tmp
+wget https://download.swift.org/swift-6.0.3-release/ubuntu2404/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
+tar -xzf swift-6.0.3-RELEASE-ubuntu24.04.tar.gz
+sudo mv swift-6.0.3-RELEASE-ubuntu24.04 /usr/share/swift
+
+# Add to PATH (add to ~/.bashrc for persistence)
+export PATH="/usr/share/swift/usr/bin:$PATH"
+```
+
+For Ubuntu 22.04, replace `ubuntu2404` with `ubuntu2204` in the URL.
+
+### Verify Installation
 
 ```bash
 swift --version

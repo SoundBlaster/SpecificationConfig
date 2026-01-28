@@ -21,6 +21,9 @@ public struct SpecProfile<Draft, Final> {
     /// Optional decision bindings that derive missing values.
     public let decisionBindings: [AnyDecisionBinding<Draft>]
 
+    /// Optional async decision bindings that derive missing values asynchronously.
+    public let asyncDecisionBindings: [AnyAsyncDecisionBinding<Draft>]
+
     /// Optional context provider for contextual specs.
     public let contextProvider: AnyContextProvider?
 
@@ -44,6 +47,7 @@ public struct SpecProfile<Draft, Final> {
     /// - Parameters:
     ///   - bindings: Ordered bindings to apply to the draft.
     ///   - decisionBindings: Ordered decision bindings to derive missing values.
+    ///   - asyncDecisionBindings: Ordered async decision bindings to derive missing values.
     ///   - contextProvider: Optional context provider for contextual specs.
     ///   - finalize: Closure that converts a populated draft into a final configuration value.
     ///   - finalSpecs: Optional specs with metadata to validate the finalized configuration.
@@ -53,6 +57,7 @@ public struct SpecProfile<Draft, Final> {
     public init(
         bindings: [AnyBinding<Draft>],
         decisionBindings: [AnyDecisionBinding<Draft>] = [],
+        asyncDecisionBindings: [AnyAsyncDecisionBinding<Draft>] = [],
         contextProvider: AnyContextProvider? = nil,
         finalize: @escaping (Draft) throws -> Final,
         finalSpecs: [SpecEntry<Final>] = [],
@@ -62,6 +67,7 @@ public struct SpecProfile<Draft, Final> {
     ) {
         self.bindings = bindings
         self.decisionBindings = decisionBindings
+        self.asyncDecisionBindings = asyncDecisionBindings
         self.contextProvider = contextProvider
         self.finalize = finalize
         self.finalSpecs = finalSpecs

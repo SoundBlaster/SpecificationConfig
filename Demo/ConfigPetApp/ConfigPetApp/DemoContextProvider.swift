@@ -71,7 +71,7 @@ final class DemoContextProvider: ContextProviding {
     func currentContext() -> EvaluationContext {
         let state = snapshotState()
         let isNighttime = isNighttime(override: state.nightOverride)
-        EvaluationContext(
+        return EvaluationContext(
             currentDate: Date(),
             launchDate: launchDate,
             userData: [:],

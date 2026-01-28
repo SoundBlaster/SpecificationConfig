@@ -51,7 +51,31 @@ Linear to-do list derived from `DOCS/PRD/SpecificationConfig_PRD.md`.
 - [x] R1 (Medium): Decide and implement failure snapshot diagnostics behavior (include diagnostics in failure snapshots or update Snapshot docs/tests to reflect empty diagnostics on failure)
 - [x] R2 (Medium): Replace provenance string parsing with a structured mapping or injectable resolver; add tests for custom provider names
 - [x] R3 (Medium): Add deterministic stringification hook for snapshot values (Binding/DecisionBinding) or encode via stable format for Encodable
-- [x] R4 (Medium): Stabilize `ConfigError` API (remove “temporary” marker or make internal with new public error type)
+- [x] R4 (Medium): Stabilize `ConfigError` API (remove "temporary" marker or make internal with new public error type)
 - [x] R5 (Low): Fix `ConfigFileLoader` error classification to separate JSON parse errors from file I/O failures
 - [x] R6 (Low): Align demo sleep override UI/comment with actual behavior (wake vs sleep)
 - [x] R7 (Low): Add thread-safety boundary for `DemoContextProvider` (e.g., @MainActor or actor) to avoid data races
+
+## Improvement enhancements (from DOCS/PRD/IMPROVEMENTS.md)
+
+### High Priority
+- [x] I1 (Critical): Async Decision Bindings — Add AsyncDecisionBinding for async predicates (database lookups, API calls, remote feature flags)
+- [x] I2 (High): Config Diffing API for Reloads — Add Snapshot.diff(from:) to detect configuration changes (added/removed/modified keys)
+- [x] I3 (High): Deterministic Error Ordering Golden Tests — Add golden tests with 50+ bindings to prove deterministic error ordering across runs
+- [x] I4 (High): Thread-Safety Audit and Tests — Add sanitizer-enabled tests for concurrent binding resolution and provenance reporter access
+
+### Medium Priority
+- [x] I5 (Medium): Performance Metrics in Snapshot — Add PerformanceMetrics with binding/spec timing data for troubleshooting
+- [x] I6 (Medium): Optimize Snapshot Lookups — Convert resolvedValues from array to dictionary for O(1) lookups
+- [x] I7 (Medium): Enhanced Documentation - Decoder Contract — Document when decoder should return nil vs throw errors
+- [x] I8 (Medium): Enhanced Documentation - Async Spec Usage — Add tutorial showing async spec patterns and error handling
+
+### Lower Priority
+- [x] I9 (Low): Schema Validation API — Add ConfigSchema to validate required keys before binding
+- [x] I10 (Low): Config File Watcher Integration — Add ConfigLoader.watch(onChange:) for automatic reload on file changes
+- [x] I11 (Low): YAML/TOML Support Examples — Add README examples for YAML and TOML configuration formats
+
+### CI/CD Enhancements
+- [x] I12 (Low): Code Coverage Reporting — Add coverage tracking and threshold enforcement in CI
+- [x] I13 (Low): Performance Regression Detection — Add benchmark tests to detect performance degradation
+- [ ] I14 (Low): Demo App Build in CI — Ensure demo app builds successfully in CI pipeline

@@ -186,6 +186,7 @@ private struct LargeDraft {
         \.v90, \.v91, \.v92, \.v93, \.v94, \.v95, \.v96, \.v97, \.v98, \.v99,
     ]
 }
+
 // swiftlint:enable line_length
 
 private struct SmallDraft {

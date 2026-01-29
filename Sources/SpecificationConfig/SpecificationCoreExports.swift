@@ -1,4 +1,4 @@
-import SpecificationCore
+@_exported import SpecificationCore
 
 /// Evaluation context forwarded from SpecificationCore.
 public typealias EvaluationContext = SpecificationCore.EvaluationContext

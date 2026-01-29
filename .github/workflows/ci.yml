@@ -192,6 +192,10 @@ jobs:
         working-directory: Demo/ConfigPetApp
         run: tuist install
 
+      - name: Generate Demo Project
+        working-directory: Demo/ConfigPetApp
+        run: tuist generate --no-open
+
       - name: Build Demo App
         working-directory: Demo/ConfigPetApp
-        run: tuist build
+        run: tuist xcodebuild build -scheme ConfigPetApp -workspace ConfigPetApp.xcworkspace
